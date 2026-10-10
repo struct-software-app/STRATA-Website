@@ -234,6 +234,7 @@ const DataContext = createContext<DataContextType>({
   heroBanners: [],
   pricingPlans: PRICING_PLANS as any,
   pricingMatrix: [],
+  faqs: [],
   categoryLogos: {},
 
   appLogos: {},
