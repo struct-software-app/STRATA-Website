@@ -19,6 +19,7 @@ import { resolveAssetUrl } from '../lib/url';
 import { searchApps } from '../lib/searchApps';
 import { formatUsd, tokensToUsd } from '../lib/pricing';
 import { ENABLE_LANGUAGE_SWITCHER } from '../config';
+import { isDesktopApp } from '../lib/env';
 
 export const Header: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -295,13 +296,15 @@ export const Header: React.FC = () => {
                   >
                     Trial
                   </Link>
-                  <Link
-                    to="/download"
-                    className="hidden sm:inline-flex h-8 px-4 text-xs font-medium text-white bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors items-center space-x-1.5 shadow-xs"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Download</span>
-                  </Link>
+                  {!isDesktopApp && (
+                    <Link
+                      to="/download"
+                      className="hidden sm:inline-flex h-8 px-4 text-xs font-medium text-white bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors items-center space-x-1.5 shadow-xs"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Download</span>
+                    </Link>
+                  )}
 
                   {/* Profile & Wallet Dropdown Trigger (Just profile picture styled like download button, no arrow, no tokens) */}
                   <div className="relative" ref={profileMenuRef}>
@@ -405,13 +408,15 @@ export const Header: React.FC = () => {
                   >
                     Trial
                   </Link>
-                  <Link
-                    to="/download"
-                    className="px-4 py-1.5 text-xs font-medium text-white bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors flex items-center space-x-1.5 shadow-xs"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Download</span>
-                  </Link>
+                  {!isDesktopApp && (
+                    <Link
+                      to="/download"
+                      className="px-4 py-1.5 text-xs font-medium text-white bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors flex items-center space-x-1.5 shadow-xs"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Download</span>
+                    </Link>
+                  )}
                 </div>
               )}
 
@@ -736,7 +741,7 @@ export const Header: React.FC = () => {
             </div>
 
             {/* Mobile CTAs */}
-            <div className="grid grid-cols-3 gap-2 mb-6 border-b border-zinc-100 pb-4">
+            <div className={`grid ${isDesktopApp ? 'grid-cols-2' : 'grid-cols-3'} gap-2 mb-6 border-b border-zinc-100 pb-4`}>
               {user ? (
                 <button
                   type="button"
@@ -770,14 +775,16 @@ export const Header: React.FC = () => {
               >
                 Trial
               </Link>
-              <Link
-                to="/download"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="p-2 text-center text-xs font-medium bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 flex items-center justify-center space-x-1 shadow-xs"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Download</span>
-              </Link>
+              {!isDesktopApp && (
+                <Link
+                  to="/download"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-2 text-center text-xs font-medium bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 flex items-center justify-center space-x-1 shadow-xs"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download</span>
+                </Link>
+              )}
             </div>
 
             {user && (

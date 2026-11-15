@@ -1,8 +1,8 @@
-import { contextBridge } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
 
 // Expose safe desktop bridge
 contextBridge.exposeInMainWorld('strataDesktop', {
   platform: process.platform,
-  version: '2.4.0',
   isElectron: true,
+  getVersion: () => ipcRenderer.invoke('app:get-version'),
 });
