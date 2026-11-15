@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FAQS } from '../data/apps';
-import { Check, X, ChevronDown, ArrowRight } from 'lucide-react';
+import { Check, X, ChevronDown, ArrowRight, Boxes } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { formatUsd, tokensToUsd, normalizePeriod } from '../lib/pricing';
 import { ANNUAL_DISCOUNT_PCT } from '../config';
+import { AssetImage } from '../components/AssetImage';
 
 export const PricingPage: React.FC = () => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -190,17 +191,12 @@ export const PricingPage: React.FC = () => {
                   >
                     <div>
                       <div className="flex items-center justify-between mb-4">
-                        {logoUrl ? (
-                          <img
-                            src={logoUrl}
-                            alt={bundle.name}
-                            className="w-10 h-10 object-cover rounded-md"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-mono font-bold text-xs">
-                            PKG
-                          </div>
-                        )}
+                        <AssetImage
+                          src={logoUrl}
+                          alt={bundle.name}
+                          className="w-10 h-10 shrink-0"
+                          fallback={<Boxes className="w-10 h-10 text-black" />}
+                        />
                         <span className="text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full border border-zinc-200 bg-zinc-50 text-zinc-700">
                           {bundle.programIds.length} Tools
                         </span>

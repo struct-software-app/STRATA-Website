@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { AccountSettingsModal } from './AccountSettingsModal';
+import { AssetImage } from './AssetImage';
 import { resolveAssetUrl } from '../lib/url';
 import { searchApps } from '../lib/searchApps';
 import { formatUsd, tokensToUsd } from '../lib/pricing';
@@ -50,6 +51,7 @@ export const Header: React.FC = () => {
     categoryLogos, 
     appLogos, 
     branding, 
+    loading,
     user, 
     profile, 
     walletTokens, 
@@ -164,27 +166,28 @@ export const Header: React.FC = () => {
             {/* Left: Brand Logo & Wordmark */}
             <div className="flex items-center space-x-8">
               <Link to="/" className="flex items-center space-x-2.5 group transition-opacity hover:opacity-90">
-                {branding.storeIcon && branding.storeNameLogo ? (
-                  <div className="flex items-center space-x-2.5">
-                    <img
-                      src={resolveAssetUrl(branding.storeIcon)}
-                      alt="Store Icon"
-                      className="w-8 h-8 object-contain"
-                    />
-                    <img
-                      src={resolveAssetUrl(branding.storeNameLogo)}
-                      alt="STRATA"
-                      className="h-6 object-contain"
-                    />
-                  </div>
-                ) : (
+                {!loading && !branding.storeIcon && !branding.storeNameLogo ? (
                   <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-zinc-900 text-white rounded-lg flex items-center justify-center font-mono font-bold text-sm shadow-xs">
+                    <div className="w-8 h-8 bg-zinc-900 text-white flex items-center justify-center font-mono font-bold text-sm">
                       S
                     </div>
                     <span className="font-bold text-lg tracking-tight text-zinc-900">
                       STRATA
                     </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2.5">
+                    {(loading || branding.storeIcon) && (
+                      <AssetImage src={branding.storeIcon} alt="Store Icon" className="w-8 h-8 shrink-0" />
+                    )}
+                    {(loading || branding.storeNameLogo) && (
+                      <AssetImage
+                        src={branding.storeNameLogo}
+                        alt="STRATA"
+                        className="h-6 w-28 shrink-0"
+                        position="left center"
+                      />
+                    )}
                   </div>
                 )}
               </Link>
@@ -343,8 +346,8 @@ export const Header: React.FC = () => {
                           {/* Tokens overview inside dropdown */}
                           <div className="mt-3 p-2.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-between">
                             <div className="flex items-center space-x-2">
-                              {branding.storeIcon && (
-                                <img src={resolveAssetUrl(branding.storeIcon)} alt="Tokens" className="w-4 h-4 object-contain" />
+                              {(loading || branding.storeIcon) && (
+                                <AssetImage src={branding.storeIcon} alt="Tokens" className="w-4 h-4 shrink-0" />
                               )}
                               <span className="text-xs font-medium text-zinc-600">Wallet</span>
                             </div>
@@ -488,13 +491,12 @@ export const Header: React.FC = () => {
                         className="flex items-center justify-between py-3 px-2 hover:bg-zinc-50 rounded-xl cursor-pointer transition-colors"
                       >
                         <div className="flex items-center space-x-3">
-                          {logoUrl ? (
-                            <img src={logoUrl} alt={app.name} className="w-7 h-7 object-cover rounded shrink-0" />
-                          ) : (
-                            <div className="w-7 h-7 bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-700 shrink-0">
-                              <Boxes className="w-4 h-4" />
-                            </div>
-                          )}
+                          <AssetImage
+                            src={logoUrl}
+                            alt={app.name}
+                            className="w-7 h-7 shrink-0"
+                            fallback={<Boxes className="w-7 h-7 text-black" />}
+                          />
                           <div>
                             <span className="text-xs font-semibold text-zinc-900">{app.name}</span>
                             <span className="text-[10px] text-zinc-500 ml-2.5 font-mono bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200/60">{app.categoryName}</span>
@@ -566,17 +568,12 @@ export const Header: React.FC = () => {
                       <div className="col-span-4 border-r border-zinc-100 pr-8 flex flex-col justify-between h-full bg-white">
                         <div>
                           <div className="flex items-center space-x-3 mb-3">
-                            {catLogoUrl ? (
-                              <img
-                                src={catLogoUrl}
-                                alt={cat.name}
-                                className="w-9 h-9 object-cover rounded-md"
-                              />
-                            ) : (
-                              <div className="w-8 h-8 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-mono font-bold text-xs">
-                                {cat.code}
-                              </div>
-                            )}
+                            <AssetImage
+                              src={catLogoUrl}
+                              alt={cat.name}
+                              className="w-9 h-9 shrink-0"
+                              fallback={<Boxes className="w-9 h-9 text-black" />}
+                            />
                             <h3 className="text-xl font-bold text-zinc-900 tracking-tight">
                               {cat.name} Suite
                             </h3>
@@ -616,17 +613,12 @@ export const Header: React.FC = () => {
                               className="group p-3 rounded-xl border border-zinc-200/70 hover:border-zinc-300 bg-white hover:bg-zinc-50 transition-all flex items-center justify-between"
                             >
                               <div className="flex items-start space-x-3">
-                                {appLogoUrl ? (
-                                  <img
-                                    src={appLogoUrl}
-                                    alt={app.name}
-                                    className="w-9 h-9 object-cover rounded-md shrink-0"
-                                  />
-                                ) : (
-                                  <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0 text-zinc-700">
-                                    <Boxes className="w-4 h-4" />
-                                  </div>
-                                )}
+                                <AssetImage
+                                  src={appLogoUrl}
+                                  alt={app.name}
+                                  className="w-9 h-9 shrink-0"
+                                  fallback={<Boxes className="w-9 h-9 text-black" />}
+                                />
                                 <div>
                                   <div className="flex items-center space-x-2">
                                     <span className="font-semibold text-sm text-zinc-900 group-hover:text-black">
@@ -848,13 +840,12 @@ export const Header: React.FC = () => {
                         className="w-full px-3.5 py-2.5 text-left text-sm font-semibold flex items-center justify-between bg-zinc-50/50"
                       >
                         <div className="flex items-center space-x-2.5">
-                          {catLogoUrl ? (
-                            <img src={catLogoUrl} alt={cat.name} className="w-6 h-6 object-cover rounded" />
-                          ) : (
-                            <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-zinc-900 text-white font-bold">
-                              {cat.code}
-                            </span>
-                          )}
+                          <AssetImage
+                            src={catLogoUrl}
+                            alt={cat.name}
+                            className="w-6 h-6 shrink-0"
+                            fallback={<Boxes className="w-6 h-6 text-black" />}
+                          />
                           <span className="text-zinc-900">{cat.name}</span>
                         </div>
                         <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
@@ -878,11 +869,12 @@ export const Header: React.FC = () => {
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className="p-2 hover:bg-zinc-50 rounded-lg text-xs flex items-center space-x-2.5 transition-colors"
                               >
-                                {appLogoUrl ? (
-                                  <img src={appLogoUrl} alt={app.name} className="w-7 h-7 object-cover rounded shrink-0" />
-                                ) : (
-                                  <Boxes className="w-4 h-4 shrink-0 text-zinc-600" />
-                                )}
+                                <AssetImage
+                                  src={appLogoUrl}
+                                  alt={app.name}
+                                  className="w-7 h-7 shrink-0"
+                                  fallback={<Boxes className="w-7 h-7 text-black" />}
+                                />
                                 <div>
                                   <div className="font-medium text-zinc-900">{app.name}</div>
                                   <div className="text-zinc-500 text-[11px] line-clamp-1">{app.shortDescription}</div>

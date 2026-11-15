@@ -1,9 +1,10 @@
 import React from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { AppCard } from '../components/AppCard';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Boxes } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { formatUsd, tokensToUsd } from '../lib/pricing';
+import { AssetImage } from '../components/AssetImage';
 
 export const CategoryPage: React.FC = () => {
   const { categorySlug } = useParams<{ categorySlug: string }>();
@@ -50,9 +51,12 @@ export const CategoryPage: React.FC = () => {
                 <span>{categoryApps.length} ENGINES</span>
               </div>
               <div className="flex items-center space-x-4 mb-3">
-                {catLogoUrl && (
-                  <img src={catLogoUrl} alt={category.name} className="w-12 h-12 object-cover rounded-lg" />
-                )}
+                <AssetImage
+                  src={catLogoUrl}
+                  alt={category.name}
+                  className="w-12 h-12 shrink-0"
+                  fallback={<Boxes className="w-12 h-12 text-black" />}
+                />
                 <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-950">
                   {category.name} Suite
                 </h1>

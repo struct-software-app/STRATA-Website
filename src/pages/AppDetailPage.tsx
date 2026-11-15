@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { AppCard } from '../components/AppCard';
 import { useData } from '../context/DataContext';
-import { resolveAssetUrl } from '../lib/url';
+import { AssetImage } from '../components/AssetImage';
 import { formatUsd, tokensToUsd } from '../lib/pricing';
 import { TRIAL_DAYS } from '../config';
 import { 
@@ -105,11 +105,7 @@ export const AppDetailPage: React.FC = () => {
 
   if (!appData) {
     if (loading) {
-      return (
-        <div className="min-h-[40vh] flex items-center justify-center text-sm font-mono text-zinc-500">
-          Loading engine…
-        </div>
-      );
+      return <div className="min-h-[50vh]" />;
     }
     return <Navigate to="/" replace />;
   }
@@ -207,22 +203,26 @@ export const AppDetailPage: React.FC = () => {
                     className="w-full h-full object-cover"
                   />
                 )
-              ) : typeof activeMedia === 'number' && screenshotsList[activeMedia] ? (
-                <img
-                  src={screenshotsList[activeMedia]}
-                  alt={`${appData.name} screenshot ${activeMedia + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              ) : coverImage ? (
-                <img
-                  src={coverImage}
-                  alt={appData.name}
-                  className="w-full h-full object-cover"
-                />
               ) : (
-                <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-xs font-mono text-zinc-500">
-                  [ No media available ]
-                </div>
+                <AssetImage
+                  src={
+                    typeof activeMedia === 'number' && screenshotsList[activeMedia]
+                      ? screenshotsList[activeMedia]
+                      : coverImage
+                  }
+                  alt={
+                    typeof activeMedia === 'number' && screenshotsList[activeMedia]
+                      ? `${appData.name} screenshot ${activeMedia + 1}`
+                      : appData.name
+                  }
+                  className="w-full h-full"
+                  fit="cover"
+                  fallback={
+                    <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-xs font-mono text-zinc-500">
+                      [ No media available ]
+                    </div>
+                  }
+                />
               )}
             </div>
 
@@ -288,21 +288,21 @@ export const AppDetailPage: React.FC = () => {
                             : 'border border-zinc-200 hover:border-zinc-400 opacity-80 hover:opacity-100'
                         }`}
                       >
-                        {item.thumb ? (
-                          <img
-                            src={item.thumb}
-                            alt={
-                              item.type === 'trailer'
-                                ? `${appData.name} trailer thumbnail`
-                                : `${appData.name} thumbnail ${(item.index ?? 0) + 1}`
-                            }
-                            className="w-full h-full object-cover rounded-lg"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-zinc-100 flex items-center justify-center text-zinc-400">
-                            <ImageIcon className="w-6 h-6" />
-                          </div>
-                        )}
+                        <AssetImage
+                          src={item.thumb}
+                          alt={
+                            item.type === 'trailer'
+                              ? `${appData.name} trailer thumbnail`
+                              : `${appData.name} thumbnail ${(item.index ?? 0) + 1}`
+                          }
+                          className="w-full h-full"
+                          fit="cover"
+                          fallback={
+                            <div className="w-full h-full bg-zinc-100 flex items-center justify-center text-zinc-400">
+                              <ImageIcon className="w-6 h-6" />
+                            </div>
+                          }
+                        />
 
                         <div className="absolute inset-0 bg-black/20 hover:bg-black/0 transition-colors" />
 
@@ -391,17 +391,12 @@ export const AppDetailPage: React.FC = () => {
             {/* App Identification Card */}
             <div className="border border-zinc-200 rounded-2xl p-6 bg-white shadow-2xs space-y-4">
               <div className="flex items-center space-x-4">
-                {logoUrl ? (
-                  <img
-                    src={logoUrl}
-                    alt={appData.name}
-                    className="w-12 h-12 object-cover rounded-xl shrink-0 shadow-2xs"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-bold text-sm shrink-0">
-                    <Boxes className="w-6 h-6" />
-                  </div>
-                )}
+                <AssetImage
+                  src={logoUrl}
+                  alt={appData.name}
+                  className="w-12 h-12 shrink-0"
+                  fallback={<Boxes className="w-12 h-12 text-black" />}
+                />
                 <div>
                   <h1 className="text-2xl font-bold text-zinc-950 tracking-tight leading-tight">
                     {appData.name}
@@ -421,8 +416,8 @@ export const AppDetailPage: React.FC = () => {
                   Engine Perpetual Seat
                 </div>
                 <div className="flex items-baseline space-x-2">
-                  {branding.storeIcon && (
-                    <img src={resolveAssetUrl(branding.storeIcon)} alt="Tokens" className="w-5 h-5 object-contain" />
+                  {(loading || branding.storeIcon) && (
+                    <AssetImage src={branding.storeIcon} alt="Tokens" className="w-5 h-5 shrink-0" />
                   )}
                   <span className="text-3xl font-extrabold font-mono tracking-tight text-zinc-950">
                     {appData.price}
@@ -461,8 +456,8 @@ export const AppDetailPage: React.FC = () => {
                     disabled={purchasing}
                     className="w-full py-3 bg-zinc-900 text-white text-center text-xs font-medium uppercase tracking-wider rounded-xl hover:bg-zinc-800 transition-colors flex items-center justify-center space-x-2 shadow-xs disabled:opacity-50"
                   >
-                    {branding.storeIcon && (
-                      <img src={resolveAssetUrl(branding.storeIcon)} alt="Tokens" className="w-3.5 h-3.5 object-contain filter brightness-0 invert" />
+                    {(loading || branding.storeIcon) && (
+                      <AssetImage src={branding.storeIcon} alt="Tokens" className="w-3.5 h-3.5 shrink-0 filter brightness-0 invert" />
                     )}
                     <span>{purchasing ? 'Processing...' : `Buy Engine License (${appData.price} Tokens)`}</span>
                   </button>

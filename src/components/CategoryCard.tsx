@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { CategoryItem } from '../data/apps';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Boxes } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { AssetImage } from './AssetImage';
 
 interface CategoryCardProps {
   category: CategoryItem;
@@ -19,13 +20,12 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
     >
       <div>
         <div className="flex items-center justify-between mb-4">
-          {catLogoUrl ? (
-            <img src={catLogoUrl} alt={category.name} className="w-10 h-10 object-cover rounded-md" />
-          ) : (
-            <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-mono font-bold text-xs shadow-xs">
-              {category.code}
-            </div>
-          )}
+          <AssetImage
+            src={catLogoUrl}
+            alt={category.name}
+            className="w-10 h-10 shrink-0"
+            fallback={<Boxes className="w-10 h-10 text-black" />}
+          />
           {/* Removed engines count badge */}
         </div>
 

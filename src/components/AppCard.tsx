@@ -4,6 +4,7 @@ import { AppItem } from '../data/apps';
 import { ArrowRight, Boxes } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { formatUsd, tokensToUsd } from '../lib/pricing';
+import { AssetImage } from './AssetImage';
 
 interface AppCardProps {
   app: AppItem;
@@ -20,13 +21,12 @@ export const AppCard: React.FC<AppCardProps> = ({ app, showCategory = true }) =>
         {/* Top meta */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2.5">
-            {logoUrl ? (
-              <img src={logoUrl} alt={app.name} className="w-9 h-9 object-cover rounded-md" />
-            ) : (
-              <div className="w-9 h-9 rounded-md bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-700">
-                <Boxes className="w-4 h-4" />
-              </div>
-            )}
+            <AssetImage
+              src={logoUrl}
+              alt={app.name}
+              className="w-9 h-9 shrink-0"
+              fallback={<Boxes className="w-9 h-9 text-black" />}
+            />
             {showCategory && (
               <span className="text-[11px] font-medium text-zinc-600 px-2.5 py-0.5 bg-zinc-100 rounded-full border border-zinc-200/60">
                 {app.categoryName}

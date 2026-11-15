@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Boxes } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { TRIAL_DAYS } from '../config';
+import { AssetImage } from '../components/AssetImage';
 
 export const AboutPage: React.FC = () => {
   const { categories, apps, categoryLogos, websiteInfo } = useData();
@@ -101,13 +102,12 @@ export const AboutPage: React.FC = () => {
             {categories.map((cat) => (
               <div key={cat.slug} className="bg-white border border-zinc-200 rounded-2xl p-6 space-y-4 shadow-2xs hover:shadow-md hover:border-zinc-300 transition-all">
                 <div className="flex items-center justify-between">
-                  {categoryLogos[cat.slug] ? (
-                    <img src={categoryLogos[cat.slug]} alt={cat.name} className="w-8 h-8 object-cover rounded-md" />
-                  ) : (
-                    <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-zinc-900 text-white">
-                      {cat.code}
-                    </span>
-                  )}
+                  <AssetImage
+                    src={categoryLogos[cat.slug]}
+                    alt={cat.name}
+                    className="w-8 h-8 shrink-0"
+                    fallback={<Boxes className="w-8 h-8 text-black" />}
+                  />
                   <span className="text-xs text-zinc-500 font-medium uppercase">
                     {apps.filter((a) => a.categorySlug === cat.slug).length} Tools
                   </span>

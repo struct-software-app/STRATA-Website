@@ -55,13 +55,7 @@ export function App() {
 
           {/* Dynamic Route Content */}
           <main id="main-content" tabIndex={-1} className="flex-grow focus:outline-none">
-            <Suspense
-              fallback={
-                <div className="min-h-[50vh] flex items-center justify-center text-sm font-mono text-zinc-500">
-                  Loading…
-                </div>
-              }
-            >
+            <Suspense fallback={<div className="min-h-[50vh]" />}>
               <ErrorBoundary>
                 <Routes>
                   <Route path="/" element={<HomePage />} />

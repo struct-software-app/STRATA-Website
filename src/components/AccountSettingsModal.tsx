@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X, User, ShoppingBag, Coins, Check, AlertCircle } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import { resolveAssetUrl } from '../lib/url';
+import { AssetImage } from './AssetImage';
 
 interface AccountSettingsModalProps {
   isOpen: boolean;
@@ -14,7 +14,7 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
   onClose,
   initialTab = 'profile',
 }) => {
-  const { profile, walletTokens, purchases, apps, bundles, branding, updateProfile, formatTokens } = useData();
+  const { profile, walletTokens, purchases, apps, bundles, branding, loading, updateProfile, formatTokens } = useData();
   const [activeTab, setActiveTab] = useState<'profile' | 'purchases'>(initialTab);
 
   const [formData, setFormData] = useState({
@@ -235,11 +235,12 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
               {/* Token balance overview */}
               <div className="p-3.5 bg-zinc-50 border border-zinc-200 rounded-xl flex items-center justify-between">
                 <div className="flex items-center space-x-2.5">
-                  {branding.storeIcon ? (
-                    <img src={resolveAssetUrl(branding.storeIcon)} alt="Tokens" className="w-5 h-5 object-contain" />
-                  ) : (
-                    <Coins className="w-5 h-5 text-zinc-700" />
-                  )}
+                  <AssetImage
+                    src={branding.storeIcon}
+                    alt="Tokens"
+                    className="w-5 h-5 shrink-0"
+                    fallback={<Coins className="w-5 h-5 text-black" />}
+                  />
                   <span className="font-semibold text-zinc-800">Current Token Balance</span>
                 </div>
                 <span className="font-bold font-mono text-zinc-950 text-sm">{formatTokens(walletTokens)} Tokens</span>
@@ -312,8 +313,8 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                       </div>
 
                       <div className="flex items-center space-x-2 shrink-0">
-                        {branding.storeIcon && (
-                          <img src={resolveAssetUrl(branding.storeIcon)} alt="Tokens" className="w-4 h-4 object-contain" />
+                        {(loading || branding.storeIcon) && (
+                          <AssetImage src={branding.storeIcon} alt="Tokens" className="w-4 h-4 shrink-0" />
                         )}
                         <span className="font-bold font-mono text-zinc-900 text-xs">
                           {purchase.tokens_paid} Tokens

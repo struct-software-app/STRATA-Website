@@ -2,10 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { HardDrive } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import { resolveAssetUrl } from '../lib/url';
+import { AssetImage } from './AssetImage';
 
 export const Footer: React.FC = () => {
-  const { branding, categories, websiteInfo } = useData();
+  const { branding, categories, websiteInfo, loading } = useData();
 
   return (
     <footer className="bg-zinc-50 border-t border-zinc-200 text-zinc-600 pt-16 pb-12 px-4 md:px-8 select-none">
@@ -15,27 +15,28 @@ export const Footer: React.FC = () => {
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
             <Link to="/" className="flex items-center space-x-2.5 transition-opacity hover:opacity-90">
-              {branding.storeIcon && branding.storeNameLogo ? (
-                <div className="flex items-center space-x-2.5">
-                  <img
-                    src={resolveAssetUrl(branding.storeIcon)}
-                    alt="Store Icon"
-                    className="w-8 h-8 object-contain"
-                  />
-                  <img
-                    src={resolveAssetUrl(branding.storeNameLogo)}
-                    alt="STRATA"
-                    className="h-6 object-contain"
-                  />
-                </div>
-              ) : (
+              {!loading && !branding.storeIcon && !branding.storeNameLogo ? (
                 <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-zinc-900 text-white rounded-lg flex items-center justify-center font-mono font-bold text-sm">
+                  <div className="w-8 h-8 bg-zinc-900 text-white flex items-center justify-center font-mono font-bold text-sm">
                     S
                   </div>
                   <span className="font-bold text-lg tracking-tight text-zinc-900">
                     STRATA SUITE
                   </span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2.5">
+                  {(loading || branding.storeIcon) && (
+                    <AssetImage src={branding.storeIcon} alt="Store Icon" className="w-8 h-8 shrink-0" />
+                  )}
+                  {(loading || branding.storeNameLogo) && (
+                    <AssetImage
+                      src={branding.storeNameLogo}
+                      alt="STRATA"
+                      className="h-6 w-28 shrink-0"
+                      position="left center"
+                    />
+                  )}
                 </div>
               )}
             </Link>

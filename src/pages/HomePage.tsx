@@ -9,11 +9,11 @@ import { CategoryCard } from '../components/CategoryCard';
 import { AppCard } from '../components/AppCard';
 import { HeroSlider } from '../components/HeroSlider';
 import { useData } from '../context/DataContext';
-import { resolveAssetUrl } from '../lib/url';
+import { AssetImage } from '../components/AssetImage';
 import { formatUsd, normalizePeriod } from '../lib/pricing';
 
 export const HomePage: React.FC = () => {
-  const { categories, apps, bundles, heroBanners, pricingPlans, branding, appLogos } = useData();
+  const { categories, apps, bundles, heroBanners, pricingPlans, branding, appLogos, loading } = useData();
   const [shuffleSeed] = React.useState(() => Math.floor(Math.random() * 2 ** 31));
 
   const featuredApps = React.useMemo(() => {
@@ -67,7 +67,7 @@ export const HomePage: React.FC = () => {
       {/* ========================================================================= */}
       {/* HERO BANNER CAROUSEL (Connected to live Supabase hero_banners) */}
       {/* ========================================================================= */}
-      <HeroSlider banners={heroBanners} toolCount={apps.length} />
+      <HeroSlider banners={heroBanners} toolCount={apps.length} loading={loading} />
 
 
 
@@ -108,13 +108,12 @@ export const HomePage: React.FC = () => {
                   to={`/app/${app.slug}`}
                   className="inline-flex items-center space-x-2.5 bg-white hover:bg-zinc-50 border border-zinc-200/80 hover:border-zinc-300 hover:shadow-2xs px-4 py-2.5 rounded-xl transition-all cursor-pointer select-none shrink-0"
                 >
-                  {logoUrl ? (
-                    <img src={logoUrl} alt={app.name} className="w-5 h-5 object-cover rounded shrink-0" />
-                  ) : (
-                    <div className="w-5 h-5 rounded bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0 text-zinc-700">
-                      <Zap className="w-3 h-3 animate-pulse" />
-                    </div>
-                  )}
+                  <AssetImage
+                    src={logoUrl}
+                    alt={app.name}
+                    className="w-5 h-5 shrink-0"
+                    fallback={<Zap className="w-5 h-5 text-black" />}
+                  />
                   <span className="text-xs font-bold text-zinc-900">{app.name}</span>
                   <span className="text-[9px] font-mono text-zinc-400 bg-zinc-50 px-1 py-0.5 rounded border border-zinc-100">
                     {app.categoryName}
@@ -155,17 +154,12 @@ export const HomePage: React.FC = () => {
             <div className="bg-zinc-950 text-white p-6 rounded-2xl border border-zinc-900 flex flex-col justify-between shadow-lg relative overflow-hidden group">
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  {branding.storeIcon ? (
-                    <img
-                      src={resolveAssetUrl(branding.storeIcon)}
-                      alt="STRATA"
-                      className="w-10 h-10 object-contain filter brightness-0 invert"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 bg-white text-zinc-950 flex items-center justify-center font-mono font-bold text-xs rounded-md">
-                      STRATA
-                    </div>
-                  )}
+                  <AssetImage
+                    src={branding.storeIcon}
+                    alt="STRATA"
+                    className="w-10 h-10 filter brightness-0 invert"
+                    fallback={<Zap className="w-10 h-10 text-white" />}
+                  />
                   {/* Removed 35 Engines / Engines count text entirely */}
                 </div>
                 <h3 className="text-xl font-bold tracking-tight mb-2 text-white">

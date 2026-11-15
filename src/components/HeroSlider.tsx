@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { HeroBannerItem } from '../context/DataContext';
+import { AssetImage } from './AssetImage';
 
 const buildDefaultSlides = (toolCount: number): HeroBannerItem[] => [
   {
@@ -38,9 +39,10 @@ const VIDEO_URL_RE = /\.(mp4|webm|ogg)(\?.*)?$/i;
 interface HeroSliderProps {
   banners?: HeroBannerItem[];
   toolCount?: number;
+  loading: boolean;
 }
 
-export const HeroSlider: React.FC<HeroSliderProps> = ({ banners = [], toolCount = 35 }) => {
+export const HeroSlider: React.FC<HeroSliderProps> = ({ banners = [], toolCount = 35, loading }) => {
   const defaultSlides = useMemo(() => buildDefaultSlides(toolCount), [toolCount]);
   const slides = banners && banners.length > 0 ? banners : defaultSlides;
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -130,6 +132,12 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ banners = [], toolCount 
     }
   };
 
+  if (loading && (!banners || banners.length === 0)) {
+    return (
+      <section className="relative border-b border-zinc-200 overflow-hidden h-[350px] min-h-[350px] max-h-[350px] bg-black w-full select-none" />
+    );
+  }
+
   return (
     <section
       ref={containerRef}
@@ -188,12 +196,11 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ banners = [], toolCount 
                       className="absolute inset-0 w-full h-full object-cover pointer-events-none"
                     />
                   ) : (
-                    <img
+                    <AssetImage
                       src={mediaUrl}
                       alt={slide.title || 'STRATA Hero Banner'}
-                      draggable="false"
-                      onContextMenu={(e) => e.preventDefault()}
-                      className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+                      fit="cover"
+                      className="absolute inset-0 w-full h-full pointer-events-none select-none"
                     />
                   )}
                   <div className="absolute inset-0 bg-black/60 z-0 pointer-events-none" />

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useMemo, useCall
 import { supabase } from '../lib/supabaseClient';
 import { CATEGORIES, APPS, PRICING_PLANS, CategoryItem, AppItem } from '../data/apps';
 import { bootstrapNewUser } from '../lib/accountBootstrap';
+import { readAssetCache, writeAssetCache } from '../lib/assetCache';
 
 
 export interface LiveAppItem extends AppItem {
@@ -271,15 +272,18 @@ const DataContext = createContext<DataContextType>({
 });
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [initialCache] = useState(() => readAssetCache());
   const [categories, setCategories] = useState<CategoryItem[]>(CATEGORIES);
   const [apps, setApps] = useState<LiveAppItem[]>(APPS);
   const [bundles, setBundles] = useState<BundleItem[]>([]);
-  const [heroBanners, setHeroBanners] = useState<HeroBannerItem[]>([]);
+  const [heroBanners, setHeroBanners] = useState<HeroBannerItem[]>(() => initialCache?.heroBanners ?? []);
   const [pricingPlans, setPricingPlans] = useState<PricingPlanItem[]>(PRICING_PLANS as any);
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
-  const [categoryLogos, setCategoryLogos] = useState<Record<string, string>>({});
-  const [appLogos, setAppLogos] = useState<Record<string, string>>({});
-  const [branding, setBranding] = useState(defaultBranding);
+  const [categoryLogos, setCategoryLogos] = useState<Record<string, string>>(() => initialCache?.categoryLogos ?? {});
+  const [appLogos, setAppLogos] = useState<Record<string, string>>(() => initialCache?.appLogos ?? {});
+  const [branding, setBranding] = useState(() =>
+    initialCache?.branding ? { ...defaultBranding, ...initialCache.branding } : defaultBranding
+  );
   const [websiteInfo, setWebsiteInfo] = useState(defaultWebsiteInfo);
   const [loading, setLoading] = useState(true);
 
@@ -432,8 +436,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setFaqs(faqRes.data as FaqItem[]);
         }
 
-        if (bannerRes.data && bannerRes.data.length > 0) {
-          setHeroBanners(bannerRes.data as HeroBannerItem[]);
+        const liveBanners: HeroBannerItem[] = !bannerRes.error && Array.isArray(bannerRes.data)
+          ? (bannerRes.data as HeroBannerItem[])
+          : [];
+        if (!bannerRes.error) {
+          setHeroBanners(liveBanners);
         }
 
         if (planRes.data && planRes.data.length > 0) {
@@ -494,7 +501,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // 1. Process Branding
         const brandMap = { ...defaultBranding };
-        if (brandRes.data) {
+        if (!brandRes.error && brandRes.data) {
           brandRes.data.forEach((row: { key: string; value: string }) => {
             if (row.key in brandMap) {
               (brandMap as any)[row.key] = row.value;
@@ -505,118 +512,131 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // 2. Process Categories & Category Logos
         const catLogosMap: Record<string, string> = {};
-        if (catRes.data && catRes.data.length > 0) {
-          const liveCats = CATEGORIES.map((staticCat) => {
-            const match = catRes.data?.find(
-              (c: any) =>
-                normalizeCategorySlug(c.id) === staticCat.slug ||
-                c.name?.toLowerCase() === staticCat.name.toLowerCase()
-            );
-            if (match) {
-              if (match.icon) {
-                catLogosMap[staticCat.slug] = match.icon;
-                catLogosMap[match.id] = match.icon;
+        if (!catRes.error && catRes.data) {
+          if (catRes.data.length > 0) {
+            const liveCats = CATEGORIES.map((staticCat) => {
+              const match = catRes.data?.find(
+                (c: any) =>
+                  normalizeCategorySlug(c.id) === staticCat.slug ||
+                  c.name?.toLowerCase() === staticCat.name.toLowerCase()
+              );
+              if (match) {
+                if (match.icon) {
+                  catLogosMap[staticCat.slug] = match.icon;
+                  catLogosMap[match.id] = match.icon;
+                }
+                return {
+                  ...staticCat,
+                  name: match.name || staticCat.name,
+                  shortDescription: match.description || staticCat.shortDescription,
+                  detailedDescription: match.description || staticCat.detailedDescription,
+                };
               }
-              return {
-                ...staticCat,
-                name: match.name || staticCat.name,
-                shortDescription: match.description || staticCat.shortDescription,
-                detailedDescription: match.description || staticCat.detailedDescription,
-              };
-            }
-            return staticCat;
-          });
-          setCategories(liveCats);
+              return staticCat;
+            });
+            setCategories(liveCats);
+          }
           setCategoryLogos(catLogosMap);
         }
 
 
         // 3. Process Programs / Apps & App Logos
         const appLogosMap: Record<string, string> = {};
-        if (progRes.data && progRes.data.length > 0) {
-          // Map existing static apps with matching Supabase rows
-          const staticAppSlugs = new Set<string>();
-          const liveApps = APPS.map((staticApp) => {
-            const match = progRes.data?.find(
-              (p: any) =>
-                p.id === staticApp.slug ||
-                p.id === staticApp.id ||
-                p.name?.toLowerCase() === staticApp.name.toLowerCase()
-            );
-            if (match) {
-              staticAppSlugs.add(match.id);
-              if (match.slug) staticAppSlugs.add(match.slug);
-              if (match.logo) {
-                appLogosMap[staticApp.id] = match.logo;
-                appLogosMap[staticApp.slug] = match.logo;
-                appLogosMap[match.id] = match.logo;
+        if (!progRes.error && progRes.data) {
+          if (progRes.data.length > 0) {
+            // Map existing static apps with matching Supabase rows
+            const staticAppSlugs = new Set<string>();
+            const liveApps = APPS.map((staticApp) => {
+              const match = progRes.data?.find(
+                (p: any) =>
+                  p.id === staticApp.slug ||
+                  p.id === staticApp.id ||
+                  p.name?.toLowerCase() === staticApp.name.toLowerCase()
+              );
+              if (match) {
+                staticAppSlugs.add(match.id);
+                if (match.slug) staticAppSlugs.add(match.slug);
+                if (match.logo) {
+                  appLogosMap[staticApp.id] = match.logo;
+                  appLogosMap[staticApp.slug] = match.logo;
+                  appLogosMap[match.id] = match.logo;
+                }
+                return {
+                  ...staticApp,
+                  name: match.name || staticApp.name,
+                  version: match.version || staticApp.version,
+                  price: typeof match.price === 'number' ? match.price : staticApp.price,
+                  monthlyPrice: typeof match.price === 'number' ? Math.round(match.price * 0.1) : staticApp.monthlyPrice,
+                  shortDescription: match.description || staticApp.shortDescription,
+                  fullDescription: match.description || staticApp.fullDescription,
+                  trailerUrl: match.trailerUrl || '',
+                  trailerThumbnail: match.trailerThumbnail || '',
+                  banner: match.banner || '',
+                  rating: match.rating || 5,
+                  downloadUrl: match.downloadUrl || '',
+                  screenshots: Array.isArray(match.screenshots) ? match.screenshots : [],
+                  features: Array.isArray(match.features) && match.features.length > 0 ? match.features : staticApp.features,
+                  standards: Array.isArray(match.standards) && match.standards.length > 0 ? match.standards : staticApp.standards,
+                  techSpecs: match.techSpecs && typeof match.techSpecs === 'object' ? match.techSpecs : (staticApp as any).techSpecs,
+                };
               }
-              return {
-                ...staticApp,
-                name: match.name || staticApp.name,
-                version: match.version || staticApp.version,
-                price: typeof match.price === 'number' ? match.price : staticApp.price,
-                monthlyPrice: typeof match.price === 'number' ? Math.round(match.price * 0.1) : staticApp.monthlyPrice,
-                shortDescription: match.description || staticApp.shortDescription,
-                fullDescription: match.description || staticApp.fullDescription,
-                trailerUrl: match.trailerUrl || '',
-                trailerThumbnail: match.trailerThumbnail || '',
-                banner: match.banner || '',
-                rating: match.rating || 5,
-                downloadUrl: match.downloadUrl || '',
-                screenshots: Array.isArray(match.screenshots) ? match.screenshots : [],
-                features: Array.isArray(match.features) && match.features.length > 0 ? match.features : staticApp.features,
-                standards: Array.isArray(match.standards) && match.standards.length > 0 ? match.standards : staticApp.standards,
-                techSpecs: match.techSpecs && typeof match.techSpecs === 'object' ? match.techSpecs : (staticApp as any).techSpecs,
-              };
-            }
-            return staticApp;
-          });
+              return staticApp;
+            });
 
-          // Append newly created apps from Supabase SQL that aren't in static APPS array
-          progRes.data.forEach((p: any) => {
-            const matchesStatic = APPS.some(
-              (s) => s.id === p.id || s.slug === p.id || s.name.toLowerCase() === p.name?.toLowerCase()
-            );
-            if (!matchesStatic) {
-              const normalizedCatSlug = normalizeCategorySlug(p.categoryId);
-              const matchedCat =
-                catRes.data?.find((c: any) => c.id === p.categoryId || normalizeCategorySlug(c.id) === normalizedCatSlug) ||
-                CATEGORIES.find((c) => c.slug === normalizedCatSlug) ||
-                { name: 'Engineering', id: 'general' };
-              const slugStr = p.id || p.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-              if (p.logo) {
-                appLogosMap[p.id] = p.logo;
-                appLogosMap[slugStr] = p.logo;
+            // Append newly created apps from Supabase SQL that aren't in static APPS array
+            progRes.data.forEach((p: any) => {
+              const matchesStatic = APPS.some(
+                (s) => s.id === p.id || s.slug === p.id || s.name.toLowerCase() === p.name?.toLowerCase()
+              );
+              if (!matchesStatic) {
+                const normalizedCatSlug = normalizeCategorySlug(p.categoryId);
+                const matchedCat =
+                  catRes.data?.find((c: any) => c.id === p.categoryId || normalizeCategorySlug(c.id) === normalizedCatSlug) ||
+                  CATEGORIES.find((c) => c.slug === normalizedCatSlug) ||
+                  { name: 'Engineering', id: 'general' };
+                const slugStr = p.id || p.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                if (p.logo) {
+                  appLogosMap[p.id] = p.logo;
+                  appLogosMap[slugStr] = p.logo;
+                }
+                liveApps.push({
+                  id: p.id,
+                  name: p.name,
+                  slug: slugStr,
+                  categorySlug: normalizedCatSlug || 'general',
+                  categoryName: matchedCat.name || 'Engineering',
+                  shortDescription: p.description || '',
+                  fullDescription: p.description || '',
+
+                  standards: Array.isArray(p.standards) ? p.standards : [],
+                  features: Array.isArray(p.features) ? p.features : [],
+                  specs: [],
+                  techSpecs: p.techSpecs || {},
+                  price: parseFloat(p.price) || 0,
+                  monthlyPrice: Math.round((parseFloat(p.price) || 0) * 0.1),
+                  iconName: 'Boxes',
+                  version: '1.0.0',
+                  banner: p.banner || '',
+                  trailerUrl: p.trailerUrl || '',
+                  trailerThumbnail: p.trailerThumbnail || '',
+                  downloadUrl: p.downloadUrl || '',
+                  screenshots: Array.isArray(p.screenshots) ? p.screenshots : [],
+                } as any);
               }
-              liveApps.push({
-                id: p.id,
-                name: p.name,
-                slug: slugStr,
-                categorySlug: normalizedCatSlug || 'general',
-                categoryName: matchedCat.name || 'Engineering',
-                shortDescription: p.description || '',
-                fullDescription: p.description || '',
+            });
 
-                standards: Array.isArray(p.standards) ? p.standards : [],
-                features: Array.isArray(p.features) ? p.features : [],
-                specs: [],
-                techSpecs: p.techSpecs || {},
-                price: parseFloat(p.price) || 0,
-                monthlyPrice: Math.round((parseFloat(p.price) || 0) * 0.1),
-                iconName: 'Boxes',
-                version: '1.0.0',
-                banner: p.banner || '',
-                trailerUrl: p.trailerUrl || '',
-                trailerThumbnail: p.trailerThumbnail || '',
-                downloadUrl: p.downloadUrl || '',
-                screenshots: Array.isArray(p.screenshots) ? p.screenshots : [],
-              } as any);
-            }
-          });
-
-          setApps(liveApps);
+            setApps(liveApps);
+          }
           setAppLogos(appLogosMap);
+        }
+
+        if (!brandRes.error && !catRes.error && !progRes.error && !bannerRes.error) {
+          writeAssetCache({
+            branding: brandMap,
+            categoryLogos: catLogosMap,
+            appLogos: appLogosMap,
+            heroBanners: liveBanners,
+          });
         }
 
 
