@@ -37,7 +37,11 @@ Catalog website and Electron desktop wrapper for the **STRATA Suite** — standa
 - `src/data/apps.ts` — Static baseline definitions for categories (7), tools (35), pricing plans, and FAQs.
 - `src/lib/` — Client helpers (`supabaseClient.ts`, `accountBootstrap.ts`, `pricing.ts`, `searchApps.ts`, `url.ts`, `env.ts`).
 - `electron/` — Desktop main process (`main.ts`) and hardened preload bridge (`preload.ts`).
-- `supabase/` — SQL migrations (`migrations/001_contact_and_trial_tables.sql`) and database notes (`README.md`) to review and apply in Supabase.
+- `supabase/` — single unified database schema (`SQL.sql`) and database notes (`README.md`) to review and apply in Supabase.
+
+## SQL
+
+All database SQL lives in [`supabase/SQL.sql`](supabase/SQL.sql) (see [`supabase/README.md`](supabase/README.md) for instructions, pending RLS notes, and permanent SQL rules). To apply updates, open **Supabase Dashboard > SQL Editor**, paste the entire `supabase/SQL.sql` file, and click **Run** (safe to re-run).
 
 ## How Data Works
 
@@ -45,7 +49,7 @@ The application renders immediately using the static baseline in `src/data/apps.
 
 ## Pending Items Before Production Launch
 
-- **Supabase Row Level Security (RLS)**: Review and tighten RLS policies across `users`, `user_wallets`, `purchases`, `contact_messages`, and `trial_requests` before going live (apply `supabase/migrations/001_contact_and_trial_tables.sql` in the Supabase SQL Editor).
+- **Supabase Row Level Security (RLS)**: Review and tighten RLS policies across `users`, `user_wallets`, `purchases`, `contact_messages`, and `trial_requests` before going live (apply `supabase/SQL.sql` in the Supabase SQL Editor).
 - **Server-side wallet & purchases**: Move the welcome-token grant (`src/lib/accountBootstrap.ts`) and `purchase_app` RPC logic strictly server-side (Edge Functions / database triggers and RPC permissions) so balances and ledger writes cannot be tampered with from clients.
 - **Installer download URLs**: Populate real release URLs and optional SHA-256 checksums for Windows, macOS, and Linux installers in Supabase (`website` table) so `DownloadPage.tsx` enables direct downloads.
 - **Legal text**: Replace the placeholder copy in `src/pages/TermsPage.tsx` and `src/pages/PrivacyPage.tsx` with counsel-approved Terms of Service and Privacy Policy text.

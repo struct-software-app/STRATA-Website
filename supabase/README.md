@@ -1,26 +1,41 @@
 # Supabase SQL Setup Notes
 
-## What these files are
+## Single SQL File
 
-- `migrations/001_contact_and_trial_tables.sql`: SQL migration creating the `contact_messages` and `trial_requests` tables with length constraints and insert-only Row Level Security (RLS) policies.
+- [`supabase/SQL.sql`](./SQL.sql): The **only** SQL file for **STRATA ENG** and the future **Strata Control** admin application. Contains all extensions, helper functions, tables (catalog, site content, users/commerce, inbound forms), indexes, triggers, pending RPC notes, RLS for `contact_messages` and `trial_requests`, and the update log.
 
-## How to apply
+## How to Run
 
-Run in **Supabase Dashboard > SQL Editor** only after reading the SQL file in full.
+1. Open **Supabase Dashboard > SQL Editor**.
+2. Paste the **entire** contents of `supabase/SQL.sql` and click **Run**.
+3. Every statement is idempotent (`create table if not exists`, `add column if not exists`, `create or replace function`, `drop trigger/policy if exists` before `create`), so it is safe to run again.
 
-## Which features need them
+## What SECTION 99 : UPDATE LOG Is
 
-- **Contact form** (`src/pages/ContactPage.tsx`) inserts inquiries into `public.contact_messages`.
-- **Trial key form** (`src/pages/TrialPage.tsx`) stores generated evaluation keys and requester details in `public.trial_requests`.
+`SECTION 99 : UPDATE LOG` at the bottom of `supabase/SQL.sql` tracks every schema edit (`ID | DATE | SUMMARY | SECTIONS TOUCHED | RUN IN SUPABASE`) so the owner always knows what changed and whether `supabase/SQL.sql` needs to be pasted into Supabase again.
 
-## Environment variables
+## Pending Security Review
 
-The frontend `.env` file must define:
+- **RLS review is still pending** on all existing tables (`categories`, `programs`, `bundles`, `website`, `store_branding`, `hero_banners`, `pricing_plans`, `pricing_matrix`, `faqs`, `users`, `user_wallets`, `purchases`). Only `contact_messages` and `trial_requests` currently have Row Level Security enabled (with insert-only policies). Do **not** enable RLS on other tables until the owner approves the RLS review.
+- **RPC & welcome-token review is still pending**: `purchase_app` concurrency/price lookup (documented in `SECTION 09`) and moving the 50-token welcome balance grant from client code (`src/lib/accountBootstrap.ts`) into a `SECURITY DEFINER` database trigger. Keep `VITE_ENABLE_CLIENT_PURCHASE_FALLBACK=false` in production once `purchase_app` is verified.
+
+## Environment Variables (`.env`)
 
 - `VITE_SUPABASE_URL` — your Supabase project URL
 - `VITE_SUPABASE_ANON_KEY` — your Supabase anon / publishable key
-- `VITE_ENABLE_CLIENT_PURCHASE_FALLBACK` — keep `false` in production once the `purchase_app` RPC function is deployed and verified
+- `VITE_ENABLE_CLIENT_PURCHASE_FALLBACK` — keep `false` in production
 
-## Pending security work
+## Permanent SQL Rules
 
-A full Row Level Security (RLS) review of the existing tables (`users`, `user_wallets`, `purchases`, `programs`, `bundles`, `categories`, `pricing_plans`, `pricing_matrix`, `faqs`, `hero_banners`, `website`, `store_branding`), as well as moving the welcome-token grant to a database trigger and auditing the `purchase_app` RPC function, is a separate, still-pending step.
+RULES FOR AI EDITORS OF THIS FILE
+1. All SQL for this project lives ONLY in supabase/SQL.sql. Never create another .sql file. Never put SQL inside src/ or public/.
+2. Edit the correct section in place. Never append loose snippets at the end of the file.
+3. Everything must stay re-runnable: create table if not exists, add column if not exists, create or replace function, drop policy/trigger if exists before create.
+4. Never write destructive statements (drop table, truncate, delete from, drop column, changing a column type) unless the owner explicitly asks for it in writing in the prompt.
+5. camelCase identifiers are always double-quoted.
+6. Do not enable Row Level Security or add policies on existing tables until the owner approves the RLS review.
+7. Every change adds one line to SECTION 99 UPDATE LOG (next ID, date, summary, sections touched, RUN IN SUPABASE: YES/NO).
+8. Every final report of every task that touches SQL ends with this block:
+   SQL UPDATE REQUIRED: YES or NO
+   Log entries: U-xxx, U-yyy
+   Action for the owner: open Supabase Dashboard > SQL Editor, paste the whole supabase/SQL.sql, Run.
