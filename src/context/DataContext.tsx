@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { CATEGORIES, APPS, PRICING_PLANS, CategoryItem, AppItem } from '../data/apps';
+import { bootstrapNewUser } from '../lib/accountBootstrap';
 
 
 export interface LiveAppItem extends AppItem {
@@ -144,12 +145,15 @@ interface DataContextType {
     download_win_filename?: string;
     download_win_url?: string;
     download_win_size?: string;
+    download_win_sha256?: string;
     download_mac_filename?: string;
     download_mac_url?: string;
     download_mac_size?: string;
+    download_mac_sha256?: string;
     download_linux_filename?: string;
     download_linux_url?: string;
     download_linux_size?: string;
+    download_linux_sha256?: string;
   };
 
   loading: boolean;
@@ -199,18 +203,21 @@ const defaultWebsiteInfo = {
   company_legal_name: 'STRATA Engineering Software Inc.',
   office_address_line1: '100 Engineering Plaza, Suite 400',
   office_address_line2: 'San Francisco, CA 94105, USA',
-  default_trial_key_template: 'STRATA-TRIAL-35TOOLS-X749-8821-EVAL',
+  default_trial_key_template: '',
   copyright_text: 'STRATA Technologies Inc. All rights reserved.',
   footer_tagline: 'Deterministic Computation Standard',
   download_win_filename: 'STRATA_Suite_Setup_v2.4.0.exe',
   download_win_url: '',
   download_win_size: '142 MB',
+  download_win_sha256: '',
   download_mac_filename: 'STRATA_Suite_v2.4.0.dmg',
   download_mac_url: '',
   download_mac_size: '158 MB',
+  download_mac_sha256: '',
   download_linux_filename: 'STRATA_Suite_v2.4.0.AppImage',
   download_linux_url: '',
   download_linux_size: '136 MB',
+  download_linux_sha256: '',
 };
 
 function normalizeCategorySlug(id?: string | null): string {
@@ -281,6 +288,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [walletTokens, setWalletTokens] = useState<number>(0);
   const [purchases, setPurchases] = useState<PurchaseItem[]>([]);
+  const bootstrappedUsersRef = useRef<Set<string>>(new Set());
 
   // Update browser tab title and dynamic favicon
   useEffect(() => {
@@ -296,16 +304,40 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [branding.storeIcon]);
 
-  const fetchUserData = useCallback(async (userId: string) => {
+  const fetchUserData = useCallback(async (userId: string, sessionUser?: any) => {
     try {
       const [profileRes, walletRes, purchasesRes] = await Promise.all([
         supabase.from('users').select('*').eq('id', userId).maybeSingle(),
         supabase.from('user_wallets').select('tokens').eq('user_id', userId).maybeSingle(),
-        supabase.from('purchases').select('*').eq('user_id', userId),
+        supabase.from('purchases').select('*').eq('user_id', userId).order('purchased_at', { ascending: false }),
       ]);
 
       if (profileRes.data) {
         setProfile(profileRes.data as UserProfile);
+      } else if (!profileRes.error && !bootstrappedUsersRef.current.has(userId)) {
+        bootstrappedUsersRef.current.add(userId);
+        const authUser = sessionUser || (await supabase.auth.getUser()).data.user;
+        if (authUser && authUser.id === userId) {
+          const { error: bootErr } = await bootstrapNewUser(supabase, authUser, {
+            username: authUser.user_metadata?.username,
+            firstName: authUser.user_metadata?.firstName,
+            secondName: authUser.user_metadata?.secondName,
+          });
+          if (!bootErr) {
+            const [newProfileRes, newWalletRes] = await Promise.all([
+              supabase.from('users').select('*').eq('id', userId).maybeSingle(),
+              supabase.from('user_wallets').select('tokens').eq('user_id', userId).maybeSingle(),
+            ]);
+            if (newProfileRes.data) {
+              setProfile(newProfileRes.data as UserProfile);
+            }
+            if (newWalletRes.data) {
+              setWalletTokens(newWalletRes.data.tokens || 0);
+            }
+          } else {
+            console.warn('[auth] bootstrapNewUser failed:', bootErr);
+          }
+        }
       }
       if (walletRes.data) {
         setWalletTokens(walletRes.data.tokens || 0);
@@ -320,7 +352,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshUserData = useCallback(async () => {
     if (user?.id) {
-      await fetchUserData(user.id);
+      await fetchUserData(user.id, user);
     }
   }, [user, fetchUserData]);
 
@@ -329,14 +361,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user || null);
       if (session?.user) {
-        fetchUserData(session.user.id);
+        const sessionUser = session.user;
+        setTimeout(() => fetchUserData(sessionUser.id, sessionUser), 0);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
       if (session?.user) {
-        fetchUserData(session.user.id);
+        const sessionUser = session.user;
+        setTimeout(() => fetchUserData(sessionUser.id, sessionUser), 0);
       } else {
         setProfile(null);
         setWalletTokens(0);
@@ -640,7 +674,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         if (error) {
-          // If RPC fails (e.g. not created yet), perform client-side fallback
           if (error.message.includes('insufficient') || error.message.includes('Insufficient')) {
             return { success: false, error: 'Insufficient tokens in your wallet. Please top up.' };
           }
@@ -648,14 +681,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return { success: false, error: 'You already own this license.' };
           }
 
+          if (import.meta.env.VITE_ENABLE_CLIENT_PURCHASE_FALLBACK !== 'true') {
+            console.error('[purchase] purchase_app RPC failed:', error);
+            return { success: false, error: 'Purchases are temporarily unavailable. Please try again later.' };
+          }
+
+          console.warn('[purchase] using INSECURE client-side fallback');
+
           // Fallback direct insert
-          let price = 0;
+          let price: number | undefined;
           if (programId) {
             const prog = apps.find((a) => a.id === programId || a.slug === programId);
-            price = prog?.price || 29.99;
+            price = prog?.price;
           } else if (bundleId) {
             const bun = bundles.find((b) => b.id === bundleId);
-            price = bun?.price || 99.99;
+            price = bun?.price;
+          }
+
+          if (typeof price !== 'number' || Number.isNaN(price)) {
+            return { success: false, error: 'Price not found for this item.' };
           }
 
           if (walletTokens < price) {
@@ -663,14 +707,24 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
 
           // Deduct tokens
-          await supabase.from('user_wallets').update({ tokens: walletTokens - price }).eq('user_id', user.id);
+          const { error: walletError } = await supabase
+            .from('user_wallets')
+            .update({ tokens: walletTokens - price })
+            .eq('user_id', user.id);
+          if (walletError) {
+            return { success: false, error: walletError.message || 'Failed to deduct wallet tokens.' };
+          }
+
           // Insert purchase
-          await supabase.from('purchases').insert({
+          const { error: purchaseError } = await supabase.from('purchases').insert({
             user_id: user.id,
             program_id: programId || null,
             bundle_id: bundleId || null,
             tokens_paid: price,
           });
+          if (purchaseError) {
+            return { success: false, error: purchaseError.message || 'Failed to record purchase.' };
+          }
 
           await refreshUserData();
           return { success: true };
@@ -689,9 +743,23 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     async (data: Partial<UserProfile>) => {
       if (!user) return { success: false, error: 'Not authenticated.' };
       try {
+        const safePayload: {
+          firstName?: string;
+          secondName?: string;
+          username?: string;
+          birthdate?: string | null;
+        } = {};
+        if (typeof data.firstName === 'string') safePayload.firstName = data.firstName.trim();
+        if (typeof data.secondName === 'string') safePayload.secondName = data.secondName.trim();
+        if (typeof data.username === 'string') safePayload.username = data.username.trim();
+        if (data.birthdate !== undefined) {
+          const trimmedBirthdate = typeof data.birthdate === 'string' ? data.birthdate.trim() : '';
+          safePayload.birthdate = trimmedBirthdate ? trimmedBirthdate : null;
+        }
+
         const { error } = await supabase
           .from('users')
-          .update(data)
+          .update(safePayload)
           .eq('id', user.id);
 
         if (error) throw error;

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { TRIAL_DAYS } from '../config';
 
 export const AboutPage: React.FC = () => {
   const { categories, apps, categoryLogos, websiteInfo } = useData();
@@ -142,7 +143,7 @@ export const AboutPage: React.FC = () => {
                 Ready to standardize your engineering workflows?
               </h3>
               <p className="text-xs text-zinc-400">
-                Download the complete {apps.length}-engine workspace or start a 14-day full trial.
+                Download the complete {apps.length}-engine workspace or start a {TRIAL_DAYS}-day full trial.
               </p>
             </div>
 

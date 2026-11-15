@@ -169,10 +169,10 @@ export const Footer: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-6">
-            <Link to="/contact" className="hover:text-zinc-900 transition-colors">
+            <Link to="/terms" className="hover:text-zinc-900 transition-colors">
               Terms of Engineering License
             </Link>
-            <Link to="/contact" className="hover:text-zinc-900 transition-colors">
+            <Link to="/privacy" className="hover:text-zinc-900 transition-colors">
               Privacy & Local Data Policy
             </Link>
             <a

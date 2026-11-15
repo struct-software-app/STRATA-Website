@@ -4,6 +4,7 @@ import { AppCard } from '../components/AppCard';
 import { useData } from '../context/DataContext';
 import { resolveAssetUrl } from '../lib/url';
 import { formatUsd, tokensToUsd } from '../lib/pricing';
+import { TRIAL_DAYS } from '../config';
 import { 
   ChevronRight, 
   ChevronLeft,
@@ -459,7 +460,7 @@ export const AppDetailPage: React.FC = () => {
                   to="/trial"
                   className="w-full py-2.5 bg-zinc-50 text-zinc-900 text-center text-xs font-medium uppercase tracking-wider rounded-xl border border-zinc-200 hover:bg-zinc-100 transition-colors block shadow-2xs"
                 >
-                  Request 14-Day Free Trial Key
+                  Request {TRIAL_DAYS}-Day Free Trial Key
                 </Link>
 
                 <Link

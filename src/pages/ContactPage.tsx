@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, MapPin, Phone, Check, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Mail, MapPin, Phone, Check, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { supabase } from '../lib/supabaseClient';
 
 export const ContactPage: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState(false);
+  const [honeypot, setHoneypot] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -12,12 +16,44 @@ export const ContactPage: React.FC = () => {
     subject: '',
     message: '',
   });
-  const { categories, websiteInfo } = useData();
+  const { categories, websiteInfo, user } = useData();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.message) return;
-    setSubmitted(true);
+    const trimmedName = formData.name.trim();
+    const trimmedEmail = formData.email.trim();
+    const trimmedMessage = formData.message.trim();
+    if (!trimmedName || !trimmedEmail || !trimmedMessage) return;
+
+    if (honeypot.trim() !== '') {
+      setSubmitted(true);
+      return;
+    }
+
+    setSending(true);
+    setSendError(false);
+
+    try {
+      const { error } = await supabase.from('contact_messages').insert({
+        name: trimmedName.slice(0, 100),
+        email: trimmedEmail,
+        category: formData.category,
+        subject: formData.subject.trim().slice(0, 150),
+        message: trimmedMessage.slice(0, 5000),
+        user_id: user?.id ?? null,
+      });
+
+      if (error) {
+        setSendError(true);
+        return;
+      }
+
+      setSubmitted(true);
+    } catch {
+      setSendError(true);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -67,6 +103,7 @@ export const ContactPage: React.FC = () => {
                   <button
                     onClick={() => {
                       setSubmitted(false);
+                      setSendError(false);
                       setFormData({ name: '', email: '', category: 'general', subject: '', message: '' });
                     }}
                     className="px-6 py-2.5 bg-zinc-900 text-white text-xs font-medium rounded-xl hover:bg-zinc-800 transition-colors shadow-xs"
@@ -77,6 +114,26 @@ export const ContactPage: React.FC = () => {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4 text-xs font-sans">
+                <input
+                  type="text"
+                  name="website"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  className="sr-only"
+                />
+
+                {sendError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center space-x-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>
+                      We could not send your message right now. Please email {websiteInfo.support_email || 'support@stratasuite.com'} instead.
+                    </span>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Name */}
                   <div>
@@ -86,6 +143,7 @@ export const ContactPage: React.FC = () => {
                     <input
                       type="text"
                       required
+                      maxLength={100}
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="Engineer / Firm Name"
@@ -136,6 +194,7 @@ export const ContactPage: React.FC = () => {
                   </label>
                   <input
                     type="text"
+                    maxLength={150}
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     placeholder="e.g. ACI 318 Section Capacity Verification Inquiry"
@@ -151,6 +210,7 @@ export const ContactPage: React.FC = () => {
                   <textarea
                     rows={5}
                     required
+                    maxLength={5000}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     placeholder="Specify project context, calculation requirements, or requested features..."
@@ -162,9 +222,10 @@ export const ContactPage: React.FC = () => {
                 <div className="pt-2">
                   <button
                     type="submit"
-                    className="w-full py-3 bg-zinc-900 text-white text-xs font-medium uppercase tracking-wider rounded-xl hover:bg-zinc-800 transition-all flex items-center justify-center space-x-2 shadow-xs"
+                    disabled={sending}
+                    className="w-full py-3 bg-zinc-900 text-white text-xs font-medium uppercase tracking-wider rounded-xl hover:bg-zinc-800 transition-all flex items-center justify-center space-x-2 shadow-xs disabled:opacity-50"
                   >
-                    <span>Transmit Message</span>
+                    <span>{sending ? 'Sending…' : 'Transmit Message'}</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>

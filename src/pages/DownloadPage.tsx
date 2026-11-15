@@ -3,8 +3,16 @@ import { Link } from 'react-router-dom';
 import { Download, Monitor, ShieldCheck, HardDrive } from 'lucide-react';
 import { useData } from '../context/DataContext';
 
+function detectDefaultOS(): 'win' | 'mac' | 'linux' {
+  if (typeof navigator === 'undefined') return 'win';
+  const ua = navigator.userAgent.toLowerCase();
+  if (ua.includes('mac')) return 'mac';
+  if (ua.includes('linux')) return 'linux';
+  return 'win';
+}
+
 export const DownloadPage: React.FC = () => {
-  const [selectedOS, setSelectedOS] = useState<'win' | 'mac' | 'linux'>('win');
+  const [selectedOS, setSelectedOS] = useState<'win' | 'mac' | 'linux'>(detectDefaultOS);
   const [downloadStarted, setDownloadStarted] = useState(false);
   const { websiteInfo } = useData();
 
@@ -17,6 +25,7 @@ export const DownloadPage: React.FC = () => {
       file: websiteInfo.download_win_filename || 'STRATA_Suite_Setup_v2.4.0.exe',
       url: websiteInfo.download_win_url || '',
       size: websiteInfo.download_win_size || '142 MB',
+      sha256: websiteInfo.download_win_sha256 || '',
       isPrimary: true,
     },
     {
@@ -27,6 +36,7 @@ export const DownloadPage: React.FC = () => {
       file: websiteInfo.download_mac_filename || 'STRATA_Suite_v2.4.0.dmg',
       url: websiteInfo.download_mac_url || '',
       size: websiteInfo.download_mac_size || '158 MB',
+      sha256: websiteInfo.download_mac_sha256 || '',
       isPrimary: false,
     },
     {
@@ -37,24 +47,25 @@ export const DownloadPage: React.FC = () => {
       file: websiteInfo.download_linux_filename || 'STRATA_Suite_v2.4.0.AppImage',
       url: websiteInfo.download_linux_url || '',
       size: websiteInfo.download_linux_size || '136 MB',
+      sha256: websiteInfo.download_linux_sha256 || '',
       isPrimary: false,
     },
   ];
 
   const current = osOptions.find((os) => os.id === selectedOS)!;
+  const hasUrl = Boolean(current.url && current.url.trim());
 
   const handleDownload = () => {
+    if (!hasUrl) return;
     setDownloadStarted(true);
-    if (current.url) {
-      const a = document.createElement('a');
-      a.href = current.url;
-      a.download = current.file;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
+    const a = document.createElement('a');
+    a.href = current.url;
+    a.download = current.file;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
     setTimeout(() => {
       setDownloadStarted(false);
     }, 4000);
@@ -131,24 +142,42 @@ export const DownloadPage: React.FC = () => {
           <div className="border border-zinc-200 p-8 rounded-2xl bg-zinc-50/60 text-center space-y-6 shadow-2xs">
             <div className="space-y-1">
               <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                Ready for Installation
+                {hasUrl ? 'Ready for Installation' : 'Distribution Pending'}
               </span>
               <h3 className="text-2xl font-bold tracking-tight text-zinc-950 font-mono">
                 {current.file}
               </h3>
               <p className="text-xs text-zinc-500">
-                Package Size: {current.size} • Build Release: v2.4.0-STABLE • SHA-256 Verified
+                Package Size: {current.size} • Build Release: v{websiteInfo.version}
               </p>
+              {current.sha256 && (
+                <p className="text-[11px] font-mono text-zinc-500 break-all pt-1">
+                  SHA-256: {current.sha256}
+                </p>
+              )}
             </div>
 
-            <div className="max-w-md mx-auto">
+            <div className="max-w-md mx-auto space-y-2">
               <button
                 onClick={handleDownload}
-                className="w-full py-3.5 bg-zinc-900 text-white text-sm font-medium rounded-xl hover:bg-zinc-800 transition-all flex items-center justify-center space-x-2 shadow-sm"
+                disabled={!hasUrl}
+                className="w-full py-3.5 bg-zinc-900 text-white text-sm font-medium rounded-xl hover:bg-zinc-800 transition-all flex items-center justify-center space-x-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Download className="w-4 h-4" />
-                <span>Download {current.name} Build ({current.size})</span>
+                <span>
+                  {hasUrl ? `Download ${current.name} Build (${current.size})` : 'Installer not available yet'}
+                </span>
               </button>
+              {!hasUrl && (
+                <div className="pt-1">
+                  <Link
+                    to="/contact"
+                    className="text-xs font-medium text-zinc-600 hover:text-zinc-900 underline"
+                  >
+                    Contact us to get notified
+                  </Link>
+                </div>
+              )}
             </div>
 
             {downloadStarted && (
@@ -158,10 +187,12 @@ export const DownloadPage: React.FC = () => {
             )}
 
             <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-zinc-500 pt-2">
-              <span className="flex items-center space-x-1.5">
-                <ShieldCheck className="w-4 h-4 text-zinc-800" />
-                <span>Code-Signed Binary</span>
-              </span>
+              {current.sha256 && (
+                <span className="flex items-center space-x-1.5">
+                  <ShieldCheck className="w-4 h-4 text-zinc-800" />
+                  <span>Verified checksum available</span>
+                </span>
+              )}
               <span className="flex items-center space-x-1.5">
                 <HardDrive className="w-4 h-4 text-zinc-800" />
                 <span>No Network Installation Required</span>
@@ -173,7 +204,6 @@ export const DownloadPage: React.FC = () => {
           <div className="border border-zinc-200 rounded-2xl p-6 bg-white space-y-4 shadow-2xs">
             <div className="text-xs font-semibold uppercase tracking-wider text-zinc-900 border-b border-zinc-100 pb-3 flex items-center justify-between">
               <span>System Requirements & Environment Specifications</span>
-              <span className="text-zinc-400 font-normal">Updated Q3 2026</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">

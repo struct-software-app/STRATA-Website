@@ -14,6 +14,8 @@ import { GetStartedPage } from './pages/GetStartedPage';
 import { TrialPage } from './pages/TrialPage';
 import { DownloadPage } from './pages/DownloadPage';
 import { ContactPage } from './pages/ContactPage';
+import { TermsPage } from './pages/TermsPage';
+import { PrivacyPage } from './pages/PrivacyPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 // Scroll to top helper on route change
@@ -48,6 +50,8 @@ export function App() {
               <Route path="/trial" element={<TrialPage />} />
               <Route path="/download" element={<DownloadPage />} />
               <Route path="/contact" element={<ContactPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
               {/* Fallback */}
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

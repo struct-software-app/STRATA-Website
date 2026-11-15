@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ArrowRight, 
@@ -9,17 +9,16 @@ import {
   LogOut
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
+import { useData } from '../context/DataContext';
+import { bootstrapNewUser } from '../lib/accountBootstrap';
+import { TRIAL_DAYS } from '../config';
 
 export const GetStartedPage: React.FC = () => {
+  const { user, profile, walletTokens, signOut, formatTokens, refreshUserData } = useData();
   const [activeTab, setActiveTab] = useState<'signup' | 'signin'>('signup');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  // User session state
-  const [userSession, setUserSession] = useState<any>(null);
-  const [userProfile, setUserProfile] = useState<any>(null);
-  const [walletBalance, setWalletBalance] = useState<number>(0);
 
   // Sign Up Form fields (matching public.users schema)
   const [signUpData, setSignUpData] = useState({
@@ -36,46 +35,6 @@ export const GetStartedPage: React.FC = () => {
     email: '',
     password: '',
   });
-
-  // Check active Supabase auth session on mount
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUserSession(session);
-      if (session?.user) {
-        fetchUserProfileAndWallet(session.user.id);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserSession(session);
-      if (session?.user) {
-        fetchUserProfileAndWallet(session.user.id);
-      } else {
-        setUserProfile(null);
-        setWalletBalance(0);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const fetchUserProfileAndWallet = async (userId: string) => {
-    try {
-      const [profileRes, walletRes] = await Promise.all([
-        supabase.from('users').select('*').eq('id', userId).maybeSingle(),
-        supabase.from('user_wallets').select('tokens').eq('user_id', userId).maybeSingle(),
-      ]);
-
-      if (profileRes.data) {
-        setUserProfile(profileRes.data);
-      }
-      if (walletRes.data) {
-        setWalletBalance(walletRes.data.tokens || 0);
-      }
-    } catch (err) {
-      console.error('Error loading profile:', err);
-    }
-  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,24 +58,25 @@ export const GetStartedPage: React.FC = () => {
 
       if (error) throw error;
 
+      if (!data.session) {
+        setSuccessMessage('Account created. Check your email to confirm your address, then sign in.');
+        return;
+      }
+
       if (data.user) {
-        // 2. Insert or update public.users record
-        await supabase.from('users').upsert({
-          id: data.user.id,
-          username: signUpData.username || signUpData.email.split('@')[0],
+        const { error: bootstrapError } = await bootstrapNewUser(supabase, data.user, {
+          username: signUpData.username,
           firstName: signUpData.firstName,
           secondName: signUpData.secondName,
-          email: signUpData.email,
           birthdate: signUpData.birthdate || null,
-          role: 'user',
         });
 
-        // 3. Initialize wallet balance
-        await supabase.from('user_wallets').upsert({
-          user_id: data.user.id,
-          tokens: 50, // Welcome gift tokens
-        });
+        if (bootstrapError) {
+          setErrorMessage(bootstrapError);
+          return;
+        }
 
+        await refreshUserData();
         setSuccessMessage('Account created successfully! Welcome to STRATA Engineering Suite.');
       }
     } catch (err: any) {
@@ -147,13 +107,6 @@ export const GetStartedPage: React.FC = () => {
     }
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setUserSession(null);
-    setUserProfile(null);
-    setWalletBalance(0);
-  };
-
   return (
     <div className="bg-white text-zinc-900 min-h-screen">
       {/* Header Banner */}
@@ -166,10 +119,10 @@ export const GetStartedPage: React.FC = () => {
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-950 mb-3">
-            {userSession ? 'Your STRATA Account' : 'Get Started with STRATA'}
+            {user ? 'Your STRATA Account' : 'Get Started with STRATA'}
           </h1>
           <p className="text-base sm:text-lg text-zinc-600 max-w-xl mx-auto leading-relaxed">
-            {userSession
+            {user
               ? 'Manage your multidisciplinary licenses, token wallet, and local desktop workstations.'
               : 'Create your engineering profile or sign in to activate commercial licenses and sync offline seats.'}
           </p>
@@ -180,23 +133,23 @@ export const GetStartedPage: React.FC = () => {
       <section className="py-16 px-4 md:px-8 bg-white">
         <div className="max-w-xl mx-auto">
           {/* Active Logged-In State Dashboard */}
-          {userSession ? (
+          {user ? (
             <div className="bg-white border border-zinc-200 rounded-2xl p-8 shadow-md space-y-6">
               <div className="flex items-center justify-between border-b border-zinc-100 pb-6">
                 <div className="flex items-center space-x-3.5">
                   <div className="w-12 h-12 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-bold text-lg">
-                    {userProfile?.firstName ? userProfile.firstName[0].toUpperCase() : 'U'}
+                    {profile?.firstName ? profile.firstName[0].toUpperCase() : 'U'}
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-zinc-950">
-                      {userProfile?.firstName} {userProfile?.secondName}
+                      {profile?.firstName} {profile?.secondName}
                     </h3>
-                    <p className="text-xs text-zinc-500 font-mono">@{userProfile?.username || userSession.user.email?.split('@')[0]}</p>
+                    <p className="text-xs text-zinc-500 font-mono">@{profile?.username || user.email?.split('@')[0]}</p>
                   </div>
                 </div>
 
                 <button
-                  onClick={handleSignOut}
+                  onClick={signOut}
                   className="px-3 py-1.5 text-xs font-medium text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 border border-zinc-200 rounded-lg transition-colors flex items-center space-x-1.5"
                 >
                   <LogOut className="w-3.5 h-3.5" />
@@ -212,7 +165,7 @@ export const GetStartedPage: React.FC = () => {
                   </div>
                   <div>
                     <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Engineering Wallet</div>
-                    <div className="text-lg font-bold font-mono text-zinc-950">{walletBalance} Tokens</div>
+                    <div className="text-lg font-bold font-mono text-zinc-950">{formatTokens(walletTokens)} Tokens</div>
                   </div>
                 </div>
 
@@ -237,7 +190,7 @@ export const GetStartedPage: React.FC = () => {
                   to="/trial"
                   className="w-full py-2.5 text-center text-xs font-medium text-zinc-600 hover:text-zinc-900 border border-zinc-200 rounded-xl hover:bg-zinc-50 block"
                 >
-                  Generate 14-Day Free Evaluation License Key →
+                  Generate {TRIAL_DAYS}-Day Free Evaluation License Key →
                 </Link>
               </div>
             </div>
@@ -361,7 +314,7 @@ export const GetStartedPage: React.FC = () => {
                     <input
                       type="password"
                       required
-                      minLength={6}
+                      minLength={8}
                       value={signUpData.password}
                       onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
                       placeholder="••••••••"
@@ -395,7 +348,7 @@ export const GetStartedPage: React.FC = () => {
                   <div className="pt-2 text-center text-[11px] text-zinc-500">
                     Looking for evaluation only?{' '}
                     <Link to="/trial" className="font-semibold text-zinc-900 hover:underline">
-                      Get 14-Day Free Trial Key
+                      Get {TRIAL_DAYS}-Day Free Trial Key
                     </Link>
                   </div>
                 </form>
