@@ -113,6 +113,7 @@ export const Header: React.FC = () => {
         setActiveCategory(null);
         setIsLangOpen(false);
         setIsProfileMenuOpen(false);
+        setIsMobileMenuOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -309,9 +310,13 @@ export const Header: React.FC = () => {
                   {/* Profile & Wallet Dropdown Trigger (Just profile picture styled like download button, no arrow, no tokens) */}
                   <div className="relative" ref={profileMenuRef}>
                     <button
+                      type="button"
                       onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                       className="h-8 w-8 rounded-lg overflow-hidden bg-zinc-900 text-white flex items-center justify-center font-bold text-xs shadow-xs hover:bg-zinc-800 transition-all border border-zinc-200/60"
                       title="User Profile"
+                      aria-label="User Profile"
+                      aria-haspopup="true"
+                      aria-expanded={isProfileMenuOpen}
                     >
                       {profile?.avatar ? (
                         <img src={resolveAssetUrl(profile.avatar)} alt="Avatar" className="w-full h-full object-cover" />
@@ -456,7 +461,12 @@ export const Header: React.FC = () => {
                   className="w-full bg-transparent text-sm focus:outline-none text-zinc-900 placeholder:text-zinc-400"
                 />
                 {searchQuery && (
-                  <button onClick={() => setSearchQuery('')} className="p-0.5 text-zinc-400 hover:text-zinc-700">
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="p-0.5 text-zinc-400 hover:text-zinc-700"
+                    aria-label="Clear search"
+                  >
                     <X className="w-4 h-4" />
                   </button>
                 )}
@@ -676,7 +686,12 @@ export const Header: React.FC = () => {
                   className="w-full bg-transparent text-xs focus:outline-none text-zinc-900 placeholder:text-zinc-400"
                 />
                 {searchQuery && (
-                  <button onClick={() => setSearchQuery('')} className="p-0.5 text-zinc-400 hover:text-zinc-700">
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="p-0.5 text-zinc-400 hover:text-zinc-700"
+                    aria-label="Clear search"
+                  >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 )}

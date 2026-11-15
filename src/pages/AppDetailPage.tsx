@@ -244,6 +244,7 @@ export const AppDetailPage: React.FC = () => {
                           : 'border-zinc-100 bg-zinc-50 text-zinc-300 cursor-not-allowed'
                       }`}
                       title="Scroll Left"
+                      aria-label="Scroll gallery left"
                     >
                       <ChevronLeft className="w-3.5 h-3.5" />
                     </button>
@@ -257,6 +258,7 @@ export const AppDetailPage: React.FC = () => {
                           : 'border-zinc-100 bg-zinc-50 text-zinc-300 cursor-not-allowed'
                       }`}
                       title="Scroll Right"
+                      aria-label="Scroll gallery right"
                     >
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
@@ -273,7 +275,13 @@ export const AppDetailPage: React.FC = () => {
                     return (
                       <button
                         key={item.id}
+                        type="button"
                         onClick={() => setActiveMedia(item.type === 'trailer' ? 'trailer' : (item.index ?? 0))}
+                        aria-label={
+                          item.type === 'trailer'
+                            ? `Play ${appData.name} trailer`
+                            : `View ${appData.name} screenshot ${(item.index ?? 0) + 1}`
+                        }
                         className={`flex-shrink-0 w-36 h-20 rounded-xl relative overflow-hidden text-left transition-all cursor-pointer ${
                           isActive
                             ? 'border-2 border-zinc-900 shadow-md'
@@ -283,7 +291,11 @@ export const AppDetailPage: React.FC = () => {
                         {item.thumb ? (
                           <img
                             src={item.thumb}
-                            alt={item.type}
+                            alt={
+                              item.type === 'trailer'
+                                ? `${appData.name} trailer thumbnail`
+                                : `${appData.name} thumbnail ${(item.index ?? 0) + 1}`
+                            }
                             className="w-full h-full object-cover rounded-lg"
                           />
                         ) : (
