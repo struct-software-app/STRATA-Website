@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { HardDrive } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { resolveAssetUrl } from '../lib/url';
 
 export const Footer: React.FC = () => {
   const { branding, categories, websiteInfo } = useData();
@@ -17,12 +18,12 @@ export const Footer: React.FC = () => {
               {branding.storeIcon && branding.storeNameLogo ? (
                 <div className="flex items-center space-x-2.5">
                   <img
-                    src={branding.storeIcon}
+                    src={resolveAssetUrl(branding.storeIcon)}
                     alt="Store Icon"
                     className="w-8 h-8 object-contain"
                   />
                   <img
-                    src={branding.storeNameLogo}
+                    src={resolveAssetUrl(branding.storeNameLogo)}
                     alt="STRATA"
                     className="h-6 object-contain"
                   />

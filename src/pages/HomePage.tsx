@@ -10,6 +10,7 @@ import { CategoryCard } from '../components/CategoryCard';
 import { AppCard } from '../components/AppCard';
 import { HeroSlider } from '../components/HeroSlider';
 import { useData } from '../context/DataContext';
+import { resolveAssetUrl } from '../lib/url';
 
 export const HomePage: React.FC = () => {
   const { categories, apps, bundles, heroBanners, branding, appLogos } = useData();
@@ -32,7 +33,7 @@ export const HomePage: React.FC = () => {
       {/* ========================================================================= */}
       {/* HERO BANNER CAROUSEL (Connected to live Supabase hero_banners) */}
       {/* ========================================================================= */}
-      <HeroSlider banners={heroBanners} />
+      <HeroSlider banners={heroBanners} toolCount={apps.length} />
 
 
 
@@ -122,7 +123,7 @@ export const HomePage: React.FC = () => {
                 <div className="flex items-center justify-between mb-4">
                   {branding.storeIcon ? (
                     <img
-                      src={branding.storeIcon}
+                      src={resolveAssetUrl(branding.storeIcon)}
                       alt="STRATA"
                       className="w-10 h-10 object-contain filter brightness-0 invert"
                     />

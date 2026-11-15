@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, User, ShoppingBag, Coins, Check, AlertCircle } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { resolveAssetUrl } from '../lib/url';
 
 interface AccountSettingsModalProps {
   isOpen: boolean;
@@ -21,22 +22,83 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
     secondName: profile?.secondName || '',
     username: profile?.username || '',
     birthdate: profile?.birthdate || '',
-    avatar: profile?.avatar || '',
   });
 
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        firstName: profile?.firstName || '',
+        secondName: profile?.secondName || '',
+        username: profile?.username || '',
+        birthdate: profile?.birthdate || '',
+      });
+      setError(null);
+      setSuccess(false);
+    }
+  }, [isOpen, profile]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(initialTab);
+    }
+  }, [isOpen, initialTab]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  const sortedPurchases = useMemo(() => {
+    return [...purchases].sort((a, b) => {
+      const ta = new Date(a.purchased_at).getTime();
+      const tb = new Date(b.purchased_at).getTime();
+      if (Number.isNaN(ta) && Number.isNaN(tb)) return 0;
+      if (Number.isNaN(ta)) return 1;
+      if (Number.isNaN(tb)) return -1;
+      return tb - ta;
+    });
+  }, [purchases]);
+
   if (!isOpen) return null;
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
     setError(null);
     setSuccess(false);
 
-    const res = await updateProfile(formData);
+    const firstName = formData.firstName.trim();
+    const secondName = formData.secondName.trim();
+    const username = formData.username.trim();
+    const birthdate = formData.birthdate.trim();
+
+    if (!/^[a-zA-Z0-9_.-]{3,30}$/.test(username)) {
+      setError('Username must be 3–30 characters using only letters, digits, _, ., or -.');
+      return;
+    }
+
+    setSaving(true);
+    const res = await updateProfile({
+      firstName,
+      secondName,
+      username,
+      birthdate: birthdate || null,
+    });
     setSaving(false);
     if (res.success) {
       setSuccess(true);
@@ -47,8 +109,17 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150">
-      <div className="w-full max-w-2xl bg-white rounded-2xl border border-zinc-200 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-100">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Account settings"
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-2xl bg-white rounded-2xl border border-zinc-200 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-100"
+      >
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 bg-white">
           <div className="flex items-center space-x-3">
@@ -163,7 +234,7 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
               <div className="p-3.5 bg-zinc-50 border border-zinc-200 rounded-xl flex items-center justify-between">
                 <div className="flex items-center space-x-2.5">
                   {branding.storeIcon ? (
-                    <img src={branding.storeIcon} alt="Tokens" className="w-5 h-5 object-contain" />
+                    <img src={resolveAssetUrl(branding.storeIcon)} alt="Tokens" className="w-5 h-5 object-contain" />
                   ) : (
                     <Coins className="w-5 h-5 text-zinc-700" />
                   )}
@@ -201,7 +272,7 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                   <p className="text-xs text-zinc-500 mt-1">Browse the catalog to unlock perpetual licenses using tokens.</p>
                 </div>
               ) : (
-                purchases.map((purchase) => {
+                sortedPurchases.map((purchase) => {
                   let title = 'Purchased Engine';
                   let subtitle = 'Single Tool License';
 
@@ -219,6 +290,12 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                     }
                   }
 
+                  const parsedDate = purchase.purchased_at ? new Date(purchase.purchased_at) : null;
+                  const formattedDate =
+                    parsedDate && !Number.isNaN(parsedDate.getTime())
+                      ? `${parsedDate.toLocaleDateString()} at ${parsedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                      : '—';
+
                   return (
                     <div
                       key={purchase.id}
@@ -228,13 +305,13 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                         <div className="font-bold text-sm text-zinc-900">{title}</div>
                         <div className="text-zinc-500 text-[11px]">{subtitle}</div>
                         <div className="text-zinc-400 text-[10px] font-mono">
-                          {new Date(purchase.purchased_at).toLocaleDateString()} at {new Date(purchase.purchased_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {formattedDate}
                         </div>
                       </div>
 
                       <div className="flex items-center space-x-2 shrink-0">
                         {branding.storeIcon && (
-                          <img src={branding.storeIcon} alt="Tokens" className="w-4 h-4 object-contain" />
+                          <img src={resolveAssetUrl(branding.storeIcon)} alt="Tokens" className="w-4 h-4 object-contain" />
                         )}
                         <span className="font-bold font-mono text-zinc-900 text-xs">
                           {purchase.tokens_paid} Tokens

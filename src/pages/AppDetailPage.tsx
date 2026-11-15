@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { AppCard } from '../components/AppCard';
 import { useData } from '../context/DataContext';
+import { resolveAssetUrl } from '../lib/url';
 import { 
   ChevronRight, 
   ChevronLeft,
@@ -390,7 +391,7 @@ export const AppDetailPage: React.FC = () => {
                 </div>
                 <div className="flex items-baseline space-x-2">
                   {branding.storeIcon && (
-                    <img src={branding.storeIcon} alt="Tokens" className="w-5 h-5 object-contain" />
+                    <img src={resolveAssetUrl(branding.storeIcon)} alt="Tokens" className="w-5 h-5 object-contain" />
                   )}
                   <span className="text-3xl font-extrabold font-mono tracking-tight text-zinc-950">
                     {appData.price}
@@ -428,7 +429,7 @@ export const AppDetailPage: React.FC = () => {
                     className="w-full py-3 bg-zinc-900 text-white text-center text-xs font-medium uppercase tracking-wider rounded-xl hover:bg-zinc-800 transition-colors flex items-center justify-center space-x-2 shadow-xs disabled:opacity-50"
                   >
                     {branding.storeIcon && (
-                      <img src={branding.storeIcon} alt="Tokens" className="w-3.5 h-3.5 object-contain filter brightness-0 invert" />
+                      <img src={resolveAssetUrl(branding.storeIcon)} alt="Tokens" className="w-3.5 h-3.5 object-contain filter brightness-0 invert" />
                     )}
                     <span>{purchasing ? 'Processing...' : `Buy Engine License (${appData.price} Tokens)`}</span>
                   </button>

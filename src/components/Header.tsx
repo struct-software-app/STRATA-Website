@@ -15,18 +15,13 @@ import {
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { AccountSettingsModal } from './AccountSettingsModal';
-
-const getDynamicUrl = (url: string | null | undefined): string => {
-  if (!url) return '';
-  if (url.includes('localhost:') || url.includes('127.0.0.1:')) {
-    return url.replace(/localhost|127\.0\.0\.1/, window.location.hostname);
-  }
-  return url;
-};
+import { resolveAssetUrl } from '../lib/url';
+import { searchApps } from '../lib/searchApps';
+import { ENABLE_LANGUAGE_SWITCHER } from '../config';
 
 export const Header: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState('EN');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -37,11 +32,11 @@ export const Header: React.FC = () => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [settingsModalTab, setSettingsModalTab] = useState<'profile' | 'purchases'>('profile');
 
-  // Inline expanding search state
-  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  // Search state & refs
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const searchButtonRef = useRef<HTMLButtonElement>(null);
+  const searchPanelRef = useRef<HTMLDivElement>(null);
 
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const langMenuRef = useRef<HTMLDivElement>(null);
@@ -67,7 +62,7 @@ export const Header: React.FC = () => {
   useEffect(() => {
     setActiveCategory(null);
     setIsMobileMenuOpen(false);
-    setIsSearchExpanded(false);
+    setIsSearchOpen(false);
     setIsProfileMenuOpen(false);
     setSearchQuery('');
   }, [location.pathname]);
@@ -75,39 +70,44 @@ export const Header: React.FC = () => {
   // Click outside listener
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (megaMenuRef.current && !megaMenuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (megaMenuRef.current && !megaMenuRef.current.contains(target)) {
         setActiveCategory(null);
       }
-      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
+      if (langMenuRef.current && !langMenuRef.current.contains(target)) {
         setIsLangOpen(false);
       }
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(target)) {
         setIsProfileMenuOpen(false);
       }
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
-        setIsSearchExpanded(false);
+      if (
+        searchPanelRef.current &&
+        !searchPanelRef.current.contains(target) &&
+        !searchButtonRef.current?.contains(target)
+      ) {
+        setIsSearchOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Focus search input when expanded
+  // Focus search input when opened
   useEffect(() => {
-    if (isSearchExpanded) {
+    if (isSearchOpen) {
       setTimeout(() => searchInputRef.current?.focus(), 50);
     }
-  }, [isSearchExpanded]);
+  }, [isSearchOpen]);
 
   // Keyboard shortcut listener (Cmd/Ctrl + K or Escape)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        setIsSearchExpanded((prev) => !prev);
+        setIsSearchOpen((prev) => !prev);
       }
       if (e.key === 'Escape') {
-        setIsSearchExpanded(false);
+        setIsSearchOpen(false);
         setActiveCategory(null);
         setIsLangOpen(false);
         setIsProfileMenuOpen(false);
@@ -136,19 +136,12 @@ export const Header: React.FC = () => {
     { code: 'DE', name: 'Deutsch (German)' },
   ];
 
-  // Filter apps for expanding search
-  const filteredApps = searchQuery.trim()
-    ? apps.filter(
-        (app) =>
-          app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          app.categoryName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          app.shortDescription.toLowerCase().includes(searchQuery.toLowerCase())
-      ).slice(0, 6)
-    : apps.slice(0, 6);
+  const filteredApps = searchApps(apps, searchQuery, 8);
 
   const handleSelectApp = (slug: string) => {
     navigate(`/app/${slug}`);
-    setIsSearchExpanded(false);
+    setIsSearchOpen(false);
+    setIsMobileMenuOpen(false);
     setSearchQuery('');
   };
 
@@ -171,12 +164,12 @@ export const Header: React.FC = () => {
                 {branding.storeIcon && branding.storeNameLogo ? (
                   <div className="flex items-center space-x-2.5">
                     <img
-                      src={getDynamicUrl(branding.storeIcon)}
+                      src={resolveAssetUrl(branding.storeIcon)}
                       alt="Store Icon"
                       className="w-8 h-8 object-contain"
                     />
                     <img
-                      src={getDynamicUrl(branding.storeNameLogo)}
+                      src={resolveAssetUrl(branding.storeNameLogo)}
                       alt="STRATA"
                       className="h-6 object-contain"
                     />
@@ -242,60 +235,71 @@ export const Header: React.FC = () => {
             <div className="flex items-center space-x-2 sm:space-x-3">
               {/* Search Icon Button trigger to open search dropdown */}
               <button
-                onClick={() => setIsSearchModalOpen(!isSearchModalOpen)}
+                ref={searchButtonRef}
+                onClick={() => setIsSearchOpen((prev) => !prev)}
                 className="hidden lg:flex p-1.5 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors items-center justify-center shrink-0"
                 title="Search tools (Cmd+K)"
                 aria-label="Search"
+                aria-expanded={isSearchOpen}
               >
                 <Search className="w-4 h-4" />
               </button>
 
               {/* Language Switcher */}
-              <div className="relative" ref={langMenuRef}>
-                <button
-                  onClick={() => setIsLangOpen(!isLangOpen)}
-                  className="flex items-center space-x-1.5 px-2.5 py-1.5 text-xs font-medium text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors"
-                  aria-label="Change language"
-                >
-                  <Globe className="w-3.5 h-3.5 text-zinc-500" />
-                  <span className="font-semibold">{selectedLang}</span>
-                  <ChevronDown className="w-3 h-3 text-zinc-400" />
-                </button>
+              {ENABLE_LANGUAGE_SWITCHER && (
+                <div className="relative" ref={langMenuRef}>
+                  <button
+                    onClick={() => setIsLangOpen(!isLangOpen)}
+                    className="flex items-center space-x-1.5 px-2.5 py-1.5 text-xs font-medium text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors"
+                    aria-label="Change language"
+                  >
+                    <Globe className="w-3.5 h-3.5 text-zinc-500" />
+                    <span className="font-semibold">{selectedLang}</span>
+                    <ChevronDown className="w-3 h-3 text-zinc-400" />
+                  </button>
 
-                {isLangOpen && (
-                  <div className="absolute right-0 mt-1 w-44 bg-white border border-zinc-200 rounded-xl shadow-xl py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-                    {languages.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => {
-                          setSelectedLang(lang.code);
-                          setIsLangOpen(false);
-                        }}
-                        className={`w-full text-left px-3.5 py-2 text-xs font-medium flex items-center justify-between hover:bg-zinc-50 ${
-                          selectedLang === lang.code ? 'font-semibold text-zinc-900 bg-zinc-50' : 'text-zinc-600'
-                        }`}
-                      >
-                        <span>{lang.name}</span>
-                        {selectedLang === lang.code && (
-                          <span className="w-1.5 h-1.5 bg-zinc-900 rounded-full"></span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+                  {isLangOpen && (
+                    <div className="absolute right-0 mt-1 w-44 bg-white border border-zinc-200 rounded-xl shadow-xl py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                      {languages.map((lang) => (
+                        <button
+                          key={lang.code}
+                          onClick={() => {
+                            setSelectedLang(lang.code);
+                            setIsLangOpen(false);
+                          }}
+                          className={`w-full text-left px-3.5 py-2 text-xs font-medium flex items-center justify-between hover:bg-zinc-50 ${
+                            selectedLang === lang.code ? 'font-semibold text-zinc-900 bg-zinc-50' : 'text-zinc-600'
+                          }`}
+                        >
+                          <span>{lang.name}</span>
+                          {selectedLang === lang.code && (
+                            <span className="w-1.5 h-1.5 bg-zinc-900 rounded-full"></span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* ================================================================= */}
               {/* AUTH & USER PROFILE SECTION                                       */}
               {/* ================================================================= */}
               {user ? (
-                /* LOGGED IN: Profile with Trial Button */
+                /* LOGGED IN: Profile with Trial and Download Buttons */
                 <div className="flex items-center space-x-2">
                   <Link
                     to="/trial"
                     className="hidden sm:inline-flex h-8 px-3 text-xs font-medium text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 border border-zinc-200 rounded-lg transition-colors shadow-2xs items-center justify-center"
                   >
                     Trial
+                  </Link>
+                  <Link
+                    to="/download"
+                    className="hidden sm:inline-flex h-8 px-4 text-xs font-medium text-white bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors items-center space-x-1.5 shadow-xs"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download</span>
                   </Link>
 
                   {/* Profile & Wallet Dropdown Trigger (Just profile picture styled like download button, no arrow, no tokens) */}
@@ -306,7 +310,7 @@ export const Header: React.FC = () => {
                       title="User Profile"
                     >
                       {profile?.avatar ? (
-                        <img src={getDynamicUrl(profile.avatar)} alt="Avatar" className="w-full h-full object-cover" />
+                        <img src={resolveAssetUrl(profile.avatar)} alt="Avatar" className="w-full h-full object-cover" />
                       ) : (
                         <span>{initials}</span>
                       )}
@@ -331,7 +335,7 @@ export const Header: React.FC = () => {
                           <div className="mt-3 p-2.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-between">
                             <div className="flex items-center space-x-2">
                               {branding.storeIcon && (
-                                <img src={getDynamicUrl(branding.storeIcon)} alt="Tokens" className="w-4 h-4 object-contain" />
+                                <img src={resolveAssetUrl(branding.storeIcon)} alt="Tokens" className="w-4 h-4 object-contain" />
                               )}
                               <span className="text-xs font-medium text-zinc-600">Wallet</span>
                             </div>
@@ -423,21 +427,27 @@ export const Header: React.FC = () => {
         </div>
 
         {/* Inline Search Dropdown Panel (Lowered and extended below Header Bar 1) */}
-        {isSearchModalOpen && (
-          <div 
+        {isSearchOpen && (
+          <div
+            ref={searchPanelRef}
             className="absolute top-16 left-0 right-0 bg-white border-b border-zinc-200 shadow-lg z-50 animate-in fade-in slide-in-from-top-2 duration-150"
-            onMouseLeave={() => setIsSearchModalOpen(false)}
           >
             <div className="max-w-4xl mx-auto px-6 py-5">
               <div className="flex items-center border border-zinc-300 rounded-xl px-4 py-2.5 bg-zinc-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-zinc-950/10 focus-within:border-zinc-950 transition-all">
                 <Search className="w-5 h-5 text-zinc-400 mr-2.5 shrink-0" />
                 <input
+                  ref={searchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && filteredApps.length > 0) {
+                      e.preventDefault();
+                      handleSelectApp(filteredApps[0].slug);
+                    }
+                  }}
                   placeholder="Search all 35 engineering tools, codes, or formulas..."
                   className="w-full bg-transparent text-sm focus:outline-none text-zinc-900 placeholder:text-zinc-400"
-                  autoFocus
                 />
                 {searchQuery && (
                   <button onClick={() => setSearchQuery('')} className="p-0.5 text-zinc-400 hover:text-zinc-700">
@@ -500,8 +510,10 @@ export const Header: React.FC = () => {
                 return (
                   <div key={category.slug} className="relative">
                     <button
-                      onClick={() => setActiveCategory(isActive ? null : category.slug)}
+                      onClick={() => setActiveCategory(category.slug)}
                       onMouseEnter={() => setActiveCategory(category.slug)}
+                      aria-haspopup="true"
+                      aria-expanded={isActive}
                       className={`h-9 px-3 flex items-center space-x-1.5 text-xs font-medium rounded-md transition-all ${
                         isActive || isCurrentCategoryPage
                           ? 'bg-white text-zinc-950 font-semibold shadow-2xs border border-zinc-200'
@@ -648,6 +660,12 @@ export const Header: React.FC = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && filteredApps.length > 0) {
+                      e.preventDefault();
+                      handleSelectApp(filteredApps[0].slug);
+                    }
+                  }}
                   placeholder="Search 35 engineering tools..."
                   className="w-full bg-transparent text-xs focus:outline-none text-zinc-900 placeholder:text-zinc-400"
                 />
@@ -718,23 +736,32 @@ export const Header: React.FC = () => {
 
             {/* Mobile CTAs */}
             <div className="grid grid-cols-3 gap-2 mb-6 border-b border-zinc-100 pb-4">
-              <Link
-                to="/get-started"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="p-2 text-center text-xs font-medium border border-zinc-200 rounded-lg text-zinc-900 hover:bg-zinc-50 flex items-center justify-center space-x-1.5"
-              >
-                {user ? (
-                  <>
-                    {profile?.avatar ? (
-                      <img src={getDynamicUrl(profile.avatar)} alt="User Avatar" className="w-5 h-5 rounded-full object-cover shrink-0" />
-                    ) : (
-                      <span className="font-semibold">{initials}</span>
-                    )}
-                  </>
-                ) : (
-                  'Sign In'
-                )}
-              </Link>
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setSettingsModalTab('profile');
+                    setIsSettingsModalOpen(true);
+                  }}
+                  className="p-2 text-center text-xs font-medium border border-zinc-200 rounded-lg text-zinc-900 hover:bg-zinc-50 flex items-center justify-center space-x-1.5"
+                  aria-label="Account Settings"
+                >
+                  {profile?.avatar ? (
+                    <img src={resolveAssetUrl(profile.avatar)} alt="User Avatar" className="w-5 h-5 rounded-full object-cover shrink-0" />
+                  ) : (
+                    <span className="font-semibold">{initials}</span>
+                  )}
+                </button>
+              ) : (
+                <Link
+                  to="/get-started"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-2 text-center text-xs font-medium border border-zinc-200 rounded-lg text-zinc-900 hover:bg-zinc-50 flex items-center justify-center space-x-1.5"
+                >
+                  Sign In
+                </Link>
+              )}
               <Link
                 to="/trial"
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -751,6 +778,34 @@ export const Header: React.FC = () => {
                 <span>Download</span>
               </Link>
             </div>
+
+            {user && (
+              <div className="space-y-1 mb-6 border-b border-zinc-100 pb-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setSettingsModalTab('purchases');
+                    setIsSettingsModalOpen(true);
+                  }}
+                  className="w-full text-left px-3 py-2 text-sm font-medium rounded-lg text-zinc-900 hover:bg-zinc-100 flex items-center space-x-2"
+                >
+                  <ShoppingBag className="w-4 h-4 text-zinc-500" />
+                  <span>Purchase History</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    signOut();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 text-sm font-medium rounded-lg text-red-600 hover:bg-red-50 flex items-center space-x-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            )}
 
             {/* Mobile Disciplines Accordion */}
             <div className="mb-4">

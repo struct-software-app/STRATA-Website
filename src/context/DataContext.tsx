@@ -29,7 +29,7 @@ export interface UserProfile {
   firstName?: string;
   secondName?: string;
   email: string;
-  birthdate?: string;
+  birthdate?: string | null;
   avatar?: string;
   character?: any;
   role?: string;
