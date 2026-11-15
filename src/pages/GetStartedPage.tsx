@@ -4,7 +4,6 @@ import {
   ArrowRight, 
   Check, 
   AlertCircle, 
-  Coins, 
   Download, 
   LogOut
 } from 'lucide-react';
@@ -12,9 +11,11 @@ import { supabase } from '../lib/supabaseClient';
 import { useData } from '../context/DataContext';
 import { bootstrapNewUser } from '../lib/accountBootstrap';
 import { TRIAL_DAYS } from '../config';
+import { Avatar } from '../components/Avatar';
+import { WalletBalance } from '../components/WalletBalance';
 
 export const GetStartedPage: React.FC = () => {
-  const { user, profile, walletTokens, signOut, formatTokens, refreshUserData } = useData();
+  const { user, profile, signOut, refreshUserData } = useData();
   const [activeTab, setActiveTab] = useState<'signup' | 'signin'>('signup');
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -137,9 +138,7 @@ export const GetStartedPage: React.FC = () => {
             <div className="bg-white border border-zinc-200 rounded-2xl p-8 shadow-md space-y-6">
               <div className="flex items-center justify-between border-b border-zinc-100 pb-6">
                 <div className="flex items-center space-x-3.5">
-                  <div className="w-12 h-12 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-bold text-lg">
-                    {profile?.firstName ? profile.firstName[0].toUpperCase() : 'U'}
-                  </div>
+                  <Avatar size={48} />
                   <div>
                     <h3 className="text-lg font-bold text-zinc-950">
                       {profile?.firstName} {profile?.secondName}
@@ -157,17 +156,9 @@ export const GetStartedPage: React.FC = () => {
                 </button>
               </div>
 
-              {/* Wallet Tokens Card */}
-              <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 rounded-lg bg-zinc-900 text-white flex items-center justify-center shadow-xs">
-                    <Coins className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Engineering Wallet</div>
-                    <div className="text-lg font-bold font-mono text-zinc-950">{formatTokens(walletTokens)} Tokens</div>
-                  </div>
-                </div>
+              {/* Wallet Balance */}
+              <div className="flex items-center justify-between">
+                <WalletBalance size="lg" />
 
                 <Link
                   to="/pricing"

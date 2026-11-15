@@ -16,10 +16,11 @@ import {
 import { useData } from '../context/DataContext';
 import { AccountSettingsModal } from './AccountSettingsModal';
 import { AssetImage } from './AssetImage';
-import { resolveAssetUrl } from '../lib/url';
+import { Avatar } from './Avatar';
+import { WalletBalance } from './WalletBalance';
 import { searchApps } from '../lib/searchApps';
 import { formatUsd, tokensToUsd } from '../lib/pricing';
-import { ENABLE_LANGUAGE_SWITCHER } from '../config';
+import { ENABLE_LANGUAGE_SWITCHER, SEARCH_BAR_WIDTH_PX } from '../config';
 import { isDesktopApp } from '../lib/env';
 
 export const Header: React.FC = () => {
@@ -54,9 +55,7 @@ export const Header: React.FC = () => {
     loading,
     user, 
     profile, 
-    walletTokens, 
-    signOut, 
-    formatTokens 
+    signOut 
   } = useData();
 
   const location = useLocation();
@@ -150,11 +149,6 @@ export const Header: React.FC = () => {
     setSearchQuery('');
   };
 
-  // Profile display character initials
-  const initials = profile?.firstName
-    ? `${profile.firstName[0]}${profile.secondName ? profile.secondName[0] : ''}`.toUpperCase().slice(0, 3)
-    : (user?.email ? user.email.slice(0, 2).toUpperCase() : 'STR');
-
   return (
     <>
       <header className="relative z-50 w-full bg-white select-none border-b border-zinc-200 shadow-2xs">
@@ -239,16 +233,19 @@ export const Header: React.FC = () => {
 
             {/* Right: Search + Lang Switcher + Profile/Auth Buttons */}
             <div className="flex items-center space-x-2 sm:space-x-3">
-              {/* Search Icon Button trigger to open search dropdown */}
+              {/* Compact search bar trigger to open search dropdown */}
               <button
+                type="button"
                 ref={searchButtonRef}
                 onClick={() => setIsSearchOpen((prev) => !prev)}
-                className="hidden lg:flex p-1.5 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors items-center justify-center shrink-0"
-                title="Search tools (Cmd+K)"
+                style={{ width: SEARCH_BAR_WIDTH_PX }}
+                className="hidden lg:flex h-8 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors items-center justify-end gap-2 px-2.5 shrink-0"
+                title="Search (Ctrl+K)"
                 aria-label="Search"
                 aria-expanded={isSearchOpen}
               >
-                <Search className="w-4 h-4" />
+                <span className="text-xs font-medium text-black">Search</span>
+                <Search className="w-4 h-4 text-black shrink-0" />
               </button>
 
               {/* Language Switcher */}
@@ -310,88 +307,89 @@ export const Header: React.FC = () => {
                     </Link>
                   )}
 
-                  {/* Profile & Wallet Dropdown Trigger (Just profile picture styled like download button, no arrow, no tokens) */}
+                  {/* Profile & Wallet Dropdown Trigger */}
                   <div className="relative" ref={profileMenuRef}>
                     <button
                       type="button"
                       onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                      className="h-8 w-8 rounded-lg overflow-hidden bg-zinc-900 text-white flex items-center justify-center font-bold text-xs shadow-xs hover:bg-zinc-800 transition-all border border-zinc-200/60"
-                      title="User Profile"
-                      aria-label="User Profile"
+                      className="rounded-full hover:opacity-90 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
+                      title="Account menu"
+                      aria-label="Account menu"
                       aria-haspopup="true"
                       aria-expanded={isProfileMenuOpen}
                     >
-                      {profile?.avatar ? (
-                        <img src={resolveAssetUrl(profile.avatar)} alt="Avatar" className="w-full h-full object-cover" />
-                      ) : (
-                        <span>{initials}</span>
-                      )}
+                      <Avatar size={32} />
                     </button>
 
                     {/* Profile Dropdown Menu */}
                     {isProfileMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-64 bg-white border border-zinc-200 rounded-2xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100 divide-y divide-zinc-100">
+                      <div className="absolute right-0 mt-2 w-72 bg-white border border-zinc-200 rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in zoom-in-95 duration-100">
                         {/* User Header */}
-                        <div className="p-3">
-                          <div className="font-bold text-sm text-zinc-950 truncate">
-                            {profile?.firstName ? `${profile.firstName} ${profile?.secondName || ''}` : 'Engineer Profile'}
-                          </div>
-                          <div className="text-xs text-zinc-500 font-mono truncate">
-                            @{profile?.username || user.email?.split('@')[0]}
-                          </div>
-                          <div className="text-[11px] text-zinc-400 truncate mt-0.5">
-                            {user.email}
-                          </div>
-
-                          {/* Tokens overview inside dropdown */}
-                          <div className="mt-3 p-2.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              {(loading || branding.storeIcon) && (
-                                <AssetImage src={branding.storeIcon} alt="Tokens" className="w-4 h-4 shrink-0" />
-                              )}
-                              <span className="text-xs font-medium text-black">Wallet</span>
-                            </div>
-                            <span className="font-mono font-bold text-xs text-black">
-                              {formatTokens(walletTokens)} Tokens
-                            </span>
+                        <div className="flex items-center gap-3">
+                          <Avatar size={64} />
+                          <div className="min-w-0 flex-1">
+                            {profile?.firstName ? (
+                              <>
+                                <div className="font-bold text-sm text-zinc-950 truncate">
+                                  {`${profile.firstName} ${profile.secondName || ''}`.trim()}
+                                </div>
+                                <div className="text-xs text-zinc-500 font-mono truncate">
+                                  @{profile?.username || user.email?.split('@')[0]}
+                                </div>
+                              </>
+                            ) : (
+                              <div className="font-bold text-sm text-zinc-950 font-mono truncate">
+                                @{profile?.username || user.email?.split('@')[0]}
+                              </div>
+                            )}
                           </div>
                         </div>
 
+                        {user.email && (
+                          <div className="mt-3 text-xs text-zinc-500 break-all">
+                            {user.email}
+                          </div>
+                        )}
+
+                        <div className="mt-4">
+                          <WalletBalance size="md" />
+                        </div>
+
                         {/* Actions */}
-                        <div className="py-1 space-y-0.5">
+                        <div className="border-t border-zinc-100 mt-4 pt-2 space-y-0.5">
                           <button
+                            type="button"
                             onClick={() => {
                               setSettingsModalTab('profile');
                               setIsSettingsModalOpen(true);
                               setIsProfileMenuOpen(false);
                             }}
-                            className="w-full text-left px-3 py-2 text-xs font-medium text-zinc-700 hover:text-zinc-950 hover:bg-zinc-50 rounded-lg flex items-center space-x-2 transition-colors"
+                            className="w-full text-left px-2.5 py-2 text-xs font-medium text-zinc-700 hover:text-zinc-950 hover:bg-zinc-50 rounded-lg flex items-center space-x-2 transition-colors"
                           >
                             <Settings className="w-3.5 h-3.5 text-zinc-500" />
                             <span>Account Settings & Profile</span>
                           </button>
 
                           <button
+                            type="button"
                             onClick={() => {
                               setSettingsModalTab('purchases');
                               setIsSettingsModalOpen(true);
                               setIsProfileMenuOpen(false);
                             }}
-                            className="w-full text-left px-3 py-2 text-xs font-medium text-zinc-700 hover:text-zinc-950 hover:bg-zinc-50 rounded-lg flex items-center space-x-2 transition-colors"
+                            className="w-full text-left px-2.5 py-2 text-xs font-medium text-zinc-700 hover:text-zinc-950 hover:bg-zinc-50 rounded-lg flex items-center space-x-2 transition-colors"
                           >
                             <ShoppingBag className="w-3.5 h-3.5 text-zinc-500" />
                             <span>Purchase History</span>
                           </button>
-                        </div>
 
-                        {/* Sign Out */}
-                        <div className="pt-1">
                           <button
+                            type="button"
                             onClick={() => {
                               signOut();
                               setIsProfileMenuOpen(false);
                             }}
-                            className="w-full text-left px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg flex items-center space-x-2 transition-colors"
+                            className="w-full text-left px-2.5 py-2 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg flex items-center space-x-2 transition-colors"
                           >
                             <LogOut className="w-3.5 h-3.5" />
                             <span>Sign Out</span>
@@ -760,11 +758,7 @@ export const Header: React.FC = () => {
                   className="p-2 text-center text-xs font-medium border border-zinc-200 rounded-lg text-zinc-900 hover:bg-zinc-50 flex items-center justify-center space-x-1.5"
                   aria-label="Account Settings"
                 >
-                  {profile?.avatar ? (
-                    <img src={resolveAssetUrl(profile.avatar)} alt="User Avatar" className="w-5 h-5 rounded-full object-cover shrink-0" />
-                  ) : (
-                    <span className="font-semibold">{initials}</span>
-                  )}
+                  <Avatar size={24} />
                 </button>
               ) : (
                 <Link

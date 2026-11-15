@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { X, User, ShoppingBag, Coins, Check, AlertCircle } from 'lucide-react';
+import { X, User, ShoppingBag, Check, AlertCircle } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { AssetImage } from './AssetImage';
+import { Avatar } from './Avatar';
+import { WalletBalance } from './WalletBalance';
 
 interface AccountSettingsModalProps {
   isOpen: boolean;
@@ -14,7 +16,7 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
   onClose,
   initialTab = 'profile',
 }) => {
-  const { profile, walletTokens, purchases, apps, bundles, branding, loading, updateProfile, formatTokens } = useData();
+  const { profile, purchases, apps, bundles, branding, loading, updateProfile } = useData();
   const [activeTab, setActiveTab] = useState<'profile' | 'purchases'>(initialTab);
 
   const [formData, setFormData] = useState({
@@ -123,9 +125,7 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 bg-white">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-lg bg-zinc-900 text-white flex items-center justify-center font-bold text-sm shadow-xs">
-              {profile?.firstName ? profile.firstName[0].toUpperCase() : 'U'}
-            </div>
+            <Avatar size={44} />
             <div>
               <h3 className="font-bold text-base text-zinc-950">
                 {profile?.firstName ? `${profile.firstName} ${profile?.secondName || ''}` : 'Account Settings'}
@@ -233,18 +233,7 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
               </div>
 
               {/* Token balance overview */}
-              <div className="p-3.5 bg-zinc-50 border border-zinc-200 rounded-xl flex items-center justify-between">
-                <div className="flex items-center space-x-2.5">
-                  <AssetImage
-                    src={branding.storeIcon}
-                    alt="Tokens"
-                    className="w-5 h-5 shrink-0"
-                    fallback={<Coins className="w-5 h-5 text-black" />}
-                  />
-                  <span className="font-semibold text-black">Current Token Balance</span>
-                </div>
-                <span className="font-bold font-mono text-black text-sm">{formatTokens(walletTokens)} Tokens</span>
-              </div>
+              <WalletBalance size="md" />
 
               <div className="pt-2 flex justify-end space-x-2">
                 <button
@@ -267,7 +256,7 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
 
           {/* TAB 2: PURCHASE HISTORY */}
           {activeTab === 'purchases' && (
-            <div className="space-y-3 text-xs">
+            <div className="divide-y divide-zinc-100 text-xs">
               {purchases.length === 0 ? (
                 <div className="py-12 text-center text-zinc-500">
                   <ShoppingBag className="w-10 h-10 mx-auto mb-2 opacity-30 text-zinc-800" />
@@ -302,7 +291,7 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                   return (
                     <div
                       key={purchase.id}
-                      className="p-3.5 border border-zinc-200 rounded-xl flex items-center justify-between hover:bg-zinc-50 transition-colors"
+                      className="py-3.5 flex items-center justify-between gap-4"
                     >
                       <div className="space-y-0.5">
                         <div className="font-bold text-sm text-zinc-900">{title}</div>
@@ -312,13 +301,14 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-2 shrink-0">
-                        {(loading || branding.storeIcon) && (
-                          <AssetImage src={branding.storeIcon} alt="Tokens" className="w-4 h-4 shrink-0" />
-                        )}
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <span className="font-bold font-mono text-black text-xs">
-                          {purchase.tokens_paid} Tokens
+                          {purchase.tokens_paid}
                         </span>
+                        <span className="sr-only">tokens</span>
+                        {(loading || branding.storeIcon) && (
+                          <AssetImage src={branding.storeIcon} alt="" className="w-4 h-4 shrink-0" />
+                        )}
                       </div>
                     </div>
                   );

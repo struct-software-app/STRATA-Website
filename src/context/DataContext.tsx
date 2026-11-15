@@ -293,6 +293,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [walletTokens, setWalletTokens] = useState<number>(0);
   const [purchases, setPurchases] = useState<PurchaseItem[]>([]);
   const bootstrappedUsersRef = useRef<Set<string>>(new Set());
+  const loggedProfileUsersRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!import.meta.env.DEV || !profile) return;
+    if (loggedProfileUsersRef.current.has(profile.id)) return;
+    loggedProfileUsersRef.current.add(profile.id);
+    console.debug('[profile keys]', Object.keys(profile));
+    if (profile.character) {
+      console.debug('[profile.character]', typeof profile.character);
+    }
+  }, [profile]);
 
   // Update browser tab title and dynamic favicon
   useEffect(() => {
