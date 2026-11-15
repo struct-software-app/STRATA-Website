@@ -37,7 +37,7 @@ export const HomePage: React.FC = () => {
 
 
       {/* Governing Standards Section */}
-      <section className="bg-zinc-50 border-b border-zinc-200 py-4 px-4 md:px-8 text-[10px] sm:text-xs font-mono text-zinc-650">
+      <section className="bg-zinc-50 border-b border-zinc-200 py-4 px-4 md:px-8 text-[10px] sm:text-xs font-mono text-zinc-600">
         <div className="max-w-7xl mx-auto flex items-center justify-center">
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 sm:gap-x-5 sm:gap-y-2 text-zinc-700 text-center">
             <span className="whitespace-nowrap font-semibold">ACI 318 / 530</span>
@@ -45,7 +45,7 @@ export const HomePage: React.FC = () => {
             <span className="whitespace-nowrap font-semibold">AISC 360-22</span>
             <span className="text-zinc-300">•</span>
             <span className="whitespace-nowrap font-semibold">EUROCODES 0–7</span>
-            <span className="text-zinc-350">•</span>
+            <span className="text-zinc-300">•</span>
             <span className="whitespace-nowrap font-semibold">AASHTO 1993/2018</span>
             <span className="text-zinc-300">•</span>
             <span className="whitespace-nowrap font-semibold">ASTM & USCS</span>
@@ -81,7 +81,7 @@ export const HomePage: React.FC = () => {
                     </div>
                   )}
                   <span className="text-xs font-bold text-zinc-900">{app.name}</span>
-                  <span className="text-[9px] font-mono text-zinc-400 bg-zinc-50 px-1 py-0.2 rounded border border-zinc-100">
+                  <span className="text-[9px] font-mono text-zinc-400 bg-zinc-50 px-1 py-0.5 rounded border border-zinc-100">
                     {app.categoryName}
                   </span>
                 </Link>

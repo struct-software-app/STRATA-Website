@@ -22,7 +22,7 @@ export const TrialPage: React.FC = () => {
   return (
     <div className="bg-white text-zinc-900 min-h-screen">
       {/* Header Banner */}
-      <section className="border-b border-zinc-200 bg-radial-[at_top_center] from-zinc-50 via-white to-white py-16 px-4 md:px-8">
+      <section className="border-b border-zinc-200 bg-hero-glow py-16 px-4 md:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="flex items-center justify-center space-x-2 text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">
             <Link to="/" className="hover:text-zinc-900 transition-colors">Home</Link>
@@ -43,7 +43,7 @@ export const TrialPage: React.FC = () => {
       <section className="py-16 px-4 md:px-8 bg-white">
         <div className="max-w-xl mx-auto">
           {submitted ? (
-            <div className="border border-zinc-200 rounded-2xl bg-white p-8 shadow-md text-center space-y-6 animate-in fade-in zoom-in-98 duration-150">
+            <div className="border border-zinc-200 rounded-2xl bg-white p-8 shadow-md text-center space-y-6 animate-in fade-in zoom-in-95 duration-150">
               <div className="w-14 h-14 bg-zinc-900 text-white rounded-2xl flex items-center justify-center mx-auto shadow-xs">
                 <Check className="w-7 h-7 stroke-[2.5]" />
               </div>

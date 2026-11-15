@@ -243,7 +243,7 @@ export const Header: React.FC = () => {
               {/* Search Icon Button trigger to open search dropdown */}
               <button
                 onClick={() => setIsSearchModalOpen(!isSearchModalOpen)}
-                className="hidden lg:flex p-1.5 text-zinc-650 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors items-center justify-center shrink-0"
+                className="hidden lg:flex p-1.5 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors items-center justify-center shrink-0"
                 title="Search tools (Cmd+K)"
                 aria-label="Search"
               >
@@ -430,7 +430,7 @@ export const Header: React.FC = () => {
           >
             <div className="max-w-4xl mx-auto px-6 py-5">
               <div className="flex items-center border border-zinc-300 rounded-xl px-4 py-2.5 bg-zinc-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-zinc-950/10 focus-within:border-zinc-950 transition-all">
-                <Search className="w-5 h-5 text-zinc-450 mr-2.5 shrink-0" />
+                <Search className="w-5 h-5 text-zinc-400 mr-2.5 shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -505,7 +505,7 @@ export const Header: React.FC = () => {
                       className={`h-9 px-3 flex items-center space-x-1.5 text-xs font-medium rounded-md transition-all ${
                         isActive || isCurrentCategoryPage
                           ? 'bg-white text-zinc-950 font-semibold shadow-2xs border border-zinc-200'
-                          : 'text-zinc-600 hover:text-zinc-955 hover:bg-zinc-200/50'
+                          : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200/50'
                       }`}
                     >
                       <span className="whitespace-nowrap uppercase tracking-wider text-[11px] font-semibold">{category.name}</span>
@@ -585,7 +585,7 @@ export const Header: React.FC = () => {
                               key={app.id}
                               to={`/app/${app.slug}`}
                               onClick={() => setActiveCategory(null)}
-                              className="group p-3 rounded-xl border border-zinc-200/70 hover:border-zinc-350 bg-white hover:bg-zinc-50 transition-all flex items-center justify-between"
+                              className="group p-3 rounded-xl border border-zinc-200/70 hover:border-zinc-300 bg-white hover:bg-zinc-50 transition-all flex items-center justify-between"
                             >
                               <div className="flex items-start space-x-3">
                                 {appLogoUrl ? (
@@ -643,7 +643,7 @@ export const Header: React.FC = () => {
             {/* Mobile Search Bar inside navigation drawer */}
             <div className="mb-5">
               <div className="flex items-center border border-zinc-300 rounded-xl px-3 py-2.5 bg-zinc-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-zinc-950/10 focus-within:border-zinc-950 transition-all">
-                <Search className="w-4 h-4 text-zinc-450 mr-2 shrink-0" />
+                <Search className="w-4 h-4 text-zinc-400 mr-2 shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -652,7 +652,7 @@ export const Header: React.FC = () => {
                   className="w-full bg-transparent text-xs focus:outline-none text-zinc-900 placeholder:text-zinc-400"
                 />
                 {searchQuery && (
-                  <button onClick={() => setSearchQuery('')} className="p-0.5 text-zinc-405 hover:text-zinc-700">
+                  <button onClick={() => setSearchQuery('')} className="p-0.5 text-zinc-400 hover:text-zinc-700">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 )}
