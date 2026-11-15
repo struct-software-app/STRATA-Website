@@ -1,8 +1,9 @@
 {
-  "name": "siec-suite",
+  "name": "strata-suite",
   "private": true,
   "version": "2.4.0",
-  "description": "SIEC Suite - Engineering Software Desktop & Catalog Web Application",
+  "description": "STRATA Suite - Engineering Software Desktop & Catalog Web Application",
+  "author": "STRATA Engineering Software Inc.",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev:web": "vite",
@@ -38,8 +39,8 @@
     "wait-on": "^8.0.2"
   },
   "build": {
-    "appId": "com.siec.suite",
-    "productName": "SIEC Suite",
+    "appId": "com.strata.suite",
+    "productName": "STRATA Suite",
     "directories": {
       "output": "release"
     },

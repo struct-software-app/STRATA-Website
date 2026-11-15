@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { PRICING_PLANS, FAQS } from '../data/apps';
+import { FAQS } from '../data/apps';
 import { Check, X, ChevronDown, ArrowRight } from 'lucide-react';
 import { useData } from '../context/DataContext';
 
@@ -260,7 +260,7 @@ export const PricingPage: React.FC = () => {
                 <thead>
                   <tr className="bg-zinc-900 text-white border-b border-zinc-900 font-medium">
                     <th className="p-4 uppercase tracking-wider text-left w-1/3">Feature Specification</th>
-                    {pricingPlans.map((plan, i) => (
+                    {pricingPlans.map((plan) => (
                       <th
                         key={plan.id}
                         className={`p-4 uppercase tracking-wider text-center ${

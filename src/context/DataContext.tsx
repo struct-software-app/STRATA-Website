@@ -608,7 +608,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       try {
-        const { data, error } = await supabase.rpc('purchase_app', {
+        const { error } = await supabase.rpc('purchase_app', {
           p_program_id: programId || null,
           p_bundle_id: bundleId || null,
         });

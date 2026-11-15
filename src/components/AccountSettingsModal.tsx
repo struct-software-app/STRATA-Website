@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, ShoppingBag, Coins, Check, AlertCircle, Calendar } from 'lucide-react';
+import { X, User, ShoppingBag, Coins, Check, AlertCircle } from 'lucide-react';
 import { useData } from '../context/DataContext';
 
 interface AccountSettingsModalProps {

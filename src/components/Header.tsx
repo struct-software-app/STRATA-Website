@@ -9,16 +9,12 @@ import {
   Download, 
   ArrowRight,
   Boxes,
-  Layers,
-  User,
   Settings,
   ShoppingBag,
-  LogOut,
-  Coins
+  LogOut
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { AccountSettingsModal } from './AccountSettingsModal';
-import { SearchModal } from './SearchModal';
 
 const getDynamicUrl = (url: string | null | undefined): string => {
   if (!url) return '';

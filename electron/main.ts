@@ -10,7 +10,7 @@ function createWindow() {
     minWidth: 1024,
     minHeight: 700,
     backgroundColor: '#FFFFFF',
-    title: 'SIEC Suite — Engineering Desktop Workspace',
+    title: 'STRATA Suite — Engineering Desktop Workspace',
     titleBarStyle: 'default',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),

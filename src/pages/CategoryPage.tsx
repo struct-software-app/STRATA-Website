@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { AppCard } from '../components/AppCard';
-import { ChevronRight, ArrowRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useData } from '../context/DataContext';
 
 export const CategoryPage: React.FC = () => {

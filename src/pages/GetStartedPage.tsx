@@ -1,21 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { 
-  User, 
-  Lock, 
-  Mail, 
   ArrowRight, 
   Check, 
-  ShieldCheck, 
   AlertCircle, 
   Coins, 
   Download, 
-  LogOut,
-  Calendar,
-  Sparkles
+  LogOut
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import { useData } from '../context/DataContext';
 
 export const GetStartedPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'signup' | 'signin'>('signup');
@@ -43,9 +36,6 @@ export const GetStartedPage: React.FC = () => {
     email: '',
     password: '',
   });
-
-  const { branding } = useData();
-  const navigate = useNavigate();
 
   // Check active Supabase auth session on mount
   useEffect(() => {

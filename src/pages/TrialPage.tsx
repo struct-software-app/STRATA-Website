@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, ArrowRight, Download, ShieldCheck, Key } from 'lucide-react';
+import { Check, ArrowRight, Download, Key } from 'lucide-react';
 import { useData } from '../context/DataContext';
 
 export const TrialPage: React.FC = () => {

@@ -6,7 +6,6 @@ import {
   ChevronRight, 
   ChevronLeft,
   Check, 
-  Download, 
   ShieldCheck, 
   HardDrive, 
   FileCode, 
@@ -14,7 +13,6 @@ import {
   Play, 
   Image as ImageIcon,
   Boxes,
-  Coins,
   AlertCircle
 } from 'lucide-react';
 
@@ -37,7 +35,7 @@ function getTrailerEmbedDetails(url: string | undefined | null) {
 
 export const AppDetailPage: React.FC = () => {
   const { appSlug } = useParams<{ appSlug: string }>();
-  const { apps, getAppBySlug, appLogos, isOwned, purchaseItem, user, branding, formatTokens } = useData();
+  const { apps, getAppBySlug, appLogos, isOwned, purchaseItem, user, branding } = useData();
   const navigate = useNavigate();
 
   const appData = getAppBySlug(appSlug || '');

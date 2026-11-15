@@ -1,13 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  Download, 
   ArrowRight, 
   Check,
-  ShieldCheck,
-  Zap,
-  HardDrive,
-  FileCheck2
+  Zap
 } from 'lucide-react';
 import { PRICING_PLANS } from '../data/apps';
 import { CategoryCard } from '../components/CategoryCard';

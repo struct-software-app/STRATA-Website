@@ -1,12 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CATEGORIES } from '../data/apps';
-import { 
-  ShieldCheck, 
-  HardDrive, 
-  ArrowRight, 
-  Workflow
-} from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useData } from '../context/DataContext';
 
 export const AboutPage: React.FC = () => {

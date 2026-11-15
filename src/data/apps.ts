@@ -503,7 +503,7 @@ export const APPS: AppItem[] = [
       { label: 'Correlations Library', value: '30+ Peer-Reviewed Geotechnical Formulations' },
       { label: 'Test Types Supported', value: 'SPT, CPT, CPTu, DMT, PMT, Vane Shear' },
       { label: 'Output Metrics', value: 'Phi, Cu, Es, Gmax, OCR, Ko, Poisson Ratio' },
-      { label: 'Desktop Suite', value: 'Integrated Tool in SIEC Workspace' }
+      { label: 'Desktop Suite', value: 'Integrated Tool in STRATA Workspace' }
     ],
     price: 199,
     monthlyPrice: 20,
@@ -1079,7 +1079,7 @@ export const PRICING_PLANS = [
     period: 'per month',
     description: 'Ideal for specialized engineers requiring a dedicated, standalone calculation engine.',
     features: [
-      'Choice of any 1 of the 35 SIEC tools',
+      'Choice of any 1 of the 35 STRATA tools',
       '100% Offline desktop capability',
       'Unlimited local project files & calculations',
       'Full PDF & Excel report exporting',
@@ -1132,8 +1132,8 @@ export const PRICING_PLANS = [
 
 export const FAQS = [
   {
-    question: 'How do SIEC desktop licenses work?',
-    answer: 'SIEC licenses are node-locked or floating seats that operate 100% offline. Once activated using your license key, the software requires zero internet connection to run full-speed engineering calculations, ensuring maximum data privacy on sensitive infrastructure projects.'
+    question: 'How do STRATA desktop licenses work?',
+    answer: 'STRATA licenses are node-locked or floating seats that operate 100% offline. Once activated using your license key, the software requires zero internet connection to run full-speed engineering calculations, ensuring maximum data privacy on sensitive infrastructure projects.'
   },
   {
     question: 'Can I switch between single apps or upgrade to the Full Suite?',
@@ -1141,14 +1141,14 @@ export const FAQS = [
   },
   {
     question: 'Are calculations verified against international engineering codes?',
-    answer: 'Every SIEC engine is benchmarked against exact standards including ACI, AISC, ASCE 7, Eurocodes (EN 1990-1997), AASHTO, ASTM, EPA, and AWWA. Detailed step-by-step mathematical logs with explicit code references are generated with each export.'
+    answer: 'Every STRATA engine is benchmarked against exact standards including ACI, AISC, ASCE 7, Eurocodes (EN 1990-1997), AASHTO, ASTM, EPA, and AWWA. Detailed step-by-step mathematical logs with explicit code references are generated with each export.'
   },
   {
-    question: 'Does SIEC support exporting to CAD and BIM workflows?',
-    answer: 'Yes. Depending on the discipline, SIEC tools export to industry-standard DXF CAD drawings, LandXML terrain/alignments, IFC 4x3 structural schedules, CSI OAPI (ETABS/SAP2000), Excel workbooks, and archival PDF/A reports.'
+    question: 'Does STRATA support exporting to CAD and BIM workflows?',
+    answer: 'Yes. Depending on the discipline, STRATA tools export to industry-standard DXF CAD drawings, LandXML terrain/alignments, IFC 4x3 structural schedules, CSI OAPI (ETABS/SAP2000), Excel workbooks, and archival PDF/A reports.'
   },
   {
     question: 'What are the desktop system requirements?',
-    answer: 'SIEC is engineered for performance. It runs natively on Windows 10/11 (64-bit), macOS (Intel & Apple Silicon), and Linux (x86_64). A minimum of 4 GB RAM and 500 MB disk space is required.'
+    answer: 'STRATA is engineered for performance. It runs natively on Windows 10/11 (64-bit), macOS (Intel & Apple Silicon), and Linux (x86_64). A minimum of 4 GB RAM and 500 MB disk space is required.'
   }
 ];

@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 import { HeroBannerItem } from '../context/DataContext';
 
 const DEFAULT_SLIDES: HeroBannerItem[] = [

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { CATEGORIES } from '../data/apps';
 import { HardDrive } from 'lucide-react';
 import { useData } from '../context/DataContext';
 
