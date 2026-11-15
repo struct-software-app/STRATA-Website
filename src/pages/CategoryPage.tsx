@@ -3,24 +3,28 @@ import { useParams, Link, Navigate } from 'react-router-dom';
 import { AppCard } from '../components/AppCard';
 import { ChevronRight } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { formatUsd, tokensToUsd } from '../lib/pricing';
 
 export const CategoryPage: React.FC = () => {
   const { categorySlug } = useParams<{ categorySlug: string }>();
-  const { categories, apps, getCategoryBySlug, getBundleByCategoryId, categoryLogos } = useData();
+  const { categories, apps, getCategoryBySlug, getBundleByCategoryId, categoryLogos, loading } = useData();
 
   const category = getCategoryBySlug(categorySlug || '');
 
   if (!category) {
+    if (loading) {
+      return (
+        <div className="min-h-[40vh] flex items-center justify-center text-sm font-mono text-zinc-500">
+          Loading discipline…
+        </div>
+      );
+    }
     return <Navigate to="/" replace />;
   }
 
   const categoryApps = apps.filter((app) => app.categorySlug === category.slug);
   const matchingBundle = getBundleByCategoryId(category.slug);
   const catLogoUrl = categoryLogos[category.slug];
-
-  const bundleName = matchingBundle ? `${matchingBundle.name} Bundle` : `${category.name} Suite Bundle`;
-  const bundlePrice = matchingBundle ? matchingBundle.price : 99.99;
-  const bundleDescription = matchingBundle ? matchingBundle.description : 'All individual tools included in this discipline.';
 
   return (
     <div className="bg-white text-zinc-900 min-h-screen">
@@ -59,23 +63,25 @@ export const CategoryPage: React.FC = () => {
             </div>
 
             {/* Category Bundle Action (Live from Supabase) */}
-            <div className="shrink-0 p-6 rounded-2xl border border-zinc-200 bg-white shadow-xs max-w-sm w-full">
-              <div className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1">
-                {bundleName}
+            {matchingBundle && (
+              <div className="shrink-0 p-6 rounded-2xl border border-zinc-200 bg-white shadow-xs max-w-sm w-full">
+                <div className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1">
+                  {matchingBundle.name} Bundle
+                </div>
+                <div className="text-3xl font-bold tracking-tight text-zinc-950 font-mono mb-1">
+                  {formatUsd(tokensToUsd(matchingBundle.price))} <span className="text-xs font-normal text-zinc-500">/ license</span>
+                </div>
+                <div className="text-xs text-zinc-500 mb-4 line-clamp-2 leading-relaxed">
+                  {matchingBundle.description || 'All individual tools included in this discipline.'}
+                </div>
+                <Link
+                  to="/pricing"
+                  className="w-full block text-center py-2.5 bg-zinc-900 text-white text-xs font-medium rounded-xl hover:bg-zinc-800 transition-colors shadow-xs"
+                >
+                  Explore Bundle Plan
+                </Link>
               </div>
-              <div className="text-3xl font-bold tracking-tight text-zinc-950 font-mono mb-1">
-                ${bundlePrice} <span className="text-xs font-normal text-zinc-500">/ license</span>
-              </div>
-              <div className="text-xs text-zinc-500 mb-4 line-clamp-2 leading-relaxed">
-                {bundleDescription}
-              </div>
-              <Link
-                to="/pricing"
-                className="w-full block text-center py-2.5 bg-zinc-900 text-white text-xs font-medium rounded-xl hover:bg-zinc-800 transition-colors shadow-xs"
-              >
-                Explore Bundle Plan
-              </Link>
-            </div>
+            )}
           </div>
         </div>
       </section>

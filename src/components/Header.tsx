@@ -17,6 +17,7 @@ import { useData } from '../context/DataContext';
 import { AccountSettingsModal } from './AccountSettingsModal';
 import { resolveAssetUrl } from '../lib/url';
 import { searchApps } from '../lib/searchApps';
+import { formatUsd, tokensToUsd } from '../lib/pricing';
 import { ENABLE_LANGUAGE_SWITCHER } from '../config';
 
 export const Header: React.FC = () => {
@@ -446,7 +447,7 @@ export const Header: React.FC = () => {
                       handleSelectApp(filteredApps[0].slug);
                     }
                   }}
-                  placeholder="Search all 35 engineering tools, codes, or formulas..."
+                  placeholder={`Search all ${apps.length} engineering tools, codes, or formulas...`}
                   className="w-full bg-transparent text-sm focus:outline-none text-zinc-900 placeholder:text-zinc-400"
                 />
                 {searchQuery && (
@@ -630,7 +631,7 @@ export const Header: React.FC = () => {
 
                               <div className="flex items-center space-x-3 shrink-0 ml-4">
                                 <div className="text-right">
-                                  <div className="text-xs font-semibold text-zinc-900">${app.price}</div>
+                                  <div className="text-xs font-semibold text-zinc-900">{formatUsd(tokensToUsd(app.price))}</div>
                                   <div className="text-[10px] text-zinc-400 font-mono">v{app.version}</div>
                                 </div>
                                 <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all" />
@@ -666,7 +667,7 @@ export const Header: React.FC = () => {
                       handleSelectApp(filteredApps[0].slug);
                     }
                   }}
-                  placeholder="Search 35 engineering tools..."
+                  placeholder={`Search ${apps.length} engineering tools...`}
                   className="w-full bg-transparent text-xs focus:outline-none text-zinc-900 placeholder:text-zinc-400"
                 />
                 {searchQuery && (

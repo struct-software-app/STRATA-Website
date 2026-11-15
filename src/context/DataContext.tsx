@@ -213,6 +213,12 @@ const defaultWebsiteInfo = {
   download_linux_size: '136 MB',
 };
 
+function normalizeCategorySlug(id?: string | null): string {
+  const normalized = (id || '').trim().toLowerCase();
+  if (normalized === 'construction-management') return 'construction';
+  return normalized;
+}
+
 export const formatTokenNumber = (num: number): string => {
   if (!num && num !== 0) return '0';
   if (num >= 1_000_000) {
@@ -371,6 +377,23 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           supabase.from('faqs').select('*').order('sort_order', { ascending: true })
         ]);
 
+        const tableResults: Array<[string, { error: { message: string } | null }]> = [
+          ['categories', catRes],
+          ['programs', progRes],
+          ['store_branding', brandRes],
+          ['bundles', bundleRes],
+          ['website', webRes],
+          ['hero_banners', bannerRes],
+          ['pricing_plans', planRes],
+          ['pricing_matrix', matrixRes],
+          ['faqs', faqRes],
+        ];
+        for (const [tableName, res] of tableResults) {
+          if (res.error) {
+            console.warn(`[supabase] ${tableName}:`, res.error.message);
+          }
+        }
+
         if (faqRes.data && faqRes.data.length > 0) {
           setFaqs(faqRes.data as FaqItem[]);
         }
@@ -452,9 +475,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const liveCats = CATEGORIES.map((staticCat) => {
             const match = catRes.data?.find(
               (c: any) =>
-                c.id === staticCat.slug ||
-                c.name?.toLowerCase() === staticCat.name.toLowerCase() ||
-                (c.id === 'construction-management' && staticCat.slug === 'construction')
+                normalizeCategorySlug(c.id) === staticCat.slug ||
+                c.name?.toLowerCase() === staticCat.name.toLowerCase()
             );
             if (match) {
               if (match.icon) {
@@ -523,7 +545,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
               (s) => s.id === p.id || s.slug === p.id || s.name.toLowerCase() === p.name?.toLowerCase()
             );
             if (!matchesStatic) {
-              const matchedCat = catRes.data?.find((c: any) => c.id === p.categoryId) || { name: 'Engineering', id: 'general' };
+              const normalizedCatSlug = normalizeCategorySlug(p.categoryId);
+              const matchedCat =
+                catRes.data?.find((c: any) => c.id === p.categoryId || normalizeCategorySlug(c.id) === normalizedCatSlug) ||
+                CATEGORIES.find((c) => c.slug === normalizedCatSlug) ||
+                { name: 'Engineering', id: 'general' };
               const slugStr = p.id || p.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-');
               if (p.logo) {
                 appLogosMap[p.id] = p.logo;
@@ -533,7 +559,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 id: p.id,
                 name: p.name,
                 slug: slugStr,
-                categorySlug: p.categoryId || 'general',
+                categorySlug: normalizedCatSlug || 'general',
                 categoryName: matchedCat.name || 'Engineering',
                 shortDescription: p.description || '',
                 fullDescription: p.description || '',
@@ -686,29 +712,37 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPurchases([]);
   }, []);
 
+  const categoriesWithCounts = useMemo(
+    () =>
+      categories.map((cat) => ({
+        ...cat,
+        appsCount: apps.filter((a) => a.categorySlug === cat.slug).length,
+      })),
+    [categories, apps]
+  );
+
   const getAppBySlug = useMemo(
     () => (slug: string) => apps.find((a) => a.slug === slug || a.id === slug),
     [apps]
   );
 
   const getCategoryBySlug = useMemo(
-    () => (slug: string) => categories.find((c) => c.slug === slug),
-    [categories]
+    () => (slug: string) => categoriesWithCounts.find((c) => c.slug === slug),
+    [categoriesWithCounts]
   );
 
   const getBundleByCategoryId = useMemo(
     () => (categoryIdOrSlug: string) => {
-      const target = categoryIdOrSlug.toLowerCase();
+      const target = normalizeCategorySlug(categoryIdOrSlug);
       return bundles.find((b) => {
-        const catId = (b.categoryId || '').toLowerCase();
-        const bName = (b.name || '').toLowerCase();
-        const bId = (b.id || '').toLowerCase();
+        const catId = normalizeCategorySlug(b.categoryId);
+        const bName = (b.name || '').trim().toLowerCase();
+        const bId = (b.id || '').trim().toLowerCase();
         return (
           catId === target ||
           bName === target ||
           bId.includes(target) ||
-          (target === 'construction' && (catId === 'construction' || bId.includes('construction'))) ||
-          (target === 'water-resources' && (catId === 'water-resources' || bId.includes('water')))
+          (target === 'water-resources' && bId.includes('water'))
         );
       });
     },
@@ -718,7 +752,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <DataContext.Provider
       value={{
-        categories,
+        categories: categoriesWithCounts,
         apps,
         bundles,
         heroBanners,

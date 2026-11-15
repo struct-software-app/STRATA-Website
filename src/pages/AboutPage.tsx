@@ -92,7 +92,7 @@ export const AboutPage: React.FC = () => {
               Multidisciplinary Coverage
             </span>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-zinc-950">
-              7 Dedicated Engineering Disciplines
+              {categories.length} Dedicated Engineering Disciplines
             </h2>
           </div>
 
@@ -108,7 +108,7 @@ export const AboutPage: React.FC = () => {
                     </span>
                   )}
                   <span className="text-xs text-zinc-500 font-medium uppercase">
-                    5 Tools
+                    {apps.filter((a) => a.categorySlug === cat.slug).length} Tools
                   </span>
                 </div>
 
@@ -142,7 +142,7 @@ export const AboutPage: React.FC = () => {
                 Ready to standardize your engineering workflows?
               </h3>
               <p className="text-xs text-zinc-400">
-                Download the complete 35-engine workspace or start a 14-day full trial.
+                Download the complete {apps.length}-engine workspace or start a 14-day full trial.
               </p>
             </div>
 

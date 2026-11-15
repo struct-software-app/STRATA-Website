@@ -14,6 +14,7 @@ import { GetStartedPage } from './pages/GetStartedPage';
 import { TrialPage } from './pages/TrialPage';
 import { DownloadPage } from './pages/DownloadPage';
 import { ContactPage } from './pages/ContactPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 
 // Scroll to top helper on route change
 function ScrollToTop() {
@@ -48,7 +49,7 @@ export function App() {
               <Route path="/download" element={<DownloadPage />} />
               <Route path="/contact" element={<ContactPage />} />
               {/* Fallback */}
-              <Route path="*" element={<HomePage />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </main>
 

@@ -3,6 +3,7 @@ import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { AppCard } from '../components/AppCard';
 import { useData } from '../context/DataContext';
 import { resolveAssetUrl } from '../lib/url';
+import { formatUsd, tokensToUsd } from '../lib/pricing';
 import { 
   ChevronRight, 
   ChevronLeft,
@@ -36,29 +37,24 @@ function getTrailerEmbedDetails(url: string | undefined | null) {
 
 export const AppDetailPage: React.FC = () => {
   const { appSlug } = useParams<{ appSlug: string }>();
-  const { apps, getAppBySlug, appLogos, isOwned, purchaseItem, user, branding } = useData();
+  const { apps, getAppBySlug, appLogos, isOwned, purchaseItem, user, branding, loading } = useData();
   const navigate = useNavigate();
 
   const appData = getAppBySlug(appSlug || '');
 
-  if (!appData) {
-    return <Navigate to="/" replace />;
-  }
-
-  const owned = isOwned(appData.id);
   const [purchasing, setPurchasing] = useState(false);
   const [purchaseStatus, setPurchaseStatus] = useState<string | null>(null);
   const [purchaseError, setPurchaseError] = useState<string | null>(null);
 
-  const trailerUrl = appData.trailerUrl || '';
+  const trailerUrl = appData?.trailerUrl ?? '';
   const trailerEmbed = getTrailerEmbedDetails(trailerUrl);
 
-  const rawScreenshots = (Array.isArray((appData as any).screenshots) && (appData as any).screenshots.length > 0)
+  const rawScreenshots = (Array.isArray((appData as any)?.screenshots) && (appData as any).screenshots.length > 0)
     ? (appData as any).screenshots.filter(Boolean)
-    : (appData.banner ? [appData.banner] : []);
+    : (appData?.banner ? [appData.banner] : []);
 
   const screenshotsList: string[] = rawScreenshots;
-  const coverImage = screenshotsList[0] || appData.banner || '';
+  const coverImage = screenshotsList[0] || appData?.banner || '';
 
   // Active view: 'trailer' | screenshot index
   const [activeMedia, setActiveMedia] = useState<'trailer' | number>(trailerUrl ? 'trailer' : 0);
@@ -75,7 +71,7 @@ export const AppDetailPage: React.FC = () => {
           {
             type: 'trailer' as const,
             id: 'trailer',
-            thumb: appData.trailerThumbnail || coverImage,
+            thumb: appData?.trailerThumbnail || coverImage,
           },
         ]
       : []),
@@ -105,6 +101,19 @@ export const AppDetailPage: React.FC = () => {
     window.addEventListener('resize', updateScrollState);
     return () => window.removeEventListener('resize', updateScrollState);
   }, [galleryItems.length]);
+
+  if (!appData) {
+    if (loading) {
+      return (
+        <div className="min-h-[40vh] flex items-center justify-center text-sm font-mono text-zinc-500">
+          Loading engine…
+        </div>
+      );
+    }
+    return <Navigate to="/" replace />;
+  }
+
+  const owned = isOwned(appData.id);
 
   const handleScrollLeft = () => {
     galleryScrollRef.current?.scrollBy({ left: -220, behavior: 'smooth' });
@@ -304,7 +313,7 @@ export const AppDetailPage: React.FC = () => {
                 Detailed Engineering Scope
               </span>
               <p className="text-sm sm:text-base text-zinc-700 leading-relaxed font-normal">
-                {appData.shortDescription}
+                {appData.fullDescription || appData.shortDescription}
               </p>
             </div>
 
@@ -317,12 +326,21 @@ export const AppDetailPage: React.FC = () => {
                 </h3>
               </div>
               <div className="divide-y divide-zinc-100 bg-white">
-                {(appData as any).techSpecs && typeof (appData as any).techSpecs === 'object' ? (
+                {(appData as any).techSpecs && typeof (appData as any).techSpecs === 'object' && Object.keys((appData as any).techSpecs).length > 0 ? (
                   Object.entries((appData as any).techSpecs).map(([key, value], idx) => (
                     <div key={idx} className={`grid grid-cols-3 p-4 text-xs ${idx % 2 === 1 ? 'bg-zinc-50/50' : ''}`}>
                       <span className="text-zinc-500 font-medium">{key}</span>
                       <span className="col-span-2 font-mono font-semibold text-zinc-900">
                         {String(value)}
+                      </span>
+                    </div>
+                  ))
+                ) : Array.isArray(appData.specs) && appData.specs.length > 0 ? (
+                  appData.specs.map((spec, idx) => (
+                    <div key={idx} className={`grid grid-cols-3 p-4 text-xs ${idx % 2 === 1 ? 'bg-zinc-50/50' : ''}`}>
+                      <span className="text-zinc-500 font-medium">{spec.label}</span>
+                      <span className="col-span-2 font-mono font-semibold text-zinc-900">
+                        {spec.value}
                       </span>
                     </div>
                   ))
@@ -396,7 +414,9 @@ export const AppDetailPage: React.FC = () => {
                   <span className="text-3xl font-extrabold font-mono tracking-tight text-zinc-950">
                     {appData.price}
                   </span>
-                  <span className="text-xs text-zinc-500 font-medium">Tokens (or ${appData.price} USD)</span>
+                  <span className="text-xs text-zinc-500 font-medium">
+                    Tokens ≈ {formatUsd(tokensToUsd(appData.price))}
+                  </span>
                 </div>
               </div>
 

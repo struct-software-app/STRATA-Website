@@ -5,28 +5,62 @@ import {
   Check,
   Zap
 } from 'lucide-react';
-import { PRICING_PLANS } from '../data/apps';
 import { CategoryCard } from '../components/CategoryCard';
 import { AppCard } from '../components/AppCard';
 import { HeroSlider } from '../components/HeroSlider';
 import { useData } from '../context/DataContext';
 import { resolveAssetUrl } from '../lib/url';
+import { formatUsd, normalizePeriod } from '../lib/pricing';
 
 export const HomePage: React.FC = () => {
-  const { categories, apps, bundles, heroBanners, branding, appLogos } = useData();
-  const featuredApps = apps.filter((app) => app.isPopular).slice(0, 6);
+  const { categories, apps, bundles, heroBanners, pricingPlans, branding, appLogos } = useData();
+  const [shuffleSeed] = React.useState(() => Math.floor(Math.random() * 2 ** 31));
 
-  const shuffledApps = React.useMemo(() => {
-    return [...apps].sort(() => 0.5 - Math.random());
+  const featuredApps = React.useMemo(() => {
+    const popular = apps.filter((app) => app.isPopular).slice(0, 6);
+    if (popular.length >= 6) return popular;
+    const seen = new Set(popular.map((a) => a.id));
+    const result = [...popular];
+    for (const app of apps) {
+      if (result.length >= 6) break;
+      if (!seen.has(app.id)) {
+        seen.add(app.id);
+        result.push(app);
+      }
+    }
+    return result;
   }, [apps]);
 
-  const fullSuiteBundle = bundles.find(
-    (b) =>
-      b.id.toLowerCase().includes('full') ||
-      b.id.toLowerCase().includes('all') ||
-      b.name.toLowerCase().includes('suite') ||
-      b.programIds.length >= 30
-  );
+  const shuffledApps = React.useMemo(() => {
+    const copy = [...apps];
+    let a = shuffleSeed || 1;
+    const nextRand = () => {
+      let t = (a += 0x6d2b79f5);
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(nextRand() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }, [apps, shuffleSeed]);
+
+  const fullSuiteBundle = React.useMemo(() => {
+    if (bundles.length === 0) return undefined;
+    const largest = bundles.reduce((best, cur) =>
+      cur.programIds.length > best.programIds.length ? cur : best
+    , bundles[0]);
+    if (apps.length > 0 && largest.programIds.length >= apps.length / 2) {
+      return largest;
+    }
+    return bundles.find((b) => {
+      const id = b.id.toLowerCase();
+      const name = b.name.toLowerCase();
+      return id.includes('full') || id.includes('all') || name.includes('full') || name.includes('all');
+    });
+  }, [bundles, apps.length]);
 
   return (
     <div className="bg-white text-zinc-900">
@@ -278,7 +312,7 @@ export const HomePage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {PRICING_PLANS.map((plan) => (
+            {pricingPlans.map((plan) => (
               <div
                 key={plan.id}
                 className={`bg-white border rounded-2xl p-8 flex flex-col justify-between relative transition-all ${
@@ -302,8 +336,8 @@ export const HomePage: React.FC = () => {
                   </p>
 
                   <div className="flex items-baseline mb-6 border-b border-zinc-100 pb-6">
-                    <span className="text-4xl font-extrabold tracking-tight text-zinc-950 font-mono">${plan.price}</span>
-                    <span className="text-xs text-zinc-500 ml-2">/ month</span>
+                    <span className="text-4xl font-extrabold tracking-tight text-zinc-950 font-mono">{formatUsd(plan.price)}</span>
+                    <span className="text-xs text-zinc-500 ml-2">/ {normalizePeriod(plan.period)}</span>
                   </div>
 
                   <ul className="space-y-3 text-xs text-zinc-700 mb-8">

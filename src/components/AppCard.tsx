@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { AppItem } from '../data/apps';
 import { ArrowRight, Boxes } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { formatUsd, tokensToUsd } from '../lib/pricing';
 
 interface AppCardProps {
   app: AppItem;
@@ -33,7 +34,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, showCategory = true }) =>
             )}
           </div>
           <span className="text-xs font-mono font-semibold text-zinc-900 px-2 py-0.5 bg-zinc-50 border border-zinc-200 rounded-md">
-            ${app.price}
+            {formatUsd(tokensToUsd(app.price))}
           </span>
         </div>
 

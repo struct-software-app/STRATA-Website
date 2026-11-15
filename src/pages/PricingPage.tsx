@@ -3,26 +3,14 @@ import { Link } from 'react-router-dom';
 import { FAQS } from '../data/apps';
 import { Check, X, ChevronDown, ArrowRight } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { formatUsd, tokensToUsd, normalizePeriod } from '../lib/pricing';
+import { ANNUAL_DISCOUNT_PCT } from '../config';
 
 export const PricingPage: React.FC = () => {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
   const [isAnnual, setIsAnnual] = useState(false);
   const { bundles, categories, categoryLogos, pricingPlans, pricingMatrix, faqs } = useData();
   const liveFaqs = faqs && faqs.length > 0 ? faqs : FAQS;
-
-  const comparisonRows = pricingMatrix && pricingMatrix.length > 0 ? pricingMatrix : [
-    { feature: 'Number of Applications Included', single: '1 Tool', bundle: '5 Tools (1 Discipline)', full: 'All 35 Tools (7 Disciplines)' },
-    { feature: '100% Offline Desktop Mode', single: true, bundle: true, full: true },
-    { feature: 'Supported Operating Systems', single: 'Windows / macOS / Linux', bundle: 'Windows / macOS / Linux', full: 'Windows / macOS / Linux' },
-    { feature: 'Workstation Activations / Seats', single: '1 Workstation', bundle: '3 Workstations', full: '10 Workstations (Floating)' },
-    { feature: 'PDF/A Calculation Submittal Export', single: true, bundle: true, full: true },
-    { feature: 'Excel / CSV Full Math Log Export', single: true, bundle: true, full: true },
-    { feature: 'CAD DXF & LandXML Geometry Output', single: 'Selected Tools', bundle: true, full: true },
-    { feature: 'Custom Engineering Firm Letterhead', single: false, bundle: true, full: true },
-    { feature: 'Continuous International Code Updates', single: '1 Year', bundle: 'All Active', full: 'Lifetime / Continuous' },
-    { feature: 'Technical Engineering Support', single: 'Standard (48h)', bundle: 'Priority (12h)', full: 'Dedicated Engineering SLA (2h)' },
-    { feature: 'API & Command-Line Automation Interface', single: false, bundle: false, full: true },
-  ];
 
 
   return (
@@ -40,7 +28,8 @@ export const PricingPage: React.FC = () => {
             Plans & Engineering Licensing
           </h1>
           <p className="text-base sm:text-lg text-zinc-600 max-w-2xl mx-auto leading-relaxed mb-8">
-            Straightforward pricing for standalone desktop tools. No hidden usage metering, no forced cloud telemetry.
+            Straightforward pricing for standalone desktop tools. No hidden usage metering, no forced cloud telemetry.{' '}
+            Choose a monthly subscription plan, or buy perpetual licenses for single tools and discipline bundles with Tokens.
           </p>
 
           {/* Monthly / Annual Billing Switcher */}
@@ -65,7 +54,7 @@ export const PricingPage: React.FC = () => {
             >
               <span>Annual Billing</span>
               <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-extrabold uppercase">
-                Save 20%
+                Save {ANNUAL_DISCOUNT_PCT}%
               </span>
             </button>
           </div>
@@ -88,10 +77,9 @@ export const PricingPage: React.FC = () => {
           >
             {pricingPlans.map((plan) => {
 
-              const displayPrice = isAnnual
-                ? (plan.annualPrice ? plan.annualPrice : Math.round(plan.price * 0.8))
-                : plan.price;
-              const displayPeriod = isAnnual ? 'per year' : plan.period || 'per month';
+              const annualTotal = plan.annualPrice ?? Math.round(plan.price * 12 * (1 - ANNUAL_DISCOUNT_PCT / 100));
+              const displayPrice = isAnnual ? annualTotal : plan.price;
+              const periodLabel = isAnnual ? 'year' : normalizePeriod(plan.period);
               const frameText = plan.badge || (plan.popular ? 'Most Popular' : plan.highlight ? 'Best Value' : '');
 
               return (
@@ -120,9 +108,16 @@ export const PricingPage: React.FC = () => {
                       {plan.description}
                     </p>
 
-                    <div className="flex items-baseline mb-6 border-b border-zinc-100 pb-6">
-                      <span className="text-4xl font-extrabold tracking-tight text-zinc-950 font-mono">${displayPrice}</span>
-                      <span className="text-xs text-zinc-500 ml-2">/ {displayPeriod}</span>
+                    <div className="mb-6 border-b border-zinc-100 pb-6">
+                      <div className="flex items-baseline">
+                        <span className="text-4xl font-extrabold tracking-tight text-zinc-950 font-mono">{formatUsd(displayPrice)}</span>
+                        <span className="text-xs text-zinc-500 ml-2">/ {periodLabel}</span>
+                      </div>
+                      {isAnnual && (
+                        <p className="text-[11px] font-mono text-emerald-600 mt-1.5">
+                          ≈ {formatUsd(Math.round(annualTotal / 12))} / month, billed annually
+                        </p>
+                      )}
                     </div>
 
                     <ul className="space-y-3 text-xs text-zinc-700 mb-8">
@@ -169,7 +164,7 @@ export const PricingPage: React.FC = () => {
                 Discipline Bundles
               </h2>
               <p className="text-sm text-zinc-500 mt-2">
-                All individual tools included in your engineering discipline under a single perpetual license.
+                One-time perpetual licenses, purchased with Tokens.
               </p>
             </div>
 
@@ -220,7 +215,7 @@ export const PricingPage: React.FC = () => {
                       </p>
 
                       <div className="flex items-baseline mb-6 border-b border-zinc-100 pb-4">
-                        <span className="text-3xl font-bold tracking-tight text-zinc-950 font-mono">${bundle.price}</span>
+                        <span className="text-3xl font-bold tracking-tight text-zinc-950 font-mono">{formatUsd(tokensToUsd(bundle.price))}</span>
                         <span className="text-xs text-zinc-500 ml-1.5">/ license</span>
                       </div>
                     </div>
@@ -273,12 +268,12 @@ export const PricingPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
-                  {comparisonRows.map((row: any, idx) => (
-                    <tr key={idx} className="hover:bg-zinc-50/70 transition-colors">
+                  {pricingMatrix.map((row, idx) => (
+                    <tr key={row.id ?? idx} className="hover:bg-zinc-50/70 transition-colors">
                       <td className="p-4 font-medium text-zinc-900">{row.feature}</td>
                       {pricingPlans.map((plan) => {
                         // Lookup value by plan.id, plan.slug, or standard fallback keys
-                        let val: any = undefined;
+                        let val: string | boolean | undefined = undefined;
                         if (row.values && plan.id in row.values) {
                           val = row.values[plan.id];
                         } else if (row.values && plan.slug in row.values) {
@@ -295,10 +290,6 @@ export const PricingPage: React.FC = () => {
                           if (keyMatch) val = row.values[keyMatch];
                         }
 
-                        if (val === undefined) {
-                          val = plan.highlight || plan.id === 'full-suite' ? true : false;
-                        }
-
                         return (
                           <td
                             key={plan.id}
@@ -312,6 +303,8 @@ export const PricingPage: React.FC = () => {
                               ) : (
                                 <X className="w-4 h-4 text-zinc-300 mx-auto" />
                               )
+                            ) : val === undefined || val === null || val === '' ? (
+                              <span className="text-zinc-400">—</span>
                             ) : (
                               <span className="text-zinc-700 font-medium">{val}</span>
                             )}
