@@ -8,6 +8,7 @@ import {
 import { CategoryCard } from '../components/CategoryCard';
 import { AppCard } from '../components/AppCard';
 import { HeroSlider } from '../components/HeroSlider';
+import { StandardsTicker } from '../components/StandardsTicker';
 import { useData } from '../context/DataContext';
 import { AssetImage } from '../components/AssetImage';
 import { formatUsd, normalizePeriod } from '../lib/pricing';
@@ -47,6 +48,11 @@ export const HomePage: React.FC = () => {
     return copy;
   }, [apps, shuffleSeed]);
 
+  const marqueeAppsWithLogos = React.useMemo(
+    () => shuffledApps.filter((app) => Boolean((appLogos[app.id] || appLogos[app.slug] || '').trim())),
+    [shuffledApps, appLogos]
+  );
+
   const fullSuiteBundle = React.useMemo(() => {
     if (bundles.length === 0) return undefined;
     const largest = bundles.reduce((best, cur) =>
@@ -72,55 +78,54 @@ export const HomePage: React.FC = () => {
 
 
       {/* Governing Standards Section */}
-      <section className="bg-zinc-50 py-4 px-4 md:px-8 text-[10px] sm:text-xs font-mono text-zinc-600">
-        <div className="max-w-7xl mx-auto flex items-center justify-center">
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 sm:gap-x-5 sm:gap-y-2 text-zinc-700 text-center">
-            <span className="whitespace-nowrap font-semibold">ACI 318 / 530</span>
-            <span className="text-zinc-300">•</span>
-            <span className="whitespace-nowrap font-semibold">AISC 360-22</span>
-            <span className="text-zinc-300">•</span>
-            <span className="whitespace-nowrap font-semibold">EUROCODES 0–7</span>
-            <span className="text-zinc-300">•</span>
-            <span className="whitespace-nowrap font-semibold">AASHTO 1993/2018</span>
-            <span className="text-zinc-300">•</span>
-            <span className="whitespace-nowrap font-semibold">ASTM & USCS</span>
-            <span className="text-zinc-300">•</span>
-            <span className="whitespace-nowrap font-semibold">TRB HCM 6TH ED</span>
-            <span className="text-zinc-300">•</span>
-            <span className="whitespace-nowrap font-semibold">US EPA & AWWA</span>
-          </div>
-        </div>
-      </section>
+      <StandardsTicker />
 
-      {/* Infinite Scrolling Engines Row */}
-      <section className="py-8 bg-white overflow-hidden relative">
-        <div className="relative w-full flex items-center">
-          {/* Gradient Overlays for smooth fading edges */}
-          <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-          
-          <div className="flex space-x-4 animate-scroll-left whitespace-nowrap">
-            {[...shuffledApps, ...shuffledApps].map((app, idx) => {
-              const logoUrl = appLogos[app.id] || appLogos[app.slug];
-              return (
-                <Link
-                  key={`${app.id}-${idx}`}
-                  to={`/app/${app.slug}`}
-                  className="inline-flex items-center space-x-2.5 bg-white hover:bg-zinc-50 border border-zinc-200/80 hover:border-zinc-300 hover:shadow-2xs px-4 py-2.5 rounded-xl transition-all cursor-pointer select-none shrink-0"
-                >
-                  <AssetImage
-                    src={logoUrl}
-                    alt={app.name}
-                    className="w-5 h-5 shrink-0"
-                    fallback={<Zap className="w-5 h-5 text-black" />}
-                  />
-                  <span className="text-xs font-bold text-black">{app.name}</span>
-                </Link>
-              );
-            })}
+      {/* Infinite Scrolling Engines Row (Logos Only) */}
+      {(marqueeAppsWithLogos.length > 0 || loading) && (
+        <section className="py-10 bg-white overflow-hidden relative">
+          <div className="relative w-full flex items-center">
+            {/* Gradient Overlays for smooth fading edges */}
+            <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+
+            <div
+              className="animate-scroll-left items-center gap-10 md:gap-14 pr-10 md:pr-14 whitespace-nowrap"
+              style={{ '--marquee-duration': '90s' } as React.CSSProperties}
+            >
+              {marqueeAppsWithLogos.length > 0
+                ? [...marqueeAppsWithLogos, ...marqueeAppsWithLogos].map((app, idx) => {
+                    const logoUrl = appLogos[app.id] || appLogos[app.slug];
+                    const isDuplicate = idx >= marqueeAppsWithLogos.length;
+                    return (
+                      <Link
+                        key={`${app.id}-${idx}`}
+                        to={`/app/${app.slug}`}
+                        aria-label={app.name}
+                        title={app.name}
+                        aria-hidden={isDuplicate ? 'true' : undefined}
+                        tabIndex={isDuplicate ? -1 : undefined}
+                        className="inline-flex items-center justify-center shrink-0 select-none"
+                      >
+                        <AssetImage
+                          src={logoUrl}
+                          alt={app.name}
+                          fit="contain"
+                          className="w-10 h-10 md:w-12 md:h-12 shrink-0"
+                        />
+                      </Link>
+                    );
+                  })
+                : Array.from({ length: 24 }).map((_, idx) => (
+                    <div
+                      key={idx}
+                      aria-hidden="true"
+                      className="w-10 h-10 md:w-12 md:h-12 bg-black rounded-none shrink-0"
+                    />
+                  ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ========================================================================= */}
       {/* 7 CATEGORIES, 35 TOOLS SECTION                                            */}

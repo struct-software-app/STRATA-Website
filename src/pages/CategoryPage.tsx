@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { AppCard } from '../components/AppCard';
-import { ChevronRight, Boxes } from 'lucide-react';
+import { ChevronRight, Boxes, Layers } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { formatUsd, tokensToUsd } from '../lib/pricing';
 import { AssetImage } from '../components/AssetImage';
@@ -119,10 +119,13 @@ export const CategoryPage: React.FC = () => {
                 to={`/category/${other.slug}`}
                 className="p-4 bg-white border border-zinc-200 rounded-xl hover:border-zinc-300 hover:shadow-md transition-all text-center group"
               >
-                <div className="font-mono text-xs font-semibold text-black">
-                  {other.code}
-                </div>
-                <div className="font-semibold text-xs text-black mt-1">
+                <AssetImage
+                  src={categoryLogos[other.slug]}
+                  alt={other.name}
+                  className="w-10 h-10 mx-auto mb-2 shrink-0 flex items-center justify-center"
+                  fallback={<Layers className="w-8 h-8 text-black" />}
+                />
+                <div className="font-semibold text-xs text-black">
                   {other.name}
                 </div>
               </Link>
