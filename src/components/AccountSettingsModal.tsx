@@ -241,9 +241,9 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                     className="w-5 h-5 shrink-0"
                     fallback={<Coins className="w-5 h-5 text-black" />}
                   />
-                  <span className="font-semibold text-zinc-800">Current Token Balance</span>
+                  <span className="font-semibold text-black">Current Token Balance</span>
                 </div>
-                <span className="font-bold font-mono text-zinc-950 text-sm">{formatTokens(walletTokens)} Tokens</span>
+                <span className="font-bold font-mono text-black text-sm">{formatTokens(walletTokens)} Tokens</span>
               </div>
 
               <div className="pt-2 flex justify-end space-x-2">
@@ -289,7 +289,7 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                     const matched = bundles.find((b) => b.id === purchase.bundle_id);
                     if (matched) {
                       title = `${matched.name} Suite`;
-                      subtitle = `Discipline Bundle (${matched.programIds.length} Tools)`;
+                      subtitle = 'Discipline Bundle';
                     }
                   }
 
@@ -316,7 +316,7 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                         {(loading || branding.storeIcon) && (
                           <AssetImage src={branding.storeIcon} alt="Tokens" className="w-4 h-4 shrink-0" />
                         )}
-                        <span className="font-bold font-mono text-zinc-900 text-xs">
+                        <span className="font-bold font-mono text-black text-xs">
                           {purchase.tokens_paid} Tokens
                         </span>
                       </div>

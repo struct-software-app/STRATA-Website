@@ -29,7 +29,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
           {/* Removed engines count badge */}
         </div>
 
-        <h3 className="text-xl font-bold text-zinc-950 group-hover:text-black tracking-tight mb-2">
+        <h3 className="text-xl font-bold text-black tracking-tight mb-2">
           {category.name}
         </h3>
 

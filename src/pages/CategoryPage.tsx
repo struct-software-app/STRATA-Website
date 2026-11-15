@@ -30,7 +30,7 @@ export const CategoryPage: React.FC = () => {
   return (
     <div className="bg-white text-zinc-900 min-h-screen">
       {/* Header Banner & Breadcrumb */}
-      <section className="border-b border-zinc-200 bg-zinc-50/50 py-12 px-4 md:px-8">
+      <section className="bg-zinc-50 py-12 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Breadcrumb */}
           <nav className="flex items-center space-x-2 text-xs font-medium text-zinc-500 mb-6">
@@ -45,11 +45,6 @@ export const CategoryPage: React.FC = () => {
 
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
             <div className="max-w-3xl">
-              <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-zinc-200 bg-white text-zinc-700 font-mono text-xs font-semibold mb-4 shadow-2xs">
-                <span>CODE: {category.code}</span>
-                <span>•</span>
-                <span>{categoryApps.length} ENGINES</span>
-              </div>
               <div className="flex items-center space-x-4 mb-3">
                 <AssetImage
                   src={catLogoUrl}
@@ -57,7 +52,7 @@ export const CategoryPage: React.FC = () => {
                   className="w-12 h-12 shrink-0"
                   fallback={<Boxes className="w-12 h-12 text-black" />}
                 />
-                <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-950">
+                <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-black">
                   {category.name} Suite
                 </h1>
               </div>
@@ -91,11 +86,11 @@ export const CategoryPage: React.FC = () => {
       </section>
 
       {/* Grid of App Cards */}
-      <section className="py-16 px-4 md:px-8 border-b border-zinc-200 bg-white">
+      <section className="py-16 px-4 md:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8 pb-4 border-b border-zinc-100">
+          <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold tracking-tight text-zinc-950">
-              Included Calculation Engines ({categoryApps.length})
+              Included Calculation Engines
             </h2>
             <span className="text-xs font-medium text-zinc-500">
               Verified Against International Codes
@@ -111,7 +106,7 @@ export const CategoryPage: React.FC = () => {
       </section>
 
       {/* Other Disciplines Nav Bar */}
-      <section className="py-16 px-4 md:px-8 bg-zinc-50/60">
+      <section className="py-16 px-4 md:px-8 bg-zinc-50">
         <div className="max-w-7xl mx-auto">
           <h3 className="text-xl font-bold tracking-tight text-zinc-950 mb-6">
             Explore Other Engineering Disciplines
@@ -124,10 +119,10 @@ export const CategoryPage: React.FC = () => {
                 to={`/category/${other.slug}`}
                 className="p-4 bg-white border border-zinc-200 rounded-xl hover:border-zinc-300 hover:shadow-md transition-all text-center group"
               >
-                <div className="font-mono text-xs font-semibold text-zinc-400 group-hover:text-zinc-600">
+                <div className="font-mono text-xs font-semibold text-black">
                   {other.code}
                 </div>
-                <div className="font-semibold text-xs text-zinc-900 mt-1">
+                <div className="font-semibold text-xs text-black mt-1">
                   {other.name}
                 </div>
               </Link>

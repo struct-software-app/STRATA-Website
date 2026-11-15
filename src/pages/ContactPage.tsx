@@ -59,7 +59,7 @@ export const ContactPage: React.FC = () => {
   return (
     <div className="bg-white text-zinc-900 min-h-screen">
       {/* Header Banner */}
-      <section className="border-b border-zinc-200 bg-hero-glow py-16 px-4 md:px-8">
+      <section className="bg-hero-glow py-16 px-4 md:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="flex items-center justify-center space-x-2 text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">
             <Link to="/" className="hover:text-zinc-900 transition-colors">Home</Link>
@@ -77,7 +77,7 @@ export const ContactPage: React.FC = () => {
       </section>
 
       {/* Main 2-Column Contact Section */}
-      <section className="py-16 px-4 md:px-8 border-b border-zinc-200 bg-white">
+      <section className="py-16 px-4 md:px-8 bg-white">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           {/* Left Column: Contact Form */}
           <div className="lg:col-span-7 bg-white border border-zinc-200 rounded-2xl p-8 shadow-md">

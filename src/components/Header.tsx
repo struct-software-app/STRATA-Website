@@ -171,7 +171,7 @@ export const Header: React.FC = () => {
                     <div className="w-8 h-8 bg-zinc-900 text-white flex items-center justify-center font-mono font-bold text-sm">
                       S
                     </div>
-                    <span className="font-bold text-lg tracking-tight text-zinc-900">
+                    <span className="font-bold text-lg tracking-tight text-black">
                       STRATA
                     </span>
                   </div>
@@ -349,9 +349,9 @@ export const Header: React.FC = () => {
                               {(loading || branding.storeIcon) && (
                                 <AssetImage src={branding.storeIcon} alt="Tokens" className="w-4 h-4 shrink-0" />
                               )}
-                              <span className="text-xs font-medium text-zinc-600">Wallet</span>
+                              <span className="text-xs font-medium text-black">Wallet</span>
                             </div>
-                            <span className="font-mono font-bold text-xs text-zinc-950">
+                            <span className="font-mono font-bold text-xs text-black">
                               {formatTokens(walletTokens)} Tokens
                             </span>
                           </div>
@@ -498,8 +498,8 @@ export const Header: React.FC = () => {
                             fallback={<Boxes className="w-7 h-7 text-black" />}
                           />
                           <div>
-                            <span className="text-xs font-semibold text-zinc-900">{app.name}</span>
-                            <span className="text-[10px] text-zinc-500 ml-2.5 font-mono bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200/60">{app.categoryName}</span>
+                            <span className="text-xs font-semibold text-black">{app.name}</span>
+                            <span className="text-[10px] text-black ml-2.5 font-mono">{app.categoryName}</span>
                           </div>
                         </div>
                         <ArrowRight className="w-4 h-4 text-zinc-400" />
@@ -574,7 +574,7 @@ export const Header: React.FC = () => {
                               className="w-9 h-9 shrink-0"
                               fallback={<Boxes className="w-9 h-9 text-black" />}
                             />
-                            <h3 className="text-xl font-bold text-zinc-900 tracking-tight">
+                            <h3 className="text-xl font-bold text-black tracking-tight">
                               {cat.name} Suite
                             </h3>
                           </div>
@@ -598,7 +598,7 @@ export const Header: React.FC = () => {
                       {/* Right: Apps List */}
                       <div className="col-span-8 grid grid-cols-1 gap-2 bg-white">
                         <div className="text-[11px] font-medium text-zinc-400 uppercase tracking-wider mb-1 flex justify-between">
-                          <span>Included Engineering Engines ({categoryApps.length})</span>
+                          <span>Included Engineering Engines</span>
                           <span>Select tool</span>
                         </div>
 
@@ -621,11 +621,11 @@ export const Header: React.FC = () => {
                                 />
                                 <div>
                                   <div className="flex items-center space-x-2">
-                                    <span className="font-semibold text-sm text-zinc-900 group-hover:text-black">
+                                    <span className="font-semibold text-sm text-black">
                                       {app.name}
                                     </span>
                                     {app.isPopular && (
-                                      <span className="text-[10px] font-medium bg-zinc-100 text-zinc-700 px-2 py-0.5 rounded-full border border-zinc-200">
+                                      <span className="text-[10px] font-medium text-black">
                                         Core
                                       </span>
                                     )}
@@ -638,8 +638,8 @@ export const Header: React.FC = () => {
 
                               <div className="flex items-center space-x-3 shrink-0 ml-4">
                                 <div className="text-right">
-                                  <div className="text-xs font-semibold text-zinc-900">{formatUsd(tokensToUsd(app.price))}</div>
-                                  <div className="text-[10px] text-zinc-400 font-mono">v{app.version}</div>
+                                  <div className="text-xs font-semibold text-black">{formatUsd(tokensToUsd(app.price))}</div>
+                                  <div className="text-[10px] text-black font-mono">v{app.version}</div>
                                 </div>
                                 <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all" />
                               </div>
@@ -707,8 +707,8 @@ export const Header: React.FC = () => {
                         }}
                         className="flex items-center justify-between py-2.5 px-2 hover:bg-zinc-100/80 rounded transition-colors"
                       >
-                        <span className="text-xs font-semibold text-zinc-900">{app.name}</span>
-                        <span className="text-[10px] text-zinc-500 font-mono bg-white px-1.5 py-0.5 rounded border border-zinc-200/70">{app.categoryName}</span>
+                        <span className="text-xs font-semibold text-black">{app.name}</span>
+                        <span className="text-[10px] text-black font-mono">{app.categoryName}</span>
                       </Link>
                     ))
                   )}
@@ -825,7 +825,7 @@ export const Header: React.FC = () => {
             {/* Mobile Disciplines Accordion */}
             <div className="mb-4">
               <div className="text-xs font-medium uppercase tracking-wider text-zinc-400 px-3 mb-2">
-                Engineering Disciplines ({categories.length})
+                Engineering Disciplines
               </div>
               <div className="space-y-1">
                 {categories.map((cat) => {
@@ -846,7 +846,7 @@ export const Header: React.FC = () => {
                             className="w-6 h-6 shrink-0"
                             fallback={<Boxes className="w-6 h-6 text-black" />}
                           />
-                          <span className="text-zinc-900">{cat.name}</span>
+                          <span className="text-black">{cat.name}</span>
                         </div>
                         <ChevronDown className={`w-4 h-4 text-zinc-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                       </button>
@@ -876,7 +876,7 @@ export const Header: React.FC = () => {
                                   fallback={<Boxes className="w-7 h-7 text-black" />}
                                 />
                                 <div>
-                                  <div className="font-medium text-zinc-900">{app.name}</div>
+                                  <div className="font-medium text-black">{app.name}</div>
                                   <div className="text-zinc-500 text-[11px] line-clamp-1">{app.shortDescription}</div>
                                 </div>
                               </Link>

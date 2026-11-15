@@ -72,7 +72,7 @@ export const HomePage: React.FC = () => {
 
 
       {/* Governing Standards Section */}
-      <section className="bg-zinc-50 border-b border-zinc-200 py-4 px-4 md:px-8 text-[10px] sm:text-xs font-mono text-zinc-600">
+      <section className="bg-zinc-50 py-4 px-4 md:px-8 text-[10px] sm:text-xs font-mono text-zinc-600">
         <div className="max-w-7xl mx-auto flex items-center justify-center">
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 sm:gap-x-5 sm:gap-y-2 text-zinc-700 text-center">
             <span className="whitespace-nowrap font-semibold">ACI 318 / 530</span>
@@ -93,7 +93,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Infinite Scrolling Engines Row */}
-      <section className="py-8 border-b border-zinc-200 bg-white overflow-hidden relative">
+      <section className="py-8 bg-white overflow-hidden relative">
         <div className="relative w-full flex items-center">
           {/* Gradient Overlays for smooth fading edges */}
           <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
@@ -114,10 +114,7 @@ export const HomePage: React.FC = () => {
                     className="w-5 h-5 shrink-0"
                     fallback={<Zap className="w-5 h-5 text-black" />}
                   />
-                  <span className="text-xs font-bold text-zinc-900">{app.name}</span>
-                  <span className="text-[9px] font-mono text-zinc-400 bg-zinc-50 px-1 py-0.5 rounded border border-zinc-100">
-                    {app.categoryName}
-                  </span>
+                  <span className="text-xs font-bold text-black">{app.name}</span>
                 </Link>
               );
             })}
@@ -128,9 +125,9 @@ export const HomePage: React.FC = () => {
       {/* ========================================================================= */}
       {/* 7 CATEGORIES, 35 TOOLS SECTION                                            */}
       {/* ========================================================================= */}
-      <section className="py-20 px-4 md:px-8 border-b border-zinc-200/80 bg-white">
+      <section className="py-20 px-4 md:px-8 bg-zinc-50">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 pb-6 border-b border-zinc-100">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
                 Unified Catalog Matrix
@@ -187,9 +184,9 @@ export const HomePage: React.FC = () => {
       {/* ========================================================================= */}
       {/* FEATURED / POPULAR APPS ROW                                               */}
       {/* ========================================================================= */}
-      <section className="py-20 px-4 md:px-8 border-b border-zinc-200/80 bg-zinc-50/50">
+      <section className="py-20 px-4 md:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 pb-6 border-b border-zinc-200/60">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
                 Core Engineering Engines
@@ -218,7 +215,7 @@ export const HomePage: React.FC = () => {
       {/* ========================================================================= */}
       {/* WHY STRATA — 4 VALUE POINTS                                               */}
       {/* ========================================================================= */}
-      <section className="py-20 px-4 md:px-8 border-b border-zinc-200/80 bg-white">
+      <section className="py-20 px-4 md:px-8 bg-zinc-50">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-3xl mb-16">
             <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
@@ -235,7 +232,7 @@ export const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Value Point 1 */}
             <div className="p-6 rounded-2xl border border-zinc-200 bg-white shadow-2xs hover:shadow-md hover:border-zinc-300 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-mono font-bold text-xs mb-6 shadow-xs">
+              <div className="font-mono font-bold text-xs text-black mb-4">
                 01
               </div>
               <h3 className="text-lg font-bold text-zinc-900 tracking-tight mb-2">
@@ -248,7 +245,7 @@ export const HomePage: React.FC = () => {
 
             {/* Value Point 2 */}
             <div className="p-6 rounded-2xl border border-zinc-200 bg-white shadow-2xs hover:shadow-md hover:border-zinc-300 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-mono font-bold text-xs mb-6 shadow-xs">
+              <div className="font-mono font-bold text-xs text-black mb-4">
                 02
               </div>
               <h3 className="text-lg font-bold text-zinc-900 tracking-tight mb-2">
@@ -261,7 +258,7 @@ export const HomePage: React.FC = () => {
 
             {/* Value Point 3 */}
             <div className="p-6 rounded-2xl border border-zinc-200 bg-white shadow-2xs hover:shadow-md hover:border-zinc-300 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-mono font-bold text-xs mb-6 shadow-xs">
+              <div className="font-mono font-bold text-xs text-black mb-4">
                 03
               </div>
               <h3 className="text-lg font-bold text-zinc-900 tracking-tight mb-2">
@@ -274,7 +271,7 @@ export const HomePage: React.FC = () => {
 
             {/* Value Point 4 */}
             <div className="p-6 rounded-2xl border border-zinc-200 bg-white shadow-2xs hover:shadow-md hover:border-zinc-300 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-zinc-900 text-white flex items-center justify-center font-mono font-bold text-xs mb-6 shadow-xs">
+              <div className="font-mono font-bold text-xs text-black mb-4">
                 04
               </div>
               <h3 className="text-lg font-bold text-zinc-900 tracking-tight mb-2">
@@ -291,7 +288,7 @@ export const HomePage: React.FC = () => {
       {/* ========================================================================= */}
       {/* PRICING TEASER                                                            */}
       {/* ========================================================================= */}
-      <section className="py-20 px-4 md:px-8 bg-zinc-50/60">
+      <section className="py-20 px-4 md:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
@@ -315,13 +312,12 @@ export const HomePage: React.FC = () => {
                     : 'border-zinc-200 shadow-xs hover:shadow-md hover:border-zinc-300'
                 }`}
               >
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-zinc-900 text-white px-3 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full shadow-xs">
-                    Most Popular
-                  </div>
-                )}
-
                 <div>
+                  {(plan.badge || plan.popular || plan.highlight) && (
+                    <div className="text-xs font-semibold text-black uppercase tracking-wider mb-1">
+                      {plan.badge || (plan.popular ? 'Most Popular' : 'Best Value')}
+                    </div>
+                  )}
                   <h3 className="text-xl font-bold text-zinc-900 mb-1">
                     {plan.name}
                   </h3>
@@ -337,9 +333,7 @@ export const HomePage: React.FC = () => {
                   <ul className="space-y-3 text-xs text-zinc-700 mb-8">
                     {plan.features.slice(0, 4).map((f, i) => (
                       <li key={i} className="flex items-start space-x-2.5">
-                        <div className="p-0.5 rounded bg-zinc-100 text-zinc-900 mt-0.5 shrink-0">
-                          <Check className="w-3 h-3 stroke-[2.5]" />
-                        </div>
+                        <Check className="w-3.5 h-3.5 text-black mt-0.5 shrink-0 stroke-[2.5]" />
                         <span>{f}</span>
                       </li>
                     ))}

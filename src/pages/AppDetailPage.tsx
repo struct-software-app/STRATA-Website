@@ -148,7 +148,7 @@ export const AppDetailPage: React.FC = () => {
   return (
     <div className="bg-white text-zinc-900">
       {/* Top Breadcrumb Header */}
-      <section className="border-b border-zinc-200 bg-zinc-50/70 py-6 px-4 md:px-8">
+      <section className="bg-zinc-50 py-6 px-4 md:px-8">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Breadcrumbs */}
           <div className="flex items-center space-x-2 text-xs font-medium text-zinc-500 uppercase tracking-wider overflow-x-auto">
@@ -161,20 +161,15 @@ export const AppDetailPage: React.FC = () => {
             <span className="text-zinc-900 font-semibold whitespace-nowrap">{appData.name}</span>
           </div>
 
-          {/* Engine Version & Discipline Pill */}
-          <div className="flex items-center space-x-2 shrink-0">
-            <span className="px-2.5 py-1 rounded-md text-[11px] font-mono font-medium bg-zinc-200/80 text-zinc-800">
-              v{appData.version}
-            </span>
-            <span className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-zinc-900 text-white uppercase tracking-wider">
-              {appData.categoryName}
-            </span>
+          {/* Engine Version & Discipline */}
+          <div className="text-[11px] font-mono font-medium text-black shrink-0">
+            v{appData.version} · {appData.categoryName}
           </div>
         </div>
       </section>
 
       {/* Main Product Layout */}
-      <section className="py-12 px-4 md:px-8 bg-white border-b border-zinc-200">
+      <section className="py-12 px-4 md:px-8 bg-white">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12">
           
           {/* ========================================================================= */}
@@ -398,10 +393,10 @@ export const AppDetailPage: React.FC = () => {
                   fallback={<Boxes className="w-12 h-12 text-black" />}
                 />
                 <div>
-                  <h1 className="text-2xl font-bold text-zinc-950 tracking-tight leading-tight">
+                  <h1 className="text-2xl font-bold text-black tracking-tight leading-tight">
                     {appData.name}
                   </h1>
-                  <span className="text-xs text-zinc-500 font-medium">
+                  <span className="text-xs text-black font-medium">
                     {appData.categoryName} Engine
                   </span>
                 </div>
@@ -419,10 +414,10 @@ export const AppDetailPage: React.FC = () => {
                   {(loading || branding.storeIcon) && (
                     <AssetImage src={branding.storeIcon} alt="Tokens" className="w-5 h-5 shrink-0" />
                   )}
-                  <span className="text-3xl font-extrabold font-mono tracking-tight text-zinc-950">
+                  <span className="text-3xl font-extrabold font-mono tracking-tight text-black">
                     {appData.price}
                   </span>
-                  <span className="text-xs text-zinc-500 font-medium">
+                  <span className="text-xs text-black font-medium">
                     Tokens ≈ {formatUsd(tokensToUsd(appData.price))}
                   </span>
                 </div>
@@ -500,16 +495,9 @@ export const AppDetailPage: React.FC = () => {
               <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-900">
                 Governing Standards & Reference Codes
               </h3>
-              <div className="flex flex-wrap gap-2">
-                {appData.standards?.map((std, idx) => (
-                  <span
-                    key={idx}
-                    className="text-xs font-mono font-medium px-2.5 py-1 bg-zinc-50 border border-zinc-200 rounded-md text-zinc-700"
-                  >
-                    {std}
-                  </span>
-                ))}
-              </div>
+              <p className="text-xs font-mono text-black">
+                {appData.standards?.join(' · ')}
+              </p>
             </div>
 
             {/* Key Features Bullet List */}
@@ -520,9 +508,7 @@ export const AppDetailPage: React.FC = () => {
               <ul className="space-y-3">
                 {appData.features?.map((feature, idx) => (
                   <li key={idx} className="flex items-start space-x-2.5 text-xs text-zinc-700 leading-relaxed">
-                    <div className="p-0.5 bg-zinc-100 text-zinc-900 rounded mt-0.5 shrink-0">
-                      <Check className="w-3 h-3 stroke-[2.5]" />
-                    </div>
+                    <Check className="w-3.5 h-3.5 text-black mt-0.5 shrink-0 stroke-[2.5]" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -534,9 +520,9 @@ export const AppDetailPage: React.FC = () => {
 
       {/* Related Apps in this Category */}
       {relatedApps.length > 0 && (
-        <section className="py-16 px-4 md:px-8 bg-zinc-50/50 border-b border-zinc-200">
+        <section className="py-16 px-4 md:px-8 bg-zinc-50">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-8 pb-4 border-b border-zinc-200/60">
+            <div className="flex items-center justify-between mb-8">
               <div>
                 <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block">
                   Discipline Ecosystem

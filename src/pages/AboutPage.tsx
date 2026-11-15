@@ -18,7 +18,7 @@ export const AboutPage: React.FC = () => {
   return (
     <div className="bg-white text-zinc-900">
       {/* Header Banner */}
-      <section className="border-b border-zinc-200 bg-hero-glow py-16 px-4 md:px-8">
+      <section className="bg-hero-glow py-16 px-4 md:px-8">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center space-x-2 text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">
             <Link to="/" className="hover:text-zinc-900 transition-colors">Home</Link>
@@ -36,7 +36,7 @@ export const AboutPage: React.FC = () => {
       </section>
 
       {/* 4-Column Stats Row */}
-      <section className="border-b border-zinc-200 bg-zinc-950 text-white py-12 px-4 md:px-8">
+      <section className="bg-zinc-950 text-white py-12 px-4 md:px-8">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, idx) => (
             <div key={idx} className="border-l border-zinc-700 pl-6 space-y-1">
@@ -55,7 +55,7 @@ export const AboutPage: React.FC = () => {
       </section>
 
       {/* Mission & Story */}
-      <section className="py-20 px-4 md:px-8 border-b border-zinc-200 bg-white">
+      <section className="py-20 px-4 md:px-8 bg-white">
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
           <div className="md:col-span-5 space-y-4">
             <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block">
@@ -87,7 +87,7 @@ export const AboutPage: React.FC = () => {
       </section>
 
       {/* What the Suite Covers — 7 Disciplines */}
-      <section className="py-20 px-4 md:px-8 border-b border-zinc-200 bg-zinc-50/50">
+      <section className="py-20 px-4 md:px-8 bg-zinc-50">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-3xl mb-12">
             <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
@@ -108,12 +108,9 @@ export const AboutPage: React.FC = () => {
                     className="w-8 h-8 shrink-0"
                     fallback={<Boxes className="w-8 h-8 text-black" />}
                   />
-                  <span className="text-xs text-zinc-500 font-medium uppercase">
-                    {apps.filter((a) => a.categorySlug === cat.slug).length} Tools
-                  </span>
                 </div>
 
-                <h3 className="text-lg font-bold text-zinc-950 tracking-tight">
+                <h3 className="text-lg font-bold text-black tracking-tight">
                   {cat.name}
                 </h3>
 

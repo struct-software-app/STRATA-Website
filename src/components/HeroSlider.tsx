@@ -134,14 +134,14 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ banners = [], toolCount 
 
   if (loading && (!banners || banners.length === 0)) {
     return (
-      <section className="relative border-b border-zinc-200 overflow-hidden h-[350px] min-h-[350px] max-h-[350px] bg-black w-full select-none" />
+      <section className="relative overflow-hidden h-[350px] min-h-[350px] max-h-[350px] bg-black w-full select-none" />
     );
   }
 
   return (
     <section
       ref={containerRef}
-      className="relative border-b border-zinc-200 overflow-hidden h-[350px] min-h-[350px] max-h-[350px] flex items-center bg-zinc-950 text-white w-full select-none cursor-grab active:cursor-grabbing"
+      className="relative overflow-hidden h-[350px] min-h-[350px] max-h-[350px] flex items-center bg-zinc-950 text-white w-full select-none cursor-grab active:cursor-grabbing"
       onMouseEnter={() => setIsHovered(true)}
       onMouseDown={(e) => handleDragStart(e.clientX)}
       onMouseMove={(e) => handleDragMove(e.clientX)}

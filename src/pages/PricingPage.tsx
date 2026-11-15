@@ -17,7 +17,7 @@ export const PricingPage: React.FC = () => {
   return (
     <div className="bg-white text-zinc-900 min-h-screen">
       {/* Header Banner */}
-      <section className="border-b border-zinc-200 bg-hero-glow py-16 px-4 md:px-8">
+      <section className="bg-hero-glow py-16 px-4 md:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="flex items-center justify-center space-x-2 text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">
             <Link to="/" className="hover:text-zinc-900 transition-colors">Home</Link>
@@ -54,7 +54,7 @@ export const PricingPage: React.FC = () => {
               }`}
             >
               <span>Annual Billing</span>
-              <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-extrabold uppercase">
+              <span className="text-[10px] text-emerald-600 font-extrabold uppercase">
                 Save {ANNUAL_DISCOUNT_PCT}%
               </span>
             </button>
@@ -63,7 +63,7 @@ export const PricingPage: React.FC = () => {
       </section>
 
       {/* Dynamic Pricing Cards from Supabase */}
-      <section className="py-16 px-4 md:px-8 border-b border-zinc-200 bg-white">
+      <section className="py-16 px-4 md:px-8 bg-white">
         <div className="max-w-[1400px] mx-auto">
           <div
             className={`grid grid-cols-1 ${
@@ -92,16 +92,12 @@ export const PricingPage: React.FC = () => {
                       : 'border-zinc-200 shadow-xs hover:shadow-md hover:border-zinc-300'
                   }`}
                 >
-                  {frameText && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-zinc-900 text-white px-3.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full shadow-xs">
-                      {frameText}
-                    </div>
-                  )}
-
                   <div>
-                    <div className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">
-                      {plan.badge || 'Tier'}
-                    </div>
+                    {frameText && (
+                      <div className="text-xs font-semibold text-black uppercase tracking-wider mb-1">
+                        {frameText}
+                      </div>
+                    )}
                     <h3 className="text-2xl font-bold text-zinc-950 mb-2">
                       {plan.name}
                     </h3>
@@ -124,9 +120,7 @@ export const PricingPage: React.FC = () => {
                     <ul className="space-y-3 text-xs text-zinc-700 mb-8">
                       {plan.features.map((feature, i) => (
                         <li key={i} className="flex items-start space-x-2.5">
-                          <div className="p-0.5 rounded bg-zinc-100 text-zinc-900 mt-0.5 shrink-0">
-                            <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                          </div>
+                          <Check className="w-3.5 h-3.5 text-black mt-0.5 shrink-0 stroke-[2.5]" />
                           <span>{feature}</span>
                         </li>
                       ))}
@@ -155,7 +149,7 @@ export const PricingPage: React.FC = () => {
 
       {/* Real Discipline Bundles Section (Live from Supabase) */}
       {bundles.length > 0 && (
-        <section className="py-20 px-4 md:px-8 border-b border-zinc-200 bg-zinc-50/50">
+        <section className="py-20 px-4 md:px-8 bg-zinc-50">
           <div className="max-w-7xl mx-auto">
             <div className="text-center max-w-2xl mx-auto mb-14">
               <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
@@ -197,12 +191,9 @@ export const PricingPage: React.FC = () => {
                           className="w-10 h-10 shrink-0"
                           fallback={<Boxes className="w-10 h-10 text-black" />}
                         />
-                        <span className="text-xs font-mono font-semibold px-2.5 py-0.5 rounded-full border border-zinc-200 bg-zinc-50 text-zinc-700">
-                          {bundle.programIds.length} Tools
-                        </span>
                       </div>
 
-                      <h3 className="text-lg font-bold tracking-tight text-zinc-950 mb-1 group-hover:text-black">
+                      <h3 className="text-lg font-bold tracking-tight text-black mb-1">
                         {bundle.name} Suite
                       </h3>
 
@@ -234,7 +225,7 @@ export const PricingPage: React.FC = () => {
       )}
 
       {/* Feature Comparison Matrix */}
-      <section className="py-20 px-4 md:px-8 border-b border-zinc-200 bg-white">
+      <section className={`py-20 px-4 md:px-8 ${bundles.length > 0 ? 'bg-white' : 'bg-zinc-50'}`}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
@@ -318,7 +309,7 @@ export const PricingPage: React.FC = () => {
       </section>
 
       {/* FAQ Accordion */}
-      <section className="py-20 px-4 md:px-8 bg-zinc-50/40">
+      <section className={`py-20 px-4 md:px-8 ${bundles.length > 0 ? 'bg-zinc-50' : 'bg-white'}`}>
         <div className="max-w-4xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">

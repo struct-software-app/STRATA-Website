@@ -20,7 +20,7 @@ export const Footer: React.FC = () => {
                   <div className="w-8 h-8 bg-zinc-900 text-white flex items-center justify-center font-mono font-bold text-sm">
                     S
                   </div>
-                  <span className="font-bold text-lg tracking-tight text-zinc-900">
+                  <span className="font-bold text-lg tracking-tight text-black">
                     STRATA SUITE
                   </span>
                 </div>
@@ -69,7 +69,6 @@ export const Footer: React.FC = () => {
                     className="text-zinc-600 hover:text-zinc-950 transition-colors flex items-center justify-between"
                   >
                     <span>{cat.name}</span>
-                    <span className="text-[10px] text-zinc-400 font-mono">({cat.appsCount})</span>
                   </Link>
                 </li>
               ))}
@@ -89,7 +88,6 @@ export const Footer: React.FC = () => {
                     className="text-zinc-600 hover:text-zinc-950 transition-colors flex items-center justify-between"
                   >
                     <span>{cat.name}</span>
-                    <span className="text-[10px] text-zinc-400 font-mono">({cat.appsCount})</span>
                   </Link>
                 </li>
               ))}

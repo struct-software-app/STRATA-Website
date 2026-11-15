@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react';
 export const NotFoundPage: React.FC = () => {
   return (
     <div className="bg-white text-zinc-900">
-      <section className="border-b border-zinc-200 bg-hero-glow py-20 px-4 md:px-8">
+      <section className="bg-hero-glow py-20 px-4 md:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="flex items-center justify-center space-x-2 text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">
             <Link to="/" className="hover:text-zinc-900 transition-colors">Home</Link>

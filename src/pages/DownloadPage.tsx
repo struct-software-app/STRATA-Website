@@ -74,7 +74,7 @@ export const DownloadPage: React.FC = () => {
   return (
     <div className="bg-white text-zinc-900 min-h-screen">
       {/* Header Banner */}
-      <section className="border-b border-zinc-200 bg-hero-glow py-16 px-4 md:px-8">
+      <section className="bg-hero-glow py-16 px-4 md:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="flex items-center justify-center space-x-2 text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">
             <Link to="/" className="hover:text-zinc-900 transition-colors">Home</Link>
@@ -92,7 +92,7 @@ export const DownloadPage: React.FC = () => {
       </section>
 
       {/* Main Download Workbench */}
-      <section className="py-16 px-4 md:px-8 border-b border-zinc-200 bg-white">
+      <section className="py-16 px-4 md:px-8 bg-white">
         <div className="max-w-4xl mx-auto space-y-10">
           {/* OS Selector Tabs */}
           <div>
@@ -114,8 +114,8 @@ export const DownloadPage: React.FC = () => {
                     }`}
                   >
                     {os.isPrimary && (
-                      <span className={`absolute top-3 right-3 text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full ${
-                        isSelected ? 'bg-zinc-800 text-white' : 'bg-zinc-100 text-zinc-700'
+                      <span className={`absolute top-3 right-3 text-[10px] font-semibold uppercase ${
+                        isSelected ? 'text-white' : 'text-black'
                       }`}>
                         Primary
                       </span>
