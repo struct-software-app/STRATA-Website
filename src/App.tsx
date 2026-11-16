@@ -13,6 +13,9 @@ const AppDetailPage = lazy(() => import('./pages/AppDetailPage').then((m) => ({ 
 const PricingPage = lazy(() => import('./pages/PricingPage').then((m) => ({ default: m.PricingPage })));
 const AcademyPage = lazy(() => import('./pages/AcademyPage').then((m) => ({ default: m.AcademyPage })));
 const AcademyWatchPage = lazy(() => import('./pages/AcademyWatchPage').then((m) => ({ default: m.AcademyWatchPage })));
+const ToolboxPage = lazy(() => import('./pages/ToolboxPage').then((m) => ({ default: m.ToolboxPage })));
+const ToolboxCategoryPage = lazy(() => import('./pages/ToolboxCategoryPage').then((m) => ({ default: m.ToolboxCategoryPage })));
+const ToolboxProgramPage = lazy(() => import('./pages/ToolboxProgramPage').then((m) => ({ default: m.ToolboxProgramPage })));
 const GetStartedPage = lazy(() => import('./pages/GetStartedPage').then((m) => ({ default: m.GetStartedPage })));
 const TrialPage = lazy(() => import('./pages/TrialPage').then((m) => ({ default: m.TrialPage })));
 const DownloadPage = lazy(() => import('./pages/DownloadPage').then((m) => ({ default: m.DownloadPage })));
@@ -67,6 +70,9 @@ export function App() {
                   <Route path="/pricing" element={<PricingPage />} />
                   <Route path="/academy" element={<AcademyPage />} />
                   <Route path="/academy/:videoId" element={<AcademyWatchPage />} />
+                  <Route path="/toolbox" element={<ToolboxPage />} />
+                  <Route path="/toolbox/:categorySlug" element={<ToolboxCategoryPage />} />
+                  <Route path="/toolbox/:categorySlug/:programSlug" element={<ToolboxProgramPage />} />
                   <Route path="/get-started" element={<GetStartedPage />} />
                   <Route path="/trial" element={<TrialPage />} />
                   <Route path="/download" element={<DownloadPage />} />

@@ -229,6 +229,16 @@ export const Header: React.FC = () => {
                   Academy
                 </Link>
                 <Link
+                  to="/toolbox"
+                  className={`px-3 py-1.5 rounded-md transition-colors ${
+                    location.pathname === '/toolbox' || location.pathname.startsWith('/toolbox/')
+                      ? 'text-zinc-900 bg-zinc-100 font-semibold'
+                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50'
+                  }`}
+                >
+                  Toolbox
+                </Link>
+                <Link
                   to="/contact"
                   className={`px-3 py-1.5 rounded-md transition-colors ${
                     location.pathname === '/contact' 
@@ -752,6 +762,13 @@ export const Header: React.FC = () => {
                 className="block px-3 py-2 text-sm font-medium rounded-lg text-zinc-900 hover:bg-zinc-100"
               >
                 Academy
+              </Link>
+              <Link
+                to="/toolbox"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-3 py-2 text-sm font-medium rounded-lg text-zinc-900 hover:bg-zinc-100"
+              >
+                Toolbox
               </Link>
               <Link
                 to="/contact"
