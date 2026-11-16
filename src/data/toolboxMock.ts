@@ -1,0 +1,238 @@
+import type { ToolboxCategory } from '../context/DataContext';
+
+// Development-only mock dataset enabled when DEV && VITE_TOOLBOX_MOCK === 'true'
+// and the live toolbox_categories query returns no items.
+export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
+  {
+    id: 'tb-cat-office',
+    slug: 'office',
+    name: 'Office',
+    description: 'General-purpose word processing, spreadsheet calculation, presentation, and PDF utility apps.',
+    logoUrl: '',
+    sortOrder: 1,
+    programs: [
+      {
+        id: 'tb-prog-office-1',
+        categoryId: 'tb-cat-office',
+        slug: 'sample-writer',
+        name: 'Sample Writer',
+        shortDescription: 'Clean document editor for specifications, memos, and technical reports.',
+        fullDescription:
+          'Sample Writer provides structured headings, equation blocks, cross-referenced tables, and clean typographic export for everyday technical documentation and office memos.',
+        logoUrl: '',
+        websiteUrl: 'https://example.com/sample-writer',
+        sortOrder: 1,
+      },
+      {
+        id: 'tb-prog-office-2',
+        categoryId: 'tb-cat-office',
+        slug: 'sample-sheets',
+        name: 'Sample Sheets',
+        shortDescription: 'Fast spreadsheet workbook built for schedules, estimates, and CSV transforms.',
+        fullDescription:
+          'Sample Sheets handles large multi-sheet tables, matrix formulas, pivot summaries, and batch CSV imports without heavy desktop overhead.',
+        logoUrl: '',
+        websiteUrl: 'https://example.com/sample-sheets',
+        sortOrder: 2,
+      },
+      {
+        id: 'tb-prog-office-3',
+        categoryId: 'tb-cat-office',
+        slug: 'sample-slides',
+        name: 'Sample Slides',
+        shortDescription: 'Focused presentation builder for project briefings and client reviews.',
+        fullDescription:
+          'Sample Slides lets teams assemble clean visual slide decks with reusable grids, high-contrast diagrams, and PDF handout exports.',
+        logoUrl: '',
+        websiteUrl: 'https://example.com/sample-slides',
+        sortOrder: 3,
+      },
+      {
+        id: 'tb-prog-office-4',
+        categoryId: 'tb-cat-office',
+        slug: 'sample-pdf',
+        name: 'Sample PDF Desk',
+        shortDescription: 'Merge, annotate, flatten, and redact archival project PDF packages.',
+        fullDescription:
+          'Sample PDF Desk provides batch page stamping, vector markup, bookmark cleanup, and deterministic PDF archiving utilities.',
+        logoUrl: '',
+        websiteUrl: '',
+        sortOrder: 4,
+      },
+    ],
+  },
+  {
+    id: 'tb-cat-design',
+    slug: 'design',
+    name: 'Design',
+    description: 'Vector layout, raster editing, diagramming, typography, and brand asset preparation tools.',
+    logoUrl: '',
+    sortOrder: 2,
+    programs: [
+      {
+        id: 'tb-prog-design-1',
+        categoryId: 'tb-cat-design',
+        slug: 'sample-vector',
+        name: 'Sample Vector',
+        shortDescription: 'Precision Bezier illustration and clean SVG schematic authoring.',
+        fullDescription:
+          'Sample Vector supports node-level path editing, boolean geometry operations, artboards, and clean SVG or PDF vector output.',
+        logoUrl: '',
+        websiteUrl: 'https://example.com/sample-vector',
+        sortOrder: 1,
+      },
+      {
+        id: 'tb-prog-design-2',
+        categoryId: 'tb-cat-design',
+        slug: 'sample-pixel',
+        name: 'Sample Pixel',
+        shortDescription: 'Lightweight layered raster editor for textures, screenshots, and plate cleanup.',
+        fullDescription:
+          'Sample Pixel covers non-destructive adjustments, layer masks, cropping, and crisp lossless PNG/WebP export.',
+        logoUrl: '',
+        websiteUrl: 'https://example.com/sample-pixel',
+        sortOrder: 2,
+      },
+      {
+        id: 'tb-prog-design-3',
+        categoryId: 'tb-cat-design',
+        slug: 'sample-layout',
+        name: 'Sample Page Layout',
+        shortDescription: 'Multi-page grid compositor for brochures, handbooks, and printed manuals.',
+        fullDescription:
+          'Sample Page Layout manages master spreads, paragraph styles, baseline grids, and print-ready bleed exports.',
+        logoUrl: '',
+        websiteUrl: 'https://example.com/sample-layout',
+        sortOrder: 3,
+      },
+      {
+        id: 'tb-prog-design-4',
+        categoryId: 'tb-cat-design',
+        slug: 'sample-diagram',
+        name: 'Sample Diagram',
+        shortDescription: 'Structured flowchart, org chart, and system topology canvas.',
+        fullDescription:
+          'Sample Diagram makes it quick to produce uniform box-and-arrow diagrams with orthogonal routing and alignment snaps.',
+        logoUrl: '',
+        websiteUrl: 'https://example.com/sample-diagram',
+        sortOrder: 4,
+      },
+      {
+        id: 'tb-prog-design-5',
+        categoryId: 'tb-cat-design',
+        slug: 'sample-palette',
+        name: 'Sample Swatch Lab',
+        shortDescription: 'Accessible contrast checker and print/screen color specification manager.',
+        fullDescription:
+          'Sample Swatch Lab tests foreground/background contrast ratios and exports synchronized sRGB and HEX palette tokens.',
+        logoUrl: '',
+        websiteUrl: '',
+        sortOrder: 5,
+      },
+    ],
+  },
+  {
+    id: 'tb-cat-media',
+    slug: 'media',
+    name: 'Media/Editing',
+    description: 'Desktop audio cleanup, timeline video assembly, screen capture, and format transcoding.',
+    logoUrl: '',
+    sortOrder: 3,
+    programs: [
+      {
+        id: 'tb-prog-media-1',
+        categoryId: 'tb-cat-media',
+        slug: 'sample-cut',
+        name: 'Sample Cut',
+        shortDescription: 'Multi-track timeline video editor for walkthroughs and field briefings.',
+        fullDescription:
+          'Sample Cut handles multi-layer timeline trimming, lower-thirds captions, audio level balancing, and hardware-accelerated H.264/MP4 export.',
+        logoUrl: '',
+        websiteUrl: 'https://example.com/sample-cut',
+        sortOrder: 1,
+      },
+      {
+        id: 'tb-prog-media-2',
+        categoryId: 'tb-cat-media',
+        slug: 'sample-audio',
+        name: 'Sample Audio Booth',
+        shortDescription: 'Voiceover noise reduction, loudness normalization, and multitrack mixing.',
+        fullDescription:
+          'Sample Audio Booth cleans room hum, balances LUFS voice loudness, and exports uncompressed WAV or podcast-ready AAC files.',
+        logoUrl: '',
+        websiteUrl: 'https://example.com/sample-audio',
+        sortOrder: 2,
+      },
+      {
+        id: 'tb-prog-media-3',
+        categoryId: 'tb-cat-media',
+        slug: 'sample-capture',
+        name: 'Sample Screen Capture',
+        shortDescription: 'Crisp high-DPI desktop recording for software tutorials and QA bug captures.',
+        fullDescription:
+          'Sample Screen Capture records pixel-accurate desktop windows at constant 60 fps with synchronized microphone narration.',
+        logoUrl: '',
+        websiteUrl: 'https://example.com/sample-capture',
+        sortOrder: 3,
+      },
+      {
+        id: 'tb-prog-media-4',
+        categoryId: 'tb-cat-media',
+        slug: 'sample-transcode',
+        name: 'Sample Transcoder',
+        shortDescription: 'Batch video and audio format converter with predictable size presets.',
+        fullDescription:
+          'Sample Transcoder queues MP4, MOV, WebM, and lossless audio jobs with customizable bitrate ceilings and frame-rate locks.',
+        logoUrl: '',
+        websiteUrl: 'https://example.com/sample-transcode',
+        sortOrder: 4,
+      },
+      {
+        id: 'tb-prog-media-5',
+        categoryId: 'tb-cat-media',
+        slug: 'sample-captions',
+        name: 'Sample Subtitles',
+        shortDescription: 'Synchronized SRT and WebVTT caption editor with timing ripple shifts.',
+        fullDescription:
+          'Sample Subtitles lets editors align transcript cues against waveform peaks and export clean caption sidecars.',
+        logoUrl: '',
+        websiteUrl: '',
+        sortOrder: 5,
+      },
+    ],
+  },
+  {
+    id: 'tb-cat-3d',
+    slug: '3d',
+    name: '3D',
+    description: 'Polygonal modeling, PBR material inspection, scene staging, and offline frame rendering.',
+    logoUrl: '',
+    sortOrder: 4,
+    programs: [
+      {
+        id: 'tb-prog-3d-1',
+        categoryId: 'tb-cat-3d',
+        slug: 'sample-modeler',
+        name: 'Sample Mesh Studio',
+        shortDescription: 'Subdivision surface modeling, UV unwrapping, and glTF/OBJ asset export.',
+        fullDescription:
+          'Sample Mesh Studio combines clean polygonal modeling tools, non-destructive modifiers, UV packing, and physically based viewport shading.',
+        logoUrl: '',
+        websiteUrl: 'https://example.com/sample-modeler',
+        sortOrder: 1,
+      },
+      {
+        id: 'tb-prog-3d-2',
+        categoryId: 'tb-cat-3d',
+        slug: 'sample-renderer',
+        name: 'Sample Stage Render',
+        shortDescription: 'Fast path-traced studio lighting and turntable sequence exporter.',
+        fullDescription:
+          'Sample Stage Render stages HDRI lighting rigs, camera presets, and batch turntable PNG renders for clean visual reviews.',
+        logoUrl: '',
+        websiteUrl: 'https://example.com/sample-renderer',
+        sortOrder: 2,
+      },
+    ],
+  },
+];

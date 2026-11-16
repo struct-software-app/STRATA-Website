@@ -5,6 +5,7 @@ import { bootstrapNewUser } from '../lib/accountBootstrap';
 import { readAssetCache, writeAssetCache } from '../lib/assetCache';
 import { parseYouTubeId } from '../lib/youtube';
 import { ACADEMY_MOCK_VIDEOS } from '../data/academyMock';
+import { TOOLBOX_MOCK_CATEGORIES } from '../data/toolboxMock';
 
 
 export interface LiveAppItem extends AppItem {
@@ -102,6 +103,28 @@ export interface AcademyVideo {
   createdAt: string;
 }
 
+export interface ToolboxProgram {
+  id: string;
+  categoryId: string;
+  slug: string;
+  name: string;
+  shortDescription: string;
+  fullDescription: string;
+  logoUrl: string;
+  websiteUrl: string;
+  sortOrder: number;
+}
+
+export interface ToolboxCategory {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  logoUrl: string;
+  sortOrder: number;
+  programs: ToolboxProgram[];
+}
+
 interface DataContextType {
   categories: CategoryItem[];
   apps: LiveAppItem[];
@@ -111,6 +134,7 @@ interface DataContextType {
   pricingMatrix: PricingMatrixItem[];
   faqs: FaqItem[];
   academyVideos: AcademyVideo[];
+  toolboxCategories: ToolboxCategory[];
   categoryLogos: Record<string, string>;
 
   appLogos: Record<string, string>;
@@ -187,6 +211,8 @@ interface DataContextType {
   getBundleByCategoryId: (categoryIdOrSlug: string) => BundleItem | undefined;
   getAcademyVideo: (id: string) => AcademyVideo | undefined;
   getRelatedVideos: (video: AcademyVideo, limit?: number) => AcademyVideo[];
+  getToolboxCategory: (slug: string) => ToolboxCategory | undefined;
+  getToolboxProgram: (categorySlug: string, programSlug: string) => ToolboxProgram | undefined;
 }
 
 const defaultBranding = {
@@ -266,6 +292,7 @@ const DataContext = createContext<DataContextType>({
   pricingMatrix: [],
   faqs: [],
   academyVideos: [],
+  toolboxCategories: [],
   categoryLogos: {},
 
   appLogos: {},
@@ -288,6 +315,8 @@ const DataContext = createContext<DataContextType>({
   getBundleByCategoryId: () => undefined,
   getAcademyVideo: () => undefined,
   getRelatedVideos: () => [],
+  getToolboxCategory: () => undefined,
+  getToolboxProgram: () => undefined,
 });
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -299,6 +328,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [pricingPlans, setPricingPlans] = useState<PricingPlanItem[]>(PRICING_PLANS as any);
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
   const [academyVideos, setAcademyVideos] = useState<AcademyVideo[]>([]);
+  const [toolboxCategories, setToolboxCategories] = useState<ToolboxCategory[]>([]);
   const [categoryLogos, setCategoryLogos] = useState<Record<string, string>>(() => initialCache?.categoryLogos ?? {});
   const [appLogos, setAppLogos] = useState<Record<string, string>>(() => initialCache?.appLogos ?? {});
   const [branding, setBranding] = useState(() =>
@@ -434,7 +464,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     async function fetchAllData() {
       try {
-        const [catRes, progRes, brandRes, bundleRes, webRes, bannerRes, planRes, matrixRes, faqRes, academyRes] = await Promise.all([
+        const [
+          catRes,
+          progRes,
+          brandRes,
+          bundleRes,
+          webRes,
+          bannerRes,
+          planRes,
+          matrixRes,
+          faqRes,
+          academyRes,
+          toolboxCatRes,
+          toolboxProgRes,
+        ] = await Promise.all([
           supabase.from('categories').select('*'),
           supabase.from('programs').select('*'),
           supabase.from('store_branding').select('key, value'),
@@ -450,6 +493,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .eq('is_published', true)
             .order('sort_order', { ascending: true })
             .order('created_at', { ascending: false }),
+          supabase
+            .from('toolbox_categories')
+            .select('*')
+            .eq('is_published', true)
+            .order('sort_order', { ascending: true })
+            .order('name', { ascending: true }),
+          supabase
+            .from('toolbox_programs')
+            .select('*')
+            .eq('is_published', true)
+            .order('sort_order', { ascending: true })
+            .order('name', { ascending: true }),
         ]);
 
         const tableResults: Array<[string, { error: { message: string } | null }]> = [
@@ -468,6 +523,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (res.error) {
             console.warn(`[supabase] ${tableName}:`, res.error.message);
           }
+        }
+        if (toolboxCatRes.error) {
+          console.warn('[toolbox] ' + toolboxCatRes.error.message);
+        }
+        if (toolboxProgRes.error) {
+          console.warn('[toolbox] ' + toolboxProgRes.error.message);
         }
 
         if (faqRes.data && faqRes.data.length > 0) {
@@ -710,6 +771,60 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           resolvedAcademyVideos = ACADEMY_MOCK_VIDEOS;
         }
         setAcademyVideos(resolvedAcademyVideos);
+
+        // 3c. Process Toolbox Categories & Programs (strictly separate from engineering data and assetCache)
+        let resolvedToolbox: ToolboxCategory[] = [];
+        if (!toolboxCatRes.error && Array.isArray(toolboxCatRes.data)) {
+          const catMap = new Map<string, ToolboxCategory>();
+          for (const row of toolboxCatRes.data as any[]) {
+            const catId = String(row.id || '');
+            if (!catId) continue;
+            catMap.set(catId, {
+              id: catId,
+              slug: typeof row.slug === 'string' ? row.slug.trim() : '',
+              name: typeof row.name === 'string' ? row.name : '',
+              description: typeof row.description === 'string' ? row.description : '',
+              logoUrl: typeof row.logo_url === 'string' ? row.logo_url : '',
+              sortOrder: typeof row.sort_order === 'number' ? row.sort_order : Number(row.sort_order) || 0,
+              programs: [],
+            });
+          }
+
+          if (!toolboxProgRes.error && Array.isArray(toolboxProgRes.data)) {
+            for (const row of toolboxProgRes.data as any[]) {
+              const parentId = String(row.category_id || '');
+              const parent = catMap.get(parentId);
+              if (!parent) continue;
+              parent.programs.push({
+                id: String(row.id || ''),
+                categoryId: parentId,
+                slug: typeof row.slug === 'string' ? row.slug.trim() : '',
+                name: typeof row.name === 'string' ? row.name : '',
+                shortDescription: typeof row.short_description === 'string' ? row.short_description : '',
+                fullDescription: typeof row.full_description === 'string' ? row.full_description : '',
+                logoUrl: typeof row.logo_url === 'string' ? row.logo_url : '',
+                websiteUrl: typeof row.website_url === 'string' ? row.website_url : '',
+                sortOrder: typeof row.sort_order === 'number' ? row.sort_order : Number(row.sort_order) || 0,
+              });
+            }
+          }
+
+          const byOrderName = <T extends { sortOrder: number; name: string }>(a: T, b: T) =>
+            a.sortOrder - b.sortOrder || a.name.localeCompare(b.name);
+          resolvedToolbox = Array.from(catMap.values()).sort(byOrderName);
+          for (const cat of resolvedToolbox) {
+            cat.programs.sort(byOrderName);
+          }
+        }
+        if (
+          !import.meta.env.PROD &&
+          import.meta.env.DEV &&
+          import.meta.env.VITE_TOOLBOX_MOCK === 'true' &&
+          resolvedToolbox.length === 0
+        ) {
+          resolvedToolbox = TOOLBOX_MOCK_CATEGORIES;
+        }
+        setToolboxCategories(resolvedToolbox);
 
         if (!brandRes.error && !catRes.error && !progRes.error && !bannerRes.error) {
           writeAssetCache({
@@ -960,6 +1075,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [academyVideos]
   );
 
+  const getToolboxCategory = useMemo(
+    () => (slug: string) => toolboxCategories.find((c) => c.slug === slug),
+    [toolboxCategories]
+  );
+
+  const getToolboxProgram = useMemo(
+    () => (categorySlug: string, programSlug: string) =>
+      toolboxCategories
+        .find((c) => c.slug === categorySlug)
+        ?.programs.find((p) => p.slug === programSlug),
+    [toolboxCategories]
+  );
+
   return (
     <DataContext.Provider
       value={{
@@ -971,6 +1099,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         pricingMatrix,
         faqs,
         academyVideos,
+        toolboxCategories,
         categoryLogos,
 
         appLogos,
@@ -994,6 +1123,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         getBundleByCategoryId,
         getAcademyVideo,
         getRelatedVideos,
+        getToolboxCategory,
+        getToolboxProgram,
       }}
     >
       {children}

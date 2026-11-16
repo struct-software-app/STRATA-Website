@@ -16,7 +16,7 @@
 
 ## Pending Security Review
 
-- **RLS review is still pending** on all pre-existing tables (`categories`, `programs`, `bundles`, `website`, `store_branding`, `hero_banners`, `pricing_plans`, `pricing_matrix`, `faqs`, `users`, `user_wallets`, `purchases`). Only `contact_messages`, `trial_requests`, and `academy_videos` currently have Row Level Security enabled (insert-only on inbound forms; public read of published rows on `academy_videos`). Do **not** enable RLS on other existing tables until the owner approves the RLS review.
+- **RLS review is still pending** on all pre-existing tables (`categories`, `programs`, `bundles`, `website`, `store_branding`, `hero_banners`, `pricing_plans`, `pricing_matrix`, `faqs`, `users`, `user_wallets`, `purchases`). Only `contact_messages`, `trial_requests`, `academy_videos`, `toolbox_categories`, and `toolbox_programs` currently have Row Level Security enabled (insert-only on inbound forms; public read of published rows on `academy_videos` and Toolbox tables). Do **not** enable RLS on other existing tables until the owner approves the RLS review.
 - **RPC & welcome-token review is still pending**: `purchase_app` concurrency/price lookup (documented in `SECTION 09`) and moving the 50-token welcome balance grant from client code (`src/lib/accountBootstrap.ts`) into a `SECURITY DEFINER` database trigger. Keep `VITE_ENABLE_CLIENT_PURCHASE_FALLBACK=false` in production once `purchase_app` is verified.
 
 ## Academy videos: what Strata Control must edit
@@ -25,6 +25,15 @@
 - **Fields**: `title`, `description` (the bio), `video_url` (a YouTube link), `program_id` (pick from `programs`), `category_id` (auto-filled from the selected program, editable), `sort_order`, `is_published`.
 - **Link validation & editor controls**: Strata Control must validate `video_url` with the exact same rules as `src/lib/youtube.ts` (supported `youtube.com`, `youtu.be`, and `youtube-nocookie.com` URL shapes and an 11-character ID matching `/^[A-Za-z0-9_-]{11}$/`), show a live preview of the video, and let the owner reorder (`sort_order`) and unpublish (`is_published`).
 - **Website updates**: the website fetches published rows when loaded and shows any edit on the next page load.
+
+## Toolbox: what Strata Control must edit
+
+- **Tables & fields**:
+  - `public.toolbox_categories`: `slug`, `name`, `description`, `logo_url`, `sort_order`, `is_published`.
+  - `public.toolbox_programs`: `category_id`, `slug`, `name`, `short_description`, `full_description`, `logo_url`, `website_url`, `sort_order`, `is_published`.
+- **Slugs**: lowercase-with-dashes (`^[a-z0-9]+(-[a-z0-9]+)*$`); globally unique on `toolbox_categories` and unique per `category_id` on `toolbox_programs`.
+- **Logos, links & controls**: `logo_url` fields store image URLs; optional `website_url` must start with `http://` or `https://` when non-empty. Strata Control lets the owner add any number of categories and programs (no fixed limits), reorder them with `sort_order`, and publish/unpublish via `is_published`.
+- **Website updates**: completely separate from engineering tools; changes appear on the next page load.
 
 ## Environment Variables (`.env`)
 

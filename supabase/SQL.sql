@@ -36,7 +36,7 @@
 --   SECTION 01 : EXTENSIONS
 --   SECTION 02 : HELPER FUNCTIONS
 --   SECTION 03 : TABLES - CATALOG (categories, programs, bundles)
---   SECTION 04 : TABLES - SITE CONTENT (website, store_branding, hero_banners, pricing_plans, pricing_matrix, faqs, academy_videos)
+--   SECTION 04 : TABLES - SITE CONTENT (website, store_branding, hero_banners, pricing_plans, pricing_matrix, faqs, academy_videos, toolbox_categories, toolbox_programs)
 --   SECTION 05 : TABLES - USERS AND COMMERCE (users, user_wallets, purchases)
 --   SECTION 06 : TABLES - INBOUND FORMS (contact_messages, trial_requests)
 --   SECTION 07 : INDEXES
@@ -44,7 +44,7 @@
 --   SECTION 09 : RPC FUNCTIONS (PENDING OWNER REVIEW)
 --   SECTION 10 : SEED DATA (PLACEHOLDER)
 --   SECTION 11 : STORAGE BUCKETS (PLACEHOLDER)
---   SECTION 12 : ROW LEVEL SECURITY (contact_messages, trial_requests, academy_videos; PENDING OWNER REVIEW)
+--   SECTION 12 : ROW LEVEL SECURITY (contact_messages, trial_requests, academy_videos, toolbox_categories, toolbox_programs; PENDING OWNER REVIEW)
 --   SECTION 99 : UPDATE LOG
 
 -- ============================================================
@@ -421,6 +421,75 @@ alter table public.academy_videos add column if not exists updated_at timestampt
 -- insert into public.academy_videos (title, description, video_url, program_id, category_id, sort_order, is_published)
 -- values ('Footing Bearing & Punching Shear Walkthrough', 'Step-by-step calculation workflow for ACI 318 isolated footings.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'str-01', 'structural', 1, true);
 
+-- General-purpose software categories for the Toolbox section (completely separate from engineering disciplines).
+-- Website reads published rows in src/context/DataContext.tsx ordered by sort_order asc, name asc.
+-- Strata Control adds, renames, reorders, publishes/unpublishes, and assigns category logos here.
+create table if not exists public.toolbox_categories (
+  id uuid primary key default gen_random_uuid(), -- Unique Toolbox category identifier.
+  slug text not null unique check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'), -- URL-safe lowercase slug with dashes.
+  name text not null check (char_length(name) between 1 and 80), -- Display name of the Toolbox category (1..80 chars).
+  description text not null default '' check (char_length(description) <= 1000), -- Optional category overview copy (max 1000 chars).
+  logo_url text not null default '', -- Remote image URL for the category icon/logo.
+  sort_order integer not null default 0, -- Ascending display order in Toolbox navigation and overview.
+  is_published boolean not null default true, -- Visibility toggle; website only reads published categories.
+  created_at timestamptz not null default now(), -- Row creation timestamp.
+  updated_at timestamptz not null default now() -- Last update timestamp maintained by trigger.
+);
+alter table public.toolbox_categories add column if not exists slug text not null default 'category'; -- URL-safe lowercase slug.
+alter table public.toolbox_categories add column if not exists name text not null default ''; -- Category display name.
+alter table public.toolbox_categories add column if not exists description text not null default ''; -- Category overview copy.
+alter table public.toolbox_categories add column if not exists logo_url text not null default ''; -- Category logo image URL.
+alter table public.toolbox_categories add column if not exists sort_order integer not null default 0; -- Ascending sort order.
+alter table public.toolbox_categories add column if not exists is_published boolean not null default true; -- Published visibility flag.
+alter table public.toolbox_categories add column if not exists created_at timestamptz not null default now(); -- Row creation timestamp.
+alter table public.toolbox_categories add column if not exists updated_at timestamptz not null default now(); -- Last update timestamp.
+
+-- General-purpose programs inside each Toolbox category (completely separate from engineering tools).
+-- Website reads published rows in src/context/DataContext.tsx and nests them under their parent ToolboxCategory.
+-- Strata Control manages program titles, summaries, full descriptions, logos, official links, sorting, and publish state here.
+create table if not exists public.toolbox_programs (
+  id uuid primary key default gen_random_uuid(), -- Unique Toolbox program identifier.
+  category_id uuid not null references public.toolbox_categories(id) on delete cascade, -- Parent Toolbox category id.
+  slug text not null check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'), -- URL-safe lowercase slug unique within category_id.
+  name text not null check (char_length(name) between 1 and 120), -- Program display name (1..120 chars).
+  short_description text not null default '' check (char_length(short_description) <= 300), -- Brief card summary (max 300 chars).
+  full_description text not null default '' check (char_length(full_description) <= 5000), -- Detailed modal/page copy (max 5000 chars).
+  logo_url text not null default '', -- Remote image URL for the square program logo.
+  website_url text not null default '' check (website_url = '' or website_url ~* '^https?://'), -- Optional external vendor/project URL.
+  sort_order integer not null default 0, -- Ascending display order within the category.
+  is_published boolean not null default true, -- Visibility toggle; website only reads published rows.
+  created_at timestamptz not null default now(), -- Row creation timestamp.
+  updated_at timestamptz not null default now(), -- Last update timestamp maintained by trigger.
+  unique (category_id, slug) -- Enforces unique program slug per Toolbox category.
+);
+alter table public.toolbox_programs add column if not exists category_id uuid; -- Parent Toolbox category id.
+alter table public.toolbox_programs add column if not exists slug text not null default 'program'; -- Per-category lowercase slug.
+alter table public.toolbox_programs add column if not exists name text not null default ''; -- Program display name.
+alter table public.toolbox_programs add column if not exists short_description text not null default ''; -- Short summary copy.
+alter table public.toolbox_programs add column if not exists full_description text not null default ''; -- Full description text.
+alter table public.toolbox_programs add column if not exists logo_url text not null default ''; -- Program logo image URL.
+alter table public.toolbox_programs add column if not exists website_url text not null default ''; -- External program link.
+alter table public.toolbox_programs add column if not exists sort_order integer not null default 0; -- Ascending sort order.
+alter table public.toolbox_programs add column if not exists is_published boolean not null default true; -- Published visibility flag.
+alter table public.toolbox_programs add column if not exists created_at timestamptz not null default now(); -- Row creation timestamp.
+alter table public.toolbox_programs add column if not exists updated_at timestamptz not null default now(); -- Last update timestamp.
+
+-- Sample rows (commented out):
+-- with cat as (
+--   insert into public.toolbox_categories (slug, name, description, logo_url, sort_order, is_published)
+--   values ('office', 'Office', 'Everyday document, spreadsheet, and PDF productivity tools.', '', 1, true)
+--   on conflict (slug) do update set name = excluded.name
+--   returning id
+-- )
+-- insert into public.toolbox_programs (category_id, slug, name, short_description, full_description, logo_url, website_url, sort_order, is_published)
+-- select cat.id, v.slug, v.name, v.short_description, v.full_description, '', v.website_url, v.sort_order, true
+-- from cat
+-- cross join (
+--   values
+--     ('sample-writer', 'Sample Writer', 'Clean word processor for reports and technical notes.', 'Sample Writer helps draft, format, and export reports cleanly.', 'https://example.com/writer', 1),
+--     ('sample-sheets', 'Sample Sheets', 'Fast spreadsheet workbook for estimates and schedules.', 'Sample Sheets organizes tabular data, budgets, and formulas.', 'https://example.com/sheets', 2)
+-- ) as v(slug, name, short_description, full_description, website_url, sort_order);
+
 -- ============================================================
 -- SECTION 05 : TABLES - USERS AND COMMERCE
 -- ============================================================
@@ -543,6 +612,8 @@ create index if not exists idx_trial_requests_created_at on public.trial_request
 create index if not exists idx_academy_videos_published_sort on public.academy_videos (is_published, sort_order); -- Fast published Academy video ordering.
 create index if not exists idx_academy_videos_program_id on public.academy_videos (program_id); -- Fast per-program Academy video filtering.
 create index if not exists idx_academy_videos_category_id on public.academy_videos (category_id); -- Fast per-category Academy video filtering.
+create index if not exists idx_toolbox_categories_published_sort on public.toolbox_categories (is_published, sort_order); -- Fast published Toolbox category ordering.
+create index if not exists idx_toolbox_programs_category_published_sort on public.toolbox_programs (category_id, is_published, sort_order); -- Fast published Toolbox program listing per category.
 
 -- ============================================================
 -- SECTION 08 : TRIGGERS
@@ -582,6 +653,12 @@ create trigger trg_user_wallets_updated_at before update on public.user_wallets 
 
 drop trigger if exists trg_academy_videos_updated_at on public.academy_videos;
 create trigger trg_academy_videos_updated_at before update on public.academy_videos for each row execute function public.set_updated_at();
+
+drop trigger if exists trg_toolbox_categories_updated_at on public.toolbox_categories;
+create trigger trg_toolbox_categories_updated_at before update on public.toolbox_categories for each row execute function public.set_updated_at();
+
+drop trigger if exists trg_toolbox_programs_updated_at on public.toolbox_programs;
+create trigger trg_toolbox_programs_updated_at before update on public.toolbox_programs for each row execute function public.set_updated_at();
 
 -- ============================================================
 -- SECTION 09 : RPC FUNCTIONS
@@ -666,6 +743,32 @@ create policy "academy_videos public read"
   to anon, authenticated
   using (is_published = true);
 
+alter table public.toolbox_categories enable row level security;
+
+drop policy if exists "toolbox_categories public read" on public.toolbox_categories;
+create policy "toolbox_categories public read"
+  on public.toolbox_categories
+  for select
+  to anon, authenticated
+  using (is_published = true);
+
+alter table public.toolbox_programs enable row level security;
+
+drop policy if exists "toolbox_programs public read" on public.toolbox_programs;
+create policy "toolbox_programs public read"
+  on public.toolbox_programs
+  for select
+  to anon, authenticated
+  using (
+    is_published = true
+    and exists (
+      select 1
+      from public.toolbox_categories c
+      where c.id = category_id
+        and c.is_published = true
+    )
+  );
+
 -- PENDING: Strata Control write policies (use public.is_admin()) after the RLS review
 
 -- PENDING REVIEW NOTES (do not uncomment until reviewed against existing schema):
@@ -686,3 +789,4 @@ create policy "academy_videos public read"
 -- ------+------------+----------------------------------------------------------------+------------------+----------------
 -- U-001 | 2026-11-15 | Initial organized file; contact_messages and trial_requests    | 00-12, 99        | YES
 -- U-002 | 2026-11-16 | Add academy_videos table, indexes, trigger, and public read RLS | 00, 04, 07, 08, 12, 99 | YES
+-- U-003 | 2026-11-16 | Add toolbox_categories and toolbox_programs tables, indexes, triggers, and RLS | 00, 04, 07, 08, 12, 99 | YES
