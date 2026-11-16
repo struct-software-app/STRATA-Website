@@ -11,6 +11,8 @@ const AboutPage = lazy(() => import('./pages/AboutPage').then((m) => ({ default:
 const CategoryPage = lazy(() => import('./pages/CategoryPage').then((m) => ({ default: m.CategoryPage })));
 const AppDetailPage = lazy(() => import('./pages/AppDetailPage').then((m) => ({ default: m.AppDetailPage })));
 const PricingPage = lazy(() => import('./pages/PricingPage').then((m) => ({ default: m.PricingPage })));
+const AcademyPage = lazy(() => import('./pages/AcademyPage').then((m) => ({ default: m.AcademyPage })));
+const AcademyWatchPage = lazy(() => import('./pages/AcademyWatchPage').then((m) => ({ default: m.AcademyWatchPage })));
 const GetStartedPage = lazy(() => import('./pages/GetStartedPage').then((m) => ({ default: m.GetStartedPage })));
 const TrialPage = lazy(() => import('./pages/TrialPage').then((m) => ({ default: m.TrialPage })));
 const DownloadPage = lazy(() => import('./pages/DownloadPage').then((m) => ({ default: m.DownloadPage })));
@@ -63,6 +65,8 @@ export function App() {
                   <Route path="/category/:categorySlug" element={<CategoryPage />} />
                   <Route path="/app/:appSlug" element={<AppDetailPage />} />
                   <Route path="/pricing" element={<PricingPage />} />
+                  <Route path="/academy" element={<AcademyPage />} />
+                  <Route path="/academy/:videoId" element={<AcademyWatchPage />} />
                   <Route path="/get-started" element={<GetStartedPage />} />
                   <Route path="/trial" element={<TrialPage />} />
                   <Route path="/download" element={<DownloadPage />} />

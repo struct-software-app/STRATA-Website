@@ -16,6 +16,7 @@ Catalog website and Electron desktop wrapper for the **STRATA Suite** — standa
    - `VITE_SUPABASE_URL` — your Supabase project URL
    - `VITE_SUPABASE_ANON_KEY` — your Supabase anon / publishable key
    - `VITE_ENABLE_CLIENT_PURCHASE_FALLBACK` — keep `false` in production (only uses the server RPC `purchase_app`)
+   - `VITE_ACADEMY_MOCK` — set to `true` in local development to preview STRATA Academy with mock videos when `academy_videos` is empty (`false` or ignored in production)
 
 ## Commands
 

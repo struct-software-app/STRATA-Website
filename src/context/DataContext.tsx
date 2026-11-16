@@ -4,6 +4,7 @@ import { CATEGORIES, APPS, PRICING_PLANS, CategoryItem, AppItem } from '../data/
 import { bootstrapNewUser } from '../lib/accountBootstrap';
 import { readAssetCache, writeAssetCache } from '../lib/assetCache';
 import { parseYouTubeId } from '../lib/youtube';
+import { ACADEMY_MOCK_VIDEOS } from '../data/academyMock';
 
 
 export interface LiveAppItem extends AppItem {
@@ -670,6 +671,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         // 3b. Process Academy Videos (not written to assetCache)
+        let resolvedAcademyVideos: AcademyVideo[] = [];
         if (!academyRes.error && Array.isArray(academyRes.data)) {
           const liveVideos: AcademyVideo[] = [];
           for (const row of academyRes.data as any[]) {
@@ -697,8 +699,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
               createdAt: typeof row.created_at === 'string' ? row.created_at : '',
             });
           }
-          setAcademyVideos(liveVideos);
+          resolvedAcademyVideos = liveVideos;
         }
+        if (
+          !import.meta.env.PROD &&
+          import.meta.env.DEV &&
+          import.meta.env.VITE_ACADEMY_MOCK === 'true' &&
+          resolvedAcademyVideos.length === 0
+        ) {
+          resolvedAcademyVideos = ACADEMY_MOCK_VIDEOS;
+        }
+        setAcademyVideos(resolvedAcademyVideos);
 
         if (!brandRes.error && !catRes.error && !progRes.error && !bannerRes.error) {
           writeAssetCache({
