@@ -1,6 +1,7 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, session, shell } from 'electron';
 import * as path from 'path';
 import { pathToFileURL } from 'url';
+import { APP_REFERER } from './config';
 
 app.setName('STRATA Suite');
 
@@ -67,6 +68,7 @@ function createWindow() {
     mainWindow.loadFile(prodIndexPath);
   }
 
+  // will-navigate only fires for top-level navigation; embedded <iframe> players are unaffected.
   mainWindow.webContents.on('will-navigate', (event, url) => {
     if (isAllowedAppNavigation(url, isDev, prodEntryUrl)) {
       return;
@@ -92,6 +94,23 @@ function createWindow() {
 
 if (gotSingleInstanceLock) {
   app.whenReady().then(() => {
+    session.defaultSession.webRequest.onBeforeSendHeaders(
+      {
+        urls: [
+          '*://*.youtube-nocookie.com/*',
+          '*://*.youtube.com/*',
+          '*://*.ytimg.com/*',
+        ],
+      },
+      (details, callback) => {
+        const requestHeaders = { ...details.requestHeaders };
+        delete requestHeaders.referer;
+        delete requestHeaders.Referer;
+        requestHeaders.Referer = APP_REFERER;
+        callback({ requestHeaders });
+      }
+    );
+
     ipcMain.handle('app:get-version', () => app.getVersion());
     createWindow();
 

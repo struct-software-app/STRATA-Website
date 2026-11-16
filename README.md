@@ -43,6 +43,7 @@ Catalog website and Electron desktop wrapper for the **STRATA Suite** — standa
 ## SQL
 
 All database SQL lives in [`supabase/SQL.sql`](supabase/SQL.sql) (see [`supabase/README.md`](supabase/README.md) for instructions, pending RLS notes, and permanent SQL rules). To apply updates, open **Supabase Dashboard > SQL Editor**, paste the entire `supabase/SQL.sql` file, and click **Run** (safe to re-run).
+For STRATA Academy admin editing rules and field requirements, see [Academy videos: what Strata Control must edit](supabase/README.md#academy-videos-what-strata-control-must-edit) in `supabase/README.md`.
 
 ## How Data Works
 

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { AppCard } from '../components/AppCard';
+import { VideoCard } from '../components/academy/VideoCard';
 import { useData } from '../context/DataContext';
 import { AssetImage } from '../components/AssetImage';
 import { formatUsd, tokensToUsd } from '../lib/pricing';
@@ -38,7 +39,7 @@ function getTrailerEmbedDetails(url: string | undefined | null) {
 
 export const AppDetailPage: React.FC = () => {
   const { appSlug } = useParams<{ appSlug: string }>();
-  const { apps, getAppBySlug, appLogos, isOwned, purchaseItem, user, branding, loading } = useData();
+  const { apps, getAppBySlug, appLogos, isOwned, purchaseItem, user, branding, loading, academyVideos } = useData();
   const navigate = useNavigate();
 
   const appData = getAppBySlug(appSlug || '');
@@ -144,6 +145,9 @@ export const AppDetailPage: React.FC = () => {
   const relatedApps = apps.filter(
     (a) => a.categorySlug === appData.categorySlug && a.id !== appData.id
   ).slice(0, 3);
+  const appVideos = academyVideos.filter(
+    (v) => v.programId === appData.id || v.programId === appData.slug
+  );
 
   return (
     <div className="bg-white text-zinc-900">
@@ -543,6 +547,32 @@ export const AppDetailPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {relatedApps.map((app) => (
                 <AppCard key={app.id} app={app} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Tutorials for this App */}
+      {appVideos.length > 0 && (
+        <section className="py-16 px-4 md:px-8 bg-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between gap-4 mb-8">
+              <h3 className="text-2xl font-bold tracking-tight text-black">
+                Tutorials
+              </h3>
+              <Link
+                to={`/academy?program=${encodeURIComponent(appData.id)}`}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-black hover:opacity-75 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-black shrink-0"
+              >
+                <span>All tutorials</span>
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {appVideos.slice(0, 4).map((video) => (
+                <VideoCard key={video.id} video={video} fromAcademy={false} />
               ))}
             </div>
           </div>
