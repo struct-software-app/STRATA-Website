@@ -36,7 +36,7 @@
 --   SECTION 01 : EXTENSIONS
 --   SECTION 02 : HELPER FUNCTIONS
 --   SECTION 03 : TABLES - CATALOG (categories, programs, bundles)
---   SECTION 04 : TABLES - SITE CONTENT (website, store_branding, hero_banners, pricing_plans, pricing_matrix, faqs)
+--   SECTION 04 : TABLES - SITE CONTENT (website, store_branding, hero_banners, pricing_plans, pricing_matrix, faqs, academy_videos)
 --   SECTION 05 : TABLES - USERS AND COMMERCE (users, user_wallets, purchases)
 --   SECTION 06 : TABLES - INBOUND FORMS (contact_messages, trial_requests)
 --   SECTION 07 : INDEXES
@@ -44,7 +44,7 @@
 --   SECTION 09 : RPC FUNCTIONS (PENDING OWNER REVIEW)
 --   SECTION 10 : SEED DATA (PLACEHOLDER)
 --   SECTION 11 : STORAGE BUCKETS (PLACEHOLDER)
---   SECTION 12 : ROW LEVEL SECURITY (contact_messages, trial_requests; PENDING OWNER REVIEW)
+--   SECTION 12 : ROW LEVEL SECURITY (contact_messages, trial_requests, academy_videos; PENDING OWNER REVIEW)
 --   SECTION 99 : UPDATE LOG
 
 -- ============================================================
@@ -392,6 +392,35 @@ alter table public.faqs add column if not exists sort_order integer not null def
 alter table public.faqs add column if not exists created_at timestamptz not null default now(); -- Row creation timestamp.
 alter table public.faqs add column if not exists updated_at timestamptz not null default now(); -- Last update timestamp.
 
+-- STRATA Academy tutorial video entries embedded directly inside the site without sending users away.
+-- Website reads published rows in src/context/DataContext.tsx ordered by sort_order asc, created_at desc.
+-- Strata Control manages tutorial titles, bios, source video links, program/category tags, ordering, and publish status.
+create table if not exists public.academy_videos (
+  id uuid primary key default gen_random_uuid(), -- Unique tutorial video identifier.
+  title text not null check (char_length(title) between 1 and 200), -- Video display title (1..200 chars).
+  description text not null default '' check (char_length(description) <= 5000), -- Video bio / description (max 5000 chars).
+  video_url text not null check (video_url ~* '^https?://([a-z0-9-]+\.)?(youtube\.com|youtu\.be|youtube-nocookie\.com)/'), -- Video source link parsed by src/lib/youtube.ts.
+  program_id text null, -- Optional program id matching public.programs.id.
+  category_id text null, -- Optional category id matching public.categories.id (may be empty when program_id is set).
+  sort_order integer not null default 0, -- Ascending display order in Academy listings.
+  is_published boolean not null default true, -- Publication toggle; website only selects rows where is_published = true.
+  created_at timestamptz not null default now(), -- Row creation timestamp.
+  updated_at timestamptz not null default now() -- Last update timestamp maintained by trigger.
+);
+alter table public.academy_videos add column if not exists title text not null default ''; -- Video display title.
+alter table public.academy_videos add column if not exists description text not null default ''; -- Video bio / description.
+alter table public.academy_videos add column if not exists video_url text not null default ''; -- Video source URL.
+alter table public.academy_videos add column if not exists program_id text null; -- Optional linked public.programs.id.
+alter table public.academy_videos add column if not exists category_id text null; -- Optional linked public.categories.id.
+alter table public.academy_videos add column if not exists sort_order integer not null default 0; -- Ascending sort order.
+alter table public.academy_videos add column if not exists is_published boolean not null default true; -- Published visibility flag.
+alter table public.academy_videos add column if not exists created_at timestamptz not null default now(); -- Row creation timestamp.
+alter table public.academy_videos add column if not exists updated_at timestamptz not null default now(); -- Last update timestamp.
+
+-- Sample row (commented out):
+-- insert into public.academy_videos (title, description, video_url, program_id, category_id, sort_order, is_published)
+-- values ('Footing Bearing & Punching Shear Walkthrough', 'Step-by-step calculation workflow for ACI 318 isolated footings.', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'str-01', 'structural', 1, true);
+
 -- ============================================================
 -- SECTION 05 : TABLES - USERS AND COMMERCE
 -- ============================================================
@@ -511,6 +540,9 @@ create index if not exists idx_faqs_sort_order on public.faqs (sort_order); -- O
 create index if not exists idx_purchases_user_date on public.purchases (user_id, purchased_at desc); -- Fast user purchase history fetch.
 create index if not exists idx_contact_messages_created_at on public.contact_messages (created_at desc); -- Admin inbox chronological sorting.
 create index if not exists idx_trial_requests_created_at on public.trial_requests (created_at desc); -- Admin trial log chronological sorting.
+create index if not exists idx_academy_videos_published_sort on public.academy_videos (is_published, sort_order); -- Fast published Academy video ordering.
+create index if not exists idx_academy_videos_program_id on public.academy_videos (program_id); -- Fast per-program Academy video filtering.
+create index if not exists idx_academy_videos_category_id on public.academy_videos (category_id); -- Fast per-category Academy video filtering.
 
 -- ============================================================
 -- SECTION 08 : TRIGGERS
@@ -547,6 +579,9 @@ create trigger trg_users_updated_at before update on public.users for each row e
 
 drop trigger if exists trg_user_wallets_updated_at on public.user_wallets;
 create trigger trg_user_wallets_updated_at before update on public.user_wallets for each row execute function public.set_updated_at();
+
+drop trigger if exists trg_academy_videos_updated_at on public.academy_videos;
+create trigger trg_academy_videos_updated_at before update on public.academy_videos for each row execute function public.set_updated_at();
 
 -- ============================================================
 -- SECTION 09 : RPC FUNCTIONS
@@ -622,6 +657,17 @@ create policy "Allow public insert into trial_requests"
 -- Intentionally no SELECT / UPDATE / DELETE policies on trial_requests.
 -- Only the project owner (via Supabase Dashboard / service role, or future is_admin() policy) can read trial requests.
 
+alter table public.academy_videos enable row level security;
+
+drop policy if exists "academy_videos public read" on public.academy_videos;
+create policy "academy_videos public read"
+  on public.academy_videos
+  for select
+  to anon, authenticated
+  using (is_published = true);
+
+-- PENDING: Strata Control write policies (use public.is_admin()) after the RLS review
+
 -- PENDING REVIEW NOTES (do not uncomment until reviewed against existing schema):
 -- Ensure new rows in public.users get a safe default role from the database
 -- rather than relying on the browser payload:
@@ -639,3 +685,4 @@ create policy "Allow public insert into trial_requests"
 -- ID    | DATE       | SUMMARY                                                        | SECTIONS TOUCHED | RUN IN SUPABASE
 -- ------+------------+----------------------------------------------------------------+------------------+----------------
 -- U-001 | 2026-11-15 | Initial organized file; contact_messages and trial_requests    | 00-12, 99        | YES
+-- U-002 | 2026-11-16 | Add academy_videos table, indexes, trigger, and public read RLS | 00, 04, 07, 08, 12, 99 | YES

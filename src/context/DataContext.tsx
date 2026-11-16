@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient';
 import { CATEGORIES, APPS, PRICING_PLANS, CategoryItem, AppItem } from '../data/apps';
 import { bootstrapNewUser } from '../lib/accountBootstrap';
 import { readAssetCache, writeAssetCache } from '../lib/assetCache';
+import { parseYouTubeId } from '../lib/youtube';
 
 
 export interface LiveAppItem extends AppItem {
@@ -89,6 +90,17 @@ export interface FaqItem {
   sort_order?: number;
 }
 
+export interface AcademyVideo {
+  id: string;
+  title: string;
+  description: string;
+  videoId: string;
+  programId: string;
+  categoryId: string;
+  sortOrder: number;
+  createdAt: string;
+}
+
 interface DataContextType {
   categories: CategoryItem[];
   apps: LiveAppItem[];
@@ -97,6 +109,7 @@ interface DataContextType {
   pricingPlans: PricingPlanItem[];
   pricingMatrix: PricingMatrixItem[];
   faqs: FaqItem[];
+  academyVideos: AcademyVideo[];
   categoryLogos: Record<string, string>;
 
   appLogos: Record<string, string>;
@@ -171,6 +184,8 @@ interface DataContextType {
   getAppBySlug: (slug: string) => LiveAppItem | undefined;
   getCategoryBySlug: (slug: string) => CategoryItem | undefined;
   getBundleByCategoryId: (categoryIdOrSlug: string) => BundleItem | undefined;
+  getAcademyVideo: (id: string) => AcademyVideo | undefined;
+  getRelatedVideos: (video: AcademyVideo, limit?: number) => AcademyVideo[];
 }
 
 const defaultBranding = {
@@ -249,6 +264,7 @@ const DataContext = createContext<DataContextType>({
   pricingPlans: PRICING_PLANS as any,
   pricingMatrix: [],
   faqs: [],
+  academyVideos: [],
   categoryLogos: {},
 
   appLogos: {},
@@ -269,6 +285,8 @@ const DataContext = createContext<DataContextType>({
   getAppBySlug: (slug: string) => APPS.find((a) => a.slug === slug),
   getCategoryBySlug: (slug: string) => CATEGORIES.find((c) => c.slug === slug),
   getBundleByCategoryId: () => undefined,
+  getAcademyVideo: () => undefined,
+  getRelatedVideos: () => [],
 });
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -279,6 +297,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [heroBanners, setHeroBanners] = useState<HeroBannerItem[]>(() => initialCache?.heroBanners ?? []);
   const [pricingPlans, setPricingPlans] = useState<PricingPlanItem[]>(PRICING_PLANS as any);
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
+  const [academyVideos, setAcademyVideos] = useState<AcademyVideo[]>([]);
   const [categoryLogos, setCategoryLogos] = useState<Record<string, string>>(() => initialCache?.categoryLogos ?? {});
   const [appLogos, setAppLogos] = useState<Record<string, string>>(() => initialCache?.appLogos ?? {});
   const [branding, setBranding] = useState(() =>
@@ -414,7 +433,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     async function fetchAllData() {
       try {
-        const [catRes, progRes, brandRes, bundleRes, webRes, bannerRes, planRes, matrixRes, faqRes] = await Promise.all([
+        const [catRes, progRes, brandRes, bundleRes, webRes, bannerRes, planRes, matrixRes, faqRes, academyRes] = await Promise.all([
           supabase.from('categories').select('*'),
           supabase.from('programs').select('*'),
           supabase.from('store_branding').select('key, value'),
@@ -423,7 +442,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           supabase.from('hero_banners').select('*').order('sort_order', { ascending: true }),
           supabase.from('pricing_plans').select('*').order('sort_order', { ascending: true }),
           supabase.from('pricing_matrix').select('*').order('sort_order', { ascending: true }),
-          supabase.from('faqs').select('*').order('sort_order', { ascending: true })
+          supabase.from('faqs').select('*').order('sort_order', { ascending: true }),
+          supabase
+            .from('academy_videos')
+            .select('*')
+            .eq('is_published', true)
+            .order('sort_order', { ascending: true })
+            .order('created_at', { ascending: false }),
         ]);
 
         const tableResults: Array<[string, { error: { message: string } | null }]> = [
@@ -436,6 +461,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ['pricing_plans', planRes],
           ['pricing_matrix', matrixRes],
           ['faqs', faqRes],
+          ['academy_videos', academyRes],
         ];
         for (const [tableName, res] of tableResults) {
           if (res.error) {
@@ -553,6 +579,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // 3. Process Programs / Apps & App Logos
         const appLogosMap: Record<string, string> = {};
+        let resolvedApps: LiveAppItem[] = APPS;
         if (!progRes.error && progRes.data) {
           if (progRes.data.length > 0) {
             // Map existing static apps with matching Supabase rows
@@ -636,9 +663,41 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
               }
             });
 
+            resolvedApps = liveApps;
             setApps(liveApps);
           }
           setAppLogos(appLogosMap);
+        }
+
+        // 3b. Process Academy Videos (not written to assetCache)
+        if (!academyRes.error && Array.isArray(academyRes.data)) {
+          const liveVideos: AcademyVideo[] = [];
+          for (const row of academyRes.data as any[]) {
+            const videoId = parseYouTubeId(typeof row.video_url === 'string' ? row.video_url : '');
+            if (!videoId) {
+              console.warn('[academy] invalid link', row.id);
+              continue;
+            }
+            const programId = typeof row.program_id === 'string' ? row.program_id.trim() : '';
+            const matchedApp = programId
+              ? resolvedApps.find((a) => a.id === programId || a.slug === programId)
+              : undefined;
+            const categoryId =
+              normalizeCategorySlug(row.category_id) ||
+              normalizeCategorySlug(matchedApp?.categorySlug) ||
+              '';
+            liveVideos.push({
+              id: String(row.id),
+              title: typeof row.title === 'string' ? row.title : '',
+              description: typeof row.description === 'string' ? row.description : '',
+              videoId,
+              programId,
+              categoryId,
+              sortOrder: typeof row.sort_order === 'number' ? row.sort_order : Number(row.sort_order) || 0,
+              createdAt: typeof row.created_at === 'string' ? row.created_at : '',
+            });
+          }
+          setAcademyVideos(liveVideos);
         }
 
         if (!brandRes.error && !catRes.error && !progRes.error && !bannerRes.error) {
@@ -848,6 +907,48 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [bundles]
   );
 
+  const getAcademyVideo = useMemo(
+    () => (id: string) => academyVideos.find((v) => v.id === id),
+    [academyVideos]
+  );
+
+  const getRelatedVideos = useCallback(
+    (video: AcademyVideo, limit = 8): AcademyVideo[] => {
+      const seen = new Set<string>([video.id]);
+      const candidates: AcademyVideo[] = [];
+      for (const item of academyVideos) {
+        if (seen.has(item.id)) continue;
+        seen.add(item.id);
+        candidates.push(item);
+      }
+
+      const byNewest = (a: AcademyVideo, b: AcademyVideo) => {
+        const ta = Date.parse(a.createdAt) || 0;
+        const tb = Date.parse(b.createdAt) || 0;
+        return tb - ta;
+      };
+
+      const sameProgram = video.programId
+        ? candidates.filter((v) => v.programId === video.programId).sort(byNewest)
+        : [];
+      const sameCategory = video.categoryId
+        ? candidates
+            .filter((v) => v.programId !== video.programId && v.categoryId === video.categoryId)
+            .sort(byNewest)
+        : [];
+      const others = candidates
+        .filter(
+          (v) =>
+            (!video.programId || v.programId !== video.programId) &&
+            (!video.categoryId || v.categoryId !== video.categoryId)
+        )
+        .sort(byNewest);
+
+      return [...sameProgram, ...sameCategory, ...others].slice(0, Math.max(0, limit));
+    },
+    [academyVideos]
+  );
+
   return (
     <DataContext.Provider
       value={{
@@ -858,6 +959,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         pricingPlans,
         pricingMatrix,
         faqs,
+        academyVideos,
         categoryLogos,
 
         appLogos,
@@ -879,6 +981,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         getAppBySlug,
         getCategoryBySlug,
         getBundleByCategoryId,
+        getAcademyVideo,
+        getRelatedVideos,
       }}
     >
       {children}
