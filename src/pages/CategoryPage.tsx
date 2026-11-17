@@ -53,7 +53,7 @@ export const CategoryPage: React.FC = () => {
                   fallback={<Boxes className="w-12 h-12 text-black" />}
                 />
                 <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-black">
-                  {category.name} Suite
+                  {category.name}
                 </h1>
               </div>
               <p className="text-base text-zinc-600 leading-relaxed font-normal">

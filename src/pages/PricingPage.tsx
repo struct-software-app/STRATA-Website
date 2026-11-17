@@ -16,22 +16,12 @@ export const PricingPage: React.FC = () => {
 
   return (
     <div className="bg-white text-zinc-900 min-h-screen">
-      {/* Header Banner */}
-      <section className="bg-hero-glow py-16 px-4 md:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="flex items-center justify-center space-x-2 text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">
-            <Link to="/" className="hover:text-zinc-900 transition-colors">Home</Link>
-            <span>/</span>
-            <span className="text-zinc-900 font-semibold">Pricing</span>
-          </div>
-
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-950 mb-4">
-            Plans & Engineering Licensing
+      {/* Direct Page Header + Billing Switcher */}
+      <section className="pt-8 pb-6 px-4 md:px-8 bg-white border-b border-zinc-100">
+        <div className="max-w-[1400px] mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-950">
+            Plans & Pricing
           </h1>
-          <p className="text-base sm:text-lg text-zinc-600 max-w-2xl mx-auto leading-relaxed mb-8">
-            Straightforward pricing for standalone desktop tools. No hidden usage metering, no forced cloud telemetry.{' '}
-            Choose a monthly subscription plan, or buy perpetual licenses for single tools and discipline bundles with Tokens.
-          </p>
 
           {/* Monthly / Annual Billing Switcher */}
           <div className="inline-flex items-center bg-zinc-100 p-1.5 rounded-full border border-zinc-200 shadow-xs">
@@ -63,7 +53,7 @@ export const PricingPage: React.FC = () => {
       </section>
 
       {/* Dynamic Pricing Cards from Supabase */}
-      <section className="py-16 px-4 md:px-8 bg-white">
+      <section className="py-12 px-4 md:px-8 bg-white">
         <div className="max-w-[1400px] mx-auto">
           <div
             className={`grid grid-cols-1 ${
@@ -194,7 +184,7 @@ export const PricingPage: React.FC = () => {
                       </div>
 
                       <h3 className="text-lg font-bold tracking-tight text-black mb-1">
-                        {bundle.name} Suite
+                        {bundle.name}
                       </h3>
 
                       <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed mb-4">

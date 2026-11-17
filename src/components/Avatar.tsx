@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useData } from '../context/DataContext';
 import { getInitials, getProfileAvatar } from '../lib/profile';
 
@@ -11,18 +11,10 @@ export const Avatar: React.FC<AvatarProps> = ({ size, className = '' }) => {
   const { user, profile } = useData();
   const avatarUrl = getProfileAvatar(profile, user);
   const initials = getInitials(profile, user);
-  const imgRef = useRef<HTMLImageElement | null>(null);
-  const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     setFailed(false);
-    const img = imgRef.current;
-    if (avatarUrl && img && img.complete && img.naturalWidth > 0) {
-      setLoaded(true);
-    } else {
-      setLoaded(false);
-    }
   }, [avatarUrl]);
 
   if (user && !profile) {
@@ -44,18 +36,14 @@ export const Avatar: React.FC<AvatarProps> = ({ size, className = '' }) => {
     >
       {showImage ? (
         <img
-          ref={imgRef}
           src={avatarUrl}
           alt=""
-          onLoad={() => setLoaded(true)}
           onError={() => setFailed(true)}
-          className={`w-full h-full object-cover transition-opacity duration-200 ${
-            loaded ? 'opacity-100' : 'opacity-0'
-          }`}
+          className="w-full h-full object-cover block"
         />
       ) : (
         <span
-          className="font-semibold leading-none text-white"
+          className="font-semibold leading-none text-white select-none"
           style={{ fontSize: Math.round(size * 0.38) }}
         >
           {initials}

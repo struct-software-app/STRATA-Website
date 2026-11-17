@@ -146,7 +146,7 @@ export const AcademyPage: React.FC = () => {
   }, [academyVideos]);
 
   const isLoadingEmpty = loading && academyVideos.length === 0;
-  const displayedGridVideos = filteredVideos.slice(0, visibleCount);
+  const displayedVideos = filteredVideos.slice(0, visibleCount);
   const hasMore = filteredVideos.length > visibleCount;
 
   return (
@@ -164,8 +164,8 @@ export const AcademyPage: React.FC = () => {
                 type="search"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Search tutorials, engines, disciplines"
-                aria-label="Search tutorials, engines, disciplines"
+                placeholder="Search"
+                aria-label="Search"
                 className="flex-1 h-full pl-4 pr-2 bg-transparent text-sm text-black placeholder:text-zinc-400 focus:outline-none"
               />
               {searchInput && (
@@ -200,15 +200,15 @@ export const AcademyPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Main 5-6 Column Video Grid */}
+      {/* Main 5-Column Video Grid */}
       <section className="pb-20 pt-3 px-4 md:px-6 bg-white">
         <div className="max-w-[1800px] mx-auto">
           {isLoadingEmpty ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-x-4 gap-y-7">
-              {Array.from({ length: 12 }).map((_, idx) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-7">
+              {Array.from({ length: 10 }).map((_, idx) => (
                 <div
                   key={idx}
-                  className="aspect-video rounded-xl bg-black"
+                  className="aspect-video rounded-2xl bg-black"
                   aria-hidden="true"
                 />
               ))}
@@ -242,7 +242,7 @@ export const AcademyPage: React.FC = () => {
                   <h2 className="text-sm font-semibold uppercase tracking-widest text-black">
                     Suggested for you
                   </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-x-4 gap-y-7">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-7">
                     {newestSuggestions.map((video) => (
                       <VideoCard key={video.id} video={video} fromAcademy />
                     ))}
@@ -251,9 +251,10 @@ export const AcademyPage: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="space-y-12">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-x-4 gap-y-7">
-                {displayedGridVideos.map((video, idx) => (
+            <div className="space-y-10">
+              {/* Main 5-Column Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-7">
+                {displayedVideos.map((video, idx) => (
                   <VideoCard
                     key={video.id}
                     video={video}

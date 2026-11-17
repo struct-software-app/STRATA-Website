@@ -10,7 +10,7 @@ export const AboutPage: React.FC = () => {
 
   const stats = [
     { label: websiteInfo.stats_calculation_engines_label || 'CALCULATION ENGINES', value: `${apps.length}+`, sub: websiteInfo.stats_calculation_engines_sub || 'Verified Solvers' },
-    { label: websiteInfo.stats_civil_disciplines_label || 'CIVIL DISCIPLINES', value: `${categories.length}`, sub: websiteInfo.stats_civil_disciplines_sub || 'Unified Suite' },
+    { label: websiteInfo.stats_civil_disciplines_label || 'CIVIL DISCIPLINES', value: `${categories.length}`, sub: websiteInfo.stats_civil_disciplines_sub || 'Unified Catalog' },
     { label: websiteInfo.stats_solver_latency_label || 'SOLVER LATENCY', value: websiteInfo.stats_solver_latency_value || '< 20ms', sub: websiteInfo.stats_solver_latency_sub || 'Native C++ / TS Core' },
     { label: websiteInfo.stats_cloud_dependency_label || 'CLOUD DEPENDENCY', value: websiteInfo.stats_cloud_dependency_value || '0%', sub: websiteInfo.stats_cloud_dependency_sub || '100% Offline Ready' },
   ];
@@ -86,7 +86,7 @@ export const AboutPage: React.FC = () => {
         </div>
       </section>
 
-      {/* What the Suite Covers — 7 Disciplines */}
+      {/* What STRATA Covers — 7 Disciplines */}
       <section className="py-20 px-4 md:px-8 bg-zinc-50">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-3xl mb-12">
@@ -155,7 +155,7 @@ export const AboutPage: React.FC = () => {
                 to="/download"
                 className="px-5 py-2.5 border border-zinc-700 text-white font-medium text-xs rounded-xl hover:bg-zinc-800 transition-colors"
               >
-                Download Suite
+                Download Desktop
               </Link>
             </div>
           </div>

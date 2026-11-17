@@ -78,7 +78,7 @@ export const GetStartedPage: React.FC = () => {
         }
 
         await refreshUserData();
-        setSuccessMessage('Account created successfully! Welcome to STRATA Engineering Suite.');
+        setSuccessMessage('Account created successfully! Welcome to STRATA Engineering.');
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'An error occurred during registration.');
@@ -175,7 +175,7 @@ export const GetStartedPage: React.FC = () => {
                   className="w-full py-3 bg-zinc-900 text-white text-xs font-medium uppercase tracking-wider rounded-xl hover:bg-zinc-800 transition-all flex items-center justify-center space-x-2 shadow-xs"
                 >
                   <Download className="w-4 h-4" />
-                  <span>Download Desktop Suite</span>
+                  <span>Download Desktop Apps</span>
                 </Link>
                 <Link
                   to="/trial"

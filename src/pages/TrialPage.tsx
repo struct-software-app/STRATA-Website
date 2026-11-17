@@ -26,7 +26,7 @@ export const TrialPage: React.FC = () => {
     company: '',
     discipline: 'all',
   });
-  const { categories, apps, websiteInfo, user } = useData();
+  const { categories, websiteInfo, user } = useData();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,26 +64,17 @@ export const TrialPage: React.FC = () => {
 
   return (
     <div className="bg-white text-zinc-900 min-h-screen">
-      {/* Header Banner */}
-      <section className="bg-hero-glow py-16 px-4 md:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="flex items-center justify-center space-x-2 text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">
-            <Link to="/" className="hover:text-zinc-900 transition-colors">Home</Link>
-            <span>/</span>
-            <span className="text-zinc-900 font-semibold">{TRIAL_DAYS}-Day Free Evaluation</span>
-          </div>
-
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-950 mb-3">
-            Start Your {TRIAL_DAYS}-Day Free Trial
+      {/* Direct Page Header */}
+      <section className="pt-8 pb-4 px-4 md:px-8 bg-white border-b border-zinc-100">
+        <div className="max-w-xl mx-auto">
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-950">
+            {TRIAL_DAYS}-Day Free Trial
           </h1>
-          <p className="text-base sm:text-lg text-zinc-600 max-w-xl mx-auto leading-relaxed">
-            Generate an instant offline evaluation key for all {apps.length} desktop engineering calculation engines. No payment or credit card required.
-          </p>
         </div>
       </section>
 
       {/* Main Trial Form */}
-      <section className="py-16 px-4 md:px-8 bg-white">
+      <section className="py-10 px-4 md:px-8 bg-white">
         <div className="max-w-xl mx-auto">
           {submitted && licenseKey ? (
             <div className="border border-zinc-200 rounded-2xl bg-white p-8 shadow-md text-center space-y-6 animate-in fade-in zoom-in-95 duration-150">
@@ -200,7 +191,7 @@ export const TrialPage: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, discipline: e.target.value })}
                     className="w-full p-3 bg-white border border-zinc-200 rounded-xl text-zinc-900 text-xs focus:outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 transition-colors"
                   >
-                    <option value="all">Full Suite (All Disciplines)</option>
+                    <option value="all">Full Bundle (All Disciplines)</option>
                     {categories.map((cat) => (
                       <option key={cat.slug} value={cat.slug}>
                         {cat.name}

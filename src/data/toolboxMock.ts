@@ -22,6 +22,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: 'https://example.com/sample-writer',
         sortOrder: 1,
+        price: 39,
+        version: '1.2.0',
       },
       {
         id: 'tb-prog-office-2',
@@ -34,6 +36,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: 'https://example.com/sample-sheets',
         sortOrder: 2,
+        price: 39,
+        version: '1.1.0',
       },
       {
         id: 'tb-prog-office-3',
@@ -46,6 +50,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: 'https://example.com/sample-slides',
         sortOrder: 3,
+        price: 29,
+        version: '1.0.4',
       },
       {
         id: 'tb-prog-office-4',
@@ -58,6 +64,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: '',
         sortOrder: 4,
+        price: 29,
+        version: '2.0.1',
       },
     ],
   },
@@ -80,6 +88,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: 'https://example.com/sample-vector',
         sortOrder: 1,
+        price: 49,
+        version: '1.4.0',
       },
       {
         id: 'tb-prog-design-2',
@@ -92,6 +102,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: 'https://example.com/sample-pixel',
         sortOrder: 2,
+        price: 49,
+        version: '1.3.2',
       },
       {
         id: 'tb-prog-design-3',
@@ -104,6 +116,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: 'https://example.com/sample-layout',
         sortOrder: 3,
+        price: 45,
+        version: '1.0.8',
       },
       {
         id: 'tb-prog-design-4',
@@ -116,6 +130,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: 'https://example.com/sample-diagram',
         sortOrder: 4,
+        price: 35,
+        version: '1.2.5',
       },
       {
         id: 'tb-prog-design-5',
@@ -128,6 +144,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: '',
         sortOrder: 5,
+        price: 25,
+        version: '1.0.0',
       },
     ],
   },
@@ -150,6 +168,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: 'https://example.com/sample-cut',
         sortOrder: 1,
+        price: 59,
+        version: '2.1.0',
       },
       {
         id: 'tb-prog-media-2',
@@ -162,6 +182,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: 'https://example.com/sample-audio',
         sortOrder: 2,
+        price: 49,
+        version: '1.5.0',
       },
       {
         id: 'tb-prog-media-3',
@@ -174,6 +196,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: 'https://example.com/sample-capture',
         sortOrder: 3,
+        price: 39,
+        version: '1.1.2',
       },
       {
         id: 'tb-prog-media-4',
@@ -186,6 +210,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: 'https://example.com/sample-transcode',
         sortOrder: 4,
+        price: 29,
+        version: '1.0.3',
       },
       {
         id: 'tb-prog-media-5',
@@ -198,6 +224,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: '',
         sortOrder: 5,
+        price: 25,
+        version: '1.0.0',
       },
     ],
   },
@@ -220,6 +248,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: 'https://example.com/sample-modeler',
         sortOrder: 1,
+        price: 69,
+        version: '2.0.0',
       },
       {
         id: 'tb-prog-3d-2',
@@ -232,6 +262,8 @@ export const TOOLBOX_MOCK_CATEGORIES: ToolboxCategory[] = [
         logoUrl: '',
         websiteUrl: 'https://example.com/sample-renderer',
         sortOrder: 2,
+        price: 59,
+        version: '1.2.0',
       },
     ],
   },

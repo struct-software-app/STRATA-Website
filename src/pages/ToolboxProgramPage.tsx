@@ -2,6 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { formatUsd, tokensToUsd } from '../lib/pricing';
 import { AssetImage } from '../components/AssetImage';
 import { ProgramCard } from '../components/toolbox/ProgramCard';
 
@@ -73,6 +74,18 @@ export const ToolboxProgramPage: React.FC = () => {
           <h1 className="mt-6 text-3xl md:text-4xl font-bold tracking-tight text-black">
             {program.name}
           </h1>
+
+          <div className="flex items-center space-x-3 mt-3">
+            <span className="text-xl font-bold font-mono text-zinc-950">
+              {formatUsd(tokensToUsd(typeof program.price === 'number' ? program.price : 39))}
+            </span>
+            <span className="text-xs font-mono text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded-md">
+              v{program.version || '1.0.0'}
+            </span>
+            <span className="text-xs text-zinc-500 font-medium">
+              {category.name}
+            </span>
+          </div>
 
           {program.shortDescription && (
             <p className="mt-3 text-base sm:text-lg text-zinc-600 leading-relaxed">

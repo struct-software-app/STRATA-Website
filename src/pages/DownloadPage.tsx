@@ -83,7 +83,7 @@ export const DownloadPage: React.FC = () => {
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-950 mb-3">
-            Download STRATA Suite Desktop
+            Download STRATA Desktop
           </h1>
           <p className="text-base sm:text-lg text-zinc-600 max-w-xl mx-auto leading-relaxed">
             Native, standalone executable packages with embedded deterministic solvers and local project manager.

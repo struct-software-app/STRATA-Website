@@ -277,7 +277,7 @@ export const AccountSettingsModal: React.FC<AccountSettingsModalProps> = ({
                   } else if (purchase.bundle_id) {
                     const matched = bundles.find((b) => b.id === purchase.bundle_id);
                     if (matched) {
-                      title = `${matched.name} Suite`;
+                      title = `${matched.name} Bundle`;
                       subtitle = 'Discipline Bundle';
                     }
                   }

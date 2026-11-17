@@ -79,9 +79,6 @@ html, body {
   animation: scroll-left var(--marquee-duration, 45s) linear infinite;
   will-change: transform;
 }
-.animate-scroll-left:hover {
-  animation-play-state: paused;
-}
 
 @keyframes marquee-right {
   from {

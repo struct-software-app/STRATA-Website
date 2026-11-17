@@ -25,13 +25,14 @@ import { Avatar } from './Avatar';
 import { WalletBalance } from './WalletBalance';
 import { searchApps } from '../lib/searchApps';
 import { formatUsd, tokensToUsd } from '../lib/pricing';
-import { ENABLE_LANGUAGE_SWITCHER, SEARCH_BAR_WIDTH_PX } from '../config';
+import { ENABLE_LANGUAGE_SWITCHER } from '../config';
 import { isDesktopApp } from '../lib/env';
 
 export const Header: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSearchHovered, setIsSearchHovered] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState('EN');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -45,7 +46,6 @@ export const Header: React.FC = () => {
   // Search state & refs
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const searchButtonRef = useRef<HTMLButtonElement>(null);
   const searchPanelRef = useRef<HTMLDivElement>(null);
 
   const megaMenuRef = useRef<HTMLDivElement>(null);
@@ -110,10 +110,11 @@ export const Header: React.FC = () => {
       }
       if (
         searchPanelRef.current &&
-        !searchPanelRef.current.contains(target) &&
-        !searchButtonRef.current?.contains(target)
+        !searchPanelRef.current.contains(target)
       ) {
         setIsSearchOpen(false);
+        setIsSearchHovered(false);
+        setIsSearchFocused(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -132,10 +133,14 @@ export const Header: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
+        setIsSearchHovered(true);
         setIsSearchOpen((prev) => !prev);
+        setTimeout(() => searchInputRef.current?.focus(), 50);
       }
       if (e.key === 'Escape') {
         setIsSearchOpen(false);
+        setIsSearchHovered(false);
+        setIsSearchFocused(false);
         setActiveCategory(null);
         setIsLangOpen(false);
         setIsProfileMenuOpen(false);
@@ -268,34 +273,117 @@ export const Header: React.FC = () => {
 
             {/* Right: Search + Lang Switcher + Profile/Auth Buttons */}
             <div className="flex items-center space-x-2 sm:space-x-3">
-              {/* Square search button that expands smoothly on hover or open */}
-              <button
-                type="button"
-                ref={searchButtonRef}
-                onClick={() => setIsSearchOpen((prev) => !prev)}
-                onMouseEnter={() => setIsSearchHovered(true)}
-                onMouseLeave={() => setIsSearchHovered(false)}
-                onFocus={() => setIsSearchHovered(true)}
-                onBlur={() => setIsSearchHovered(false)}
-                style={{ width: isSearchOpen || isSearchHovered ? SEARCH_BAR_WIDTH_PX : 32 }}
-                className={`hidden lg:inline-flex h-8 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 hover:border-zinc-300 transition-all duration-300 ease-out items-center overflow-hidden shrink-0 ${
-                  isSearchOpen || isSearchHovered ? 'justify-between px-3 gap-2' : 'justify-center px-0'
-                }`}
-                title="Search (Ctrl+K)"
-                aria-label="Search"
-                aria-expanded={isSearchOpen}
-              >
-                <span
-                  className={`text-xs font-medium text-zinc-500 whitespace-nowrap transition-all duration-200 ${
-                    isSearchOpen || isSearchHovered
-                      ? 'opacity-100 max-w-[120px]'
-                      : 'opacity-0 max-w-0 overflow-hidden'
-                  }`}
-                >
-                  Search...
-                </span>
-                <Search className="w-4 h-4 text-black shrink-0" />
-              </button>
+              {/* Expandable Search Bar: Square button that smoothly expands on hover or focus */}
+              {(() => {
+                const isSearchExpanded = isSearchHovered || isSearchFocused || Boolean(searchQuery.trim());
+                return (
+                  <div
+                    className="relative hidden lg:block transition-all duration-300 ease-out"
+                    style={{ width: isSearchExpanded ? 300 : 32 }}
+                    ref={searchPanelRef}
+                    onMouseEnter={() => {
+                      setIsSearchHovered(true);
+                      setTimeout(() => searchInputRef.current?.focus(), 100);
+                    }}
+                    onMouseLeave={() => {
+                      setIsSearchHovered(false);
+                      if (!searchQuery.trim()) {
+                        setIsSearchOpen(false);
+                      }
+                    }}
+                  >
+                    <div
+                      className={`flex items-center h-8 bg-zinc-50 hover:bg-zinc-100/80 focus-within:bg-white border border-zinc-200 focus-within:border-black rounded-lg transition-all duration-300 overflow-hidden ${
+                        isSearchExpanded ? 'px-3 w-full' : 'px-0 w-8 justify-center cursor-pointer'
+                      }`}
+                      onClick={() => {
+                        if (!isSearchExpanded) {
+                          setIsSearchHovered(true);
+                          setTimeout(() => searchInputRef.current?.focus(), 50);
+                        }
+                      }}
+                      title="Search (Ctrl+K)"
+                    >
+                      <Search className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
+                      <input
+                        ref={searchInputRef}
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => {
+                          setSearchQuery(e.target.value);
+                          setIsSearchOpen(true);
+                        }}
+                        onFocus={() => {
+                          setIsSearchFocused(true);
+                          setIsSearchOpen(true);
+                        }}
+                        onBlur={() => {
+                          setIsSearchFocused(false);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && filteredApps.length > 0) {
+                            e.preventDefault();
+                            handleSelectApp(filteredApps[0].slug);
+                          }
+                        }}
+                        placeholder="Search..."
+                        className={`bg-transparent text-xs text-black placeholder:text-zinc-400 focus:outline-none transition-all duration-200 ${
+                          isSearchExpanded ? 'ml-2 w-full opacity-100' : 'w-0 opacity-0 p-0 m-0 pointer-events-none'
+                        }`}
+                      />
+                      {isSearchExpanded && searchQuery && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSearchQuery('');
+                            setIsSearchOpen(false);
+                          }}
+                          className="p-0.5 text-zinc-400 hover:text-black shrink-0 ml-1"
+                          aria-label="Clear search"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Attached Dropdown: Expands downwards, showing ONLY logo and program name */}
+                    {isSearchOpen && searchQuery.trim() && isSearchExpanded && (
+                      <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-zinc-200 rounded-xl shadow-xl overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-100 max-h-72 overflow-y-auto divide-y divide-zinc-100">
+                        {filteredApps.length === 0 ? (
+                          <div className="py-4 text-center text-xs text-zinc-500">
+                            No engineering tools found
+                          </div>
+                        ) : (
+                          filteredApps.map((app) => {
+                            const logoUrl = appLogos[app.id] || appLogos[app.slug];
+                            return (
+                              <div
+                                key={app.id}
+                                onClick={() => handleSelectApp(app.slug)}
+                                className="flex items-center justify-between p-2.5 hover:bg-zinc-50 cursor-pointer transition-colors"
+                              >
+                                <div className="flex items-center space-x-2.5 min-w-0">
+                                  <AssetImage
+                                    src={logoUrl}
+                                    alt={app.name}
+                                    className="w-6 h-6 shrink-0"
+                                    fallback={<Boxes className="w-6 h-6 text-black" />}
+                                  />
+                                  <span className="text-xs font-semibold text-black truncate">
+                                    {app.name}
+                                  </span>
+                                </div>
+                                <ArrowRight className="w-3.5 h-3.5 text-zinc-400 shrink-0 ml-2" />
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Language Switcher */}
               {ENABLE_LANGUAGE_SWITCHER && (
@@ -372,7 +460,7 @@ export const Header: React.FC = () => {
 
                     {/* Profile Dropdown Menu */}
                     {isProfileMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-72 bg-white border border-zinc-200 rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in zoom-in-95 duration-100">
+                      <div className="absolute right-0 top-full mt-2 w-72 bg-white border border-zinc-200 rounded-2xl shadow-2xl p-4 z-50 animate-in fade-in zoom-in-95 duration-100">
                         {/* User Header */}
                         <div className="flex items-center gap-3">
                           <Avatar size={64} />
@@ -487,79 +575,8 @@ export const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Inline Search Dropdown Panel (Lowered and extended below Header Bar 1) */}
-        {isSearchOpen && (
-          <div
-            ref={searchPanelRef}
-            className="absolute top-16 left-0 right-0 bg-white border-b border-zinc-200 shadow-lg z-50 animate-in fade-in slide-in-from-top-2 duration-150"
-          >
-            <div className="max-w-4xl mx-auto px-6 py-5">
-              <div className="flex items-center border border-zinc-300 rounded-xl px-4 py-2.5 bg-zinc-50 focus-within:bg-white focus-within:ring-2 focus-within:ring-zinc-950/10 focus-within:border-zinc-950 transition-all">
-                <Search className="w-5 h-5 text-zinc-400 mr-2.5 shrink-0" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && filteredApps.length > 0) {
-                      e.preventDefault();
-                      handleSelectApp(filteredApps[0].slug);
-                    }
-                  }}
-                  placeholder={`Search all ${apps.length} engineering tools, codes, or formulas...`}
-                  className="w-full bg-transparent text-sm focus:outline-none text-zinc-900 placeholder:text-zinc-400"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery('')}
-                    className="p-0.5 text-zinc-400 hover:text-zinc-700"
-                    aria-label="Clear search"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-              
-              {/* Results List */}
-              <div className="mt-4 max-h-72 overflow-y-auto divide-y divide-zinc-100">
-                {filteredApps.length === 0 ? (
-                  <div className="py-8 text-center text-zinc-500 text-xs">
-                    No engineering tools found
-                  </div>
-                ) : (
-                  filteredApps.map((app) => {
-                    const logoUrl = appLogos[app.id] || appLogos[app.slug];
-                    return (
-                      <div
-                        key={app.id}
-                        onClick={() => handleSelectApp(app.slug)}
-                        className="flex items-center justify-between py-3 px-2 hover:bg-zinc-50 rounded-xl cursor-pointer transition-colors"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <AssetImage
-                            src={logoUrl}
-                            alt={app.name}
-                            className="w-7 h-7 shrink-0"
-                            fallback={<Boxes className="w-7 h-7 text-black" />}
-                          />
-                          <div>
-                            <span className="text-xs font-semibold text-black">{app.name}</span>
-                            <span className="text-[10px] text-black ml-2.5 font-mono">{app.categoryName}</span>
-                          </div>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-zinc-400" />
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-              {/* ========================================================================= */}
-        {/* HEADER BAR 2 (Category Bar: Fully aligned, uniform hover across all)      */}
+        {/* ========================================================================= */}
+        {/* HEADER BAR 2 (Category Bar: Fully aligned, click-to-open mega menus)      */}
         {/* ========================================================================= */}
         <div 
           className="hidden lg:block px-6 md:px-8 bg-zinc-50 border-b border-zinc-200 text-xs font-medium text-zinc-700 relative"
@@ -575,8 +592,8 @@ export const Header: React.FC = () => {
                 return (
                   <div key={category.slug} className="relative">
                     <button
-                      onClick={() => setActiveCategory(category.slug)}
-                      onMouseEnter={() => setActiveCategory(category.slug)}
+                      type="button"
+                      onClick={() => setActiveCategory(activeCategory === category.slug ? null : category.slug)}
                       aria-haspopup="true"
                       aria-expanded={isActive}
                       className={`h-9 px-3 flex items-center space-x-1.5 text-xs font-medium rounded-md transition-all ${
@@ -602,22 +619,22 @@ export const Header: React.FC = () => {
                       const isCurrentTbPage = location.pathname === `/toolbox/${tbCat.slug}` || location.pathname.startsWith(`/toolbox/${tbCat.slug}/`);
                       return (
                         <div key={tbCat.id} className="relative">
-                          <Link
-                            to={`/toolbox/${tbCat.slug}`}
-                            onClick={() => setActiveCategory(null)}
-                            onMouseEnter={() => setActiveCategory(tbKey)}
+                          <button
+                            type="button"
+                            onClick={() => setActiveCategory(activeCategory === tbKey ? null : tbKey)}
                             aria-label={tbCat.name}
                             title={tbCat.name}
                             aria-haspopup="true"
                             aria-expanded={isActive}
-                            className={`h-9 w-9 flex items-center justify-center rounded-md transition-all ${
+                            className={`h-9 px-2 flex items-center space-x-1 text-xs font-medium rounded-md transition-all ${
                               isActive || isCurrentTbPage
-                                ? 'bg-white text-black shadow-2xs border border-zinc-200'
+                                ? 'bg-white text-black font-semibold shadow-2xs border border-zinc-200'
                                 : 'text-zinc-700 hover:text-black hover:bg-zinc-200/50'
                             }`}
                           >
-                            {renderToolboxIcon(tbCat.slug, tbCat.logoUrl, tbCat.name, 'w-5 h-5')}
-                          </Link>
+                            {renderToolboxIcon(tbCat.slug, tbCat.logoUrl, tbCat.name, 'w-4 h-4')}
+                            <ChevronDown className={`w-3 h-3 transition-transform ${isActive ? 'rotate-180' : 'opacity-60'}`} />
+                          </button>
                         </div>
                       );
                     })}
@@ -633,7 +650,6 @@ export const Header: React.FC = () => {
           {activeCategory && (
             <div 
               className="absolute left-0 right-0 top-full bg-white border-b border-zinc-200 shadow-2xl z-50 animate-in fade-in-50 duration-100 px-4 md:px-8"
-              onMouseLeave={() => setActiveCategory(null)}
             >
               <div className="max-w-7xl mx-auto py-8 bg-white">
                 {activeCategory.startsWith('toolbox:') ? (() => {
@@ -649,7 +665,7 @@ export const Header: React.FC = () => {
                           <div className="flex items-center space-x-3 mb-3">
                             {renderToolboxIcon(tbCat.slug, tbCat.logoUrl, tbCat.name, 'w-9 h-9')}
                             <h3 className="text-xl font-bold text-black tracking-tight">
-                              {tbCat.name} Suite
+                              {tbCat.name}
                             </h3>
                           </div>
                           {tbCat.description && (
@@ -699,7 +715,19 @@ export const Header: React.FC = () => {
                               </div>
                             </div>
 
-                            <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all shrink-0 ml-4" />
+                            <div className="flex items-center space-x-3 shrink-0 ml-4">
+                              {(prog.price !== undefined || prog.version) && (
+                                <div className="text-right">
+                                  {prog.price !== undefined && (
+                                    <div className="text-xs font-semibold text-black">{formatUsd(tokensToUsd(prog.price))}</div>
+                                  )}
+                                  {prog.version && (
+                                    <div className="text-[10px] text-black font-mono">v{prog.version}</div>
+                                  )}
+                                </div>
+                              )}
+                              <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all" />
+                            </div>
                           </Link>
                         ))}
                       </div>
@@ -724,7 +752,7 @@ export const Header: React.FC = () => {
                               fallback={<Boxes className="w-9 h-9 text-black" />}
                             />
                             <h3 className="text-xl font-bold text-black tracking-tight">
-                              {cat.name} Suite
+                              {cat.name}
                             </h3>
                           </div>
                           <p className="text-xs text-zinc-600 leading-relaxed mb-6">
@@ -1043,7 +1071,7 @@ export const Header: React.FC = () => {
                 {toolboxCategories.length > 0 && (
                   <div className="pt-4">
                     <div className="text-xs font-medium uppercase tracking-wider text-zinc-400 px-3 mb-2">
-                      Suites & Utilities
+                      Productivity & Creative
                     </div>
                     {toolboxCategories.map((tbCat) => {
                       const tbKey = `toolbox:${tbCat.slug}`;
@@ -1068,7 +1096,7 @@ export const Header: React.FC = () => {
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className="block px-3 py-1.5 text-xs font-semibold text-zinc-900 hover:text-black border-b border-zinc-100 mb-1"
                               >
-                                View {tbCat.name} Suite Overview →
+                                View {tbCat.name} Overview →
                               </Link>
                               {tbCat.programs.map((prog) => (
                                 <Link

@@ -114,6 +114,8 @@ export interface ToolboxProgram {
   logoUrl: string;
   websiteUrl: string;
   sortOrder: number;
+  price?: number;
+  version?: string;
 }
 
 export interface ToolboxCategory {
@@ -802,6 +804,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 logoUrl: typeof row.logo_url === 'string' ? row.logo_url : '',
                 websiteUrl: typeof row.website_url === 'string' ? row.website_url : '',
                 sortOrder: typeof row.sort_order === 'number' ? row.sort_order : Number(row.sort_order) || 0,
+                price: typeof row.price === 'number' ? row.price : 39,
+                version: typeof row.version === 'string' && row.version.trim() ? row.version.trim() : '1.0.0',
               });
             }
           }

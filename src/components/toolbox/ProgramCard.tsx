@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Box, FileText, Film, Layers, Palette } from 'lucide-react';
 import { ToolboxProgram } from '../../context/DataContext';
+import { formatUsd, tokensToUsd } from '../../lib/pricing';
 import { AssetImage } from '../AssetImage';
 
 interface ProgramCardProps {
@@ -24,11 +25,11 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
   categorySlug,
   categoryName,
 }) => {
+  const priceValue = typeof program.price === 'number' ? program.price : 39;
+  const versionValue = program.version || '1.0.0';
+
   return (
-    <Link
-      to={`/toolbox/${categorySlug}/${program.slug}`}
-      className="group bg-white rounded-2xl border border-zinc-200 p-6 flex flex-col justify-between hover:shadow-lg hover:border-zinc-300 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
-    >
+    <div className="group bg-white rounded-2xl border border-zinc-200 p-6 flex flex-col justify-between hover:shadow-lg hover:border-zinc-300 transition-all duration-200">
       <div>
         {/* Top meta matching AppCard */}
         <div className="flex items-center justify-between mb-4">
@@ -45,6 +46,9 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
               </span>
             )}
           </div>
+          <span className="text-xs font-mono font-semibold text-black">
+            {formatUsd(tokensToUsd(priceValue))}
+          </span>
         </div>
 
         {/* Title & Summary */}
@@ -60,14 +64,17 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
 
       {/* Action bottom matching AppCard */}
       <div className="pt-4 border-t border-zinc-100 flex items-center justify-between">
-        <span className="text-[11px] font-mono text-zinc-500">
-          {categoryName || categorySlug}
+        <span className="text-[11px] font-mono text-black">
+          v{versionValue}
         </span>
-        <span className="inline-flex items-center space-x-1.5 text-xs font-semibold text-zinc-900 group-hover:translate-x-0.5 transition-transform">
+        <Link
+          to={`/toolbox/${categorySlug}/${program.slug}`}
+          className="inline-flex items-center space-x-1.5 text-xs font-semibold text-zinc-900 group-hover:translate-x-0.5 transition-transform"
+        >
           <span>View Details</span>
           <ArrowRight className="w-3.5 h-3.5" />
-        </span>
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 };

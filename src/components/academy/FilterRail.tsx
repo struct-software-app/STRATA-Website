@@ -20,7 +20,7 @@ export const FilterRail: React.FC<FilterRailProps> = ({
   onSelectProgram,
   onClearFilters,
 }) => {
-  const { academyVideos, categories, apps, appLogos } = useData();
+  const { academyVideos, categories, categoryLogos, apps, appLogos } = useData();
   const chipScrollRef = useRef<HTMLDivElement | null>(null);
 
   const visibleCategories = useMemo(
@@ -96,9 +96,10 @@ export const FilterRail: React.FC<FilterRailProps> = ({
           All
         </button>
 
-        {/* Category Pills */}
+        {/* Category Pills with Icons */}
         {visibleCategories.map((cat) => {
           const isActive = selectedCategory === cat.slug && !selectedProgram;
+          const catLogoUrl = categoryLogos[cat.slug];
           return (
             <button
               key={cat.slug}
@@ -108,13 +109,23 @@ export const FilterRail: React.FC<FilterRailProps> = ({
               onClick={() =>
                 onSelectCategory(selectedCategory === cat.slug ? '' : cat.slug)
               }
-              className={`shrink-0 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black ${
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black ${
                 isActive
                   ? 'bg-zinc-950 text-white font-semibold'
                   : 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 font-medium'
               }`}
             >
-              {cat.name}
+              <AssetImage
+                src={catLogoUrl}
+                alt=""
+                className="w-3.5 h-3.5 shrink-0"
+                fallback={
+                  <Boxes
+                    className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-zinc-700'}`}
+                  />
+                }
+              />
+              <span>{cat.name}</span>
             </button>
           );
         })}
@@ -146,7 +157,7 @@ export const FilterRail: React.FC<FilterRailProps> = ({
               <AssetImage
                 src={programLogo}
                 alt=""
-                className="w-4 h-4 shrink-0"
+                className="w-3.5 h-3.5 shrink-0"
                 fallback={
                   <Boxes
                     className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-zinc-700'}`}

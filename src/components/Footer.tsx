@@ -21,7 +21,7 @@ export const Footer: React.FC = () => {
                     S
                   </div>
                   <span className="font-bold text-lg tracking-tight text-black">
-                    STRATA SUITE
+                    STRATA
                   </span>
                 </div>
               ) : (
@@ -127,7 +127,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link to="/download" className="text-zinc-600 hover:text-zinc-950 transition-colors">
-                  Download Suite
+                  Download App
                 </Link>
               </li>
               <li>

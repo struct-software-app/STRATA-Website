@@ -66,7 +66,7 @@ export const ToolboxCategoryPage: React.FC = () => {
                 fallback={getCategoryFallbackIcon(category.slug, 'w-12 h-12')}
               />
               <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-black">
-                {category.name} Suite
+                {category.name}
               </h1>
             </div>
             {category.description && (

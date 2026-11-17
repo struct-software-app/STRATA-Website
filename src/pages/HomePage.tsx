@@ -4,7 +4,13 @@ import {
   ArrowRight, 
   Boxes,
   Check,
-  Zap
+  Zap,
+  FileText,
+  Palette,
+  Film,
+  Box,
+  Layers,
+  Sparkles
 } from 'lucide-react';
 import { CategoryCard } from '../components/CategoryCard';
 import { AppCard } from '../components/AppCard';
@@ -15,7 +21,7 @@ import { AssetImage } from '../components/AssetImage';
 import { formatUsd, normalizePeriod } from '../lib/pricing';
 
 export const HomePage: React.FC = () => {
-  const { categories, apps, bundles, heroBanners, pricingPlans, branding, appLogos, loading } = useData();
+  const { categories, apps, heroBanners, pricingPlans, branding, appLogos, toolboxCategories, loading } = useData();
   const [shuffleSeed] = React.useState(() => Math.floor(Math.random() * 2 ** 31));
 
   const featuredApps = React.useMemo(() => {
@@ -61,21 +67,6 @@ export const HomePage: React.FC = () => {
     }
     return filled;
   }, [shuffledApps, appLogos]);
-
-  const fullSuiteBundle = React.useMemo(() => {
-    if (bundles.length === 0) return undefined;
-    const largest = bundles.reduce((best, cur) =>
-      cur.programIds.length > best.programIds.length ? cur : best
-    , bundles[0]);
-    if (apps.length > 0 && largest.programIds.length >= apps.length / 2) {
-      return largest;
-    }
-    return bundles.find((b) => {
-      const id = b.id.toLowerCase();
-      const name = b.name.toLowerCase();
-      return id.includes('full') || id.includes('all') || name.includes('full') || name.includes('all');
-    });
-  }, [bundles, apps.length]);
 
   return (
     <div className="bg-white text-zinc-900">
@@ -123,8 +114,8 @@ export const HomePage: React.FC = () => {
                               src={logoUrl}
                               alt={app.name}
                               fit="contain"
-                              className="w-5 h-5 md:w-6 md:h-6 shrink-0"
-                              fallback={<Boxes className="w-5 h-5 text-zinc-700" />}
+                              className="w-4 h-4 md:w-4.5 md:h-4.5 shrink-0"
+                              fallback={<Boxes className="w-4 h-4 text-zinc-700" />}
                             />
                             <span className="text-[11px] md:text-xs font-medium text-zinc-800 tracking-tight whitespace-nowrap">
                               {app.name}
@@ -136,7 +127,7 @@ export const HomePage: React.FC = () => {
                         <div
                           key={`${groupIdx}-skel-${idx}`}
                           aria-hidden="true"
-                          className="w-6 h-6 bg-black rounded-none shrink-0"
+                          className="w-4 h-4 bg-black rounded-none shrink-0"
                         />
                       ))}
                 </div>
@@ -147,17 +138,17 @@ export const HomePage: React.FC = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* 7 CATEGORIES, 35 TOOLS SECTION                                            */}
+      {/* PART 1: ENGINEERING DISCIPLINES (7 CATEGORIES + FULL BUNDLE)              */}
       {/* ========================================================================= */}
-      <section className="py-20 px-4 md:px-8 bg-zinc-50">
+      <section className="py-20 px-4 md:px-8 bg-zinc-50 border-b border-zinc-200/80">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
-                Unified Catalog Matrix
+                Engineering Disciplines
               </span>
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950">
-                {categories.length} Disciplines, {apps.length} Specialized Tools
+                Civil & Structural Engineering Catalog
               </h2>
             </div>
             <p className="text-sm text-zinc-500 mt-2 md:mt-0 max-w-sm">
@@ -171,7 +162,7 @@ export const HomePage: React.FC = () => {
               <CategoryCard key={cat.slug} category={cat} />
             ))}
 
-            {/* Promo Card: Full Suite (Full-bleed logo without frames) */}
+            {/* Promo Card: Engineering Full Bundle */}
             <div className="bg-zinc-950 text-white p-6 rounded-2xl border border-zinc-900 flex flex-col justify-between shadow-lg relative overflow-hidden group">
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -181,13 +172,12 @@ export const HomePage: React.FC = () => {
                     className="w-10 h-10 filter brightness-0 invert"
                     fallback={<Zap className="w-10 h-10 text-white" />}
                   />
-                  {/* Removed 35 Engines / Engines count text entirely */}
                 </div>
                 <h3 className="text-xl font-bold tracking-tight mb-2 text-white">
-                  {fullSuiteBundle ? fullSuiteBundle.name : 'Full Suite Bundle'}
+                  Engineering Full Bundle
                 </h3>
                 <p className="text-xs text-zinc-400 leading-relaxed mb-6">
-                  {fullSuiteBundle ? fullSuiteBundle.description : 'Deploy all engineering engines across your multidisciplinary consultancy with centralized licensing.'}
+                  Deploy all engineering engines across your multidisciplinary consultancy with centralized licensing.
                 </p>
               </div>
 
@@ -196,7 +186,102 @@ export const HomePage: React.FC = () => {
                   to="/pricing"
                   className="text-xs font-semibold uppercase tracking-wider text-white hover:text-zinc-300 transition-colors flex items-center space-x-1"
                 >
-                  <span>View Suite Plan</span>
+                  <span>View Engineering Bundle</span>
+                  <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* PART 2: PRODUCTIVITY & CREATIVE SOFTWARE (4 CATEGORIES + BUNDLE)           */}
+      {/* ========================================================================= */}
+      <section className="py-20 px-4 md:px-8 bg-white border-b border-zinc-200/80">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 block mb-1">
+                Productivity & Creative
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-zinc-950">
+                Professional Office & Media Applications
+              </h2>
+            </div>
+            <p className="text-sm text-zinc-500 mt-2 md:mt-0 max-w-sm">
+              Dedicated desktop applications for office productivity, vector design, video post-production, and 3D modeling.
+            </p>
+          </div>
+
+          {/* Grid of 4 Toolbox categories + Full Bundle */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            {toolboxCategories.map((cat) => {
+              const lower = cat.slug.toLowerCase();
+              let icon = <Layers className="w-10 h-10 text-black shrink-0" />;
+              if (lower === 'office') icon = <FileText className="w-10 h-10 text-black shrink-0" />;
+              if (lower === 'design') icon = <Palette className="w-10 h-10 text-black shrink-0" />;
+              if (lower === 'media') icon = <Film className="w-10 h-10 text-black shrink-0" />;
+              if (lower === '3d') icon = <Box className="w-10 h-10 text-black shrink-0" />;
+
+              return (
+                <Link
+                  key={cat.id}
+                  to={`/toolbox/${cat.slug}`}
+                  className="group bg-white rounded-2xl border border-zinc-200 p-6 flex flex-col justify-between hover:shadow-lg hover:border-zinc-300 transition-all duration-200 relative overflow-hidden"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      {cat.logoUrl?.trim() ? (
+                        <AssetImage src={cat.logoUrl} alt={cat.name} className="w-10 h-10 shrink-0" />
+                      ) : (
+                        icon
+                      )}
+                    </div>
+
+                    <h3 className="text-xl font-bold text-black tracking-tight mb-2">
+                      {cat.name}
+                    </h3>
+
+                    <p className="text-xs text-zinc-500 leading-relaxed line-clamp-3 mb-6">
+                      {cat.description || `Specialized applications for professional ${cat.name.toLowerCase()} workflows.`}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-zinc-100 flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-zinc-900">
+                      Open Category
+                    </span>
+                    <div className="w-7 h-7 rounded-lg border border-zinc-200 flex items-center justify-center group-hover:bg-zinc-900 group-hover:text-white group-hover:border-zinc-900 transition-colors">
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+
+            {/* Promo Card: Productivity Full Bundle */}
+            <div className="bg-zinc-950 text-white p-6 rounded-2xl border border-zinc-900 flex flex-col justify-between shadow-lg relative overflow-hidden group">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold tracking-tight mb-2 text-white">
+                  Productivity Full Bundle
+                </h3>
+                <p className="text-xs text-zinc-400 leading-relaxed mb-6">
+                  Access all office, vector design, video editing, and 3D modeling tools in one unified license.
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-zinc-800/80 flex items-center justify-between">
+                <Link
+                  to="/pricing"
+                  className="text-xs font-semibold uppercase tracking-wider text-white hover:text-zinc-300 transition-colors flex items-center space-x-1"
+                >
+                  <span>View Productivity Bundle</span>
                   <ArrowRight className="w-3.5 h-3.5 ml-1" />
                 </Link>
               </div>
@@ -223,7 +308,7 @@ export const HomePage: React.FC = () => {
               to="/get-started"
               className="mt-4 md:mt-0 text-xs font-semibold uppercase tracking-wider text-zinc-900 hover:text-zinc-600 transition-colors inline-flex items-center space-x-1"
             >
-              <span>Explore All {apps.length} Tools in Catalog</span>
+              <span>Explore All Tools in Catalog</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Mail, MapPin, Phone, Check, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { supabase } from '../lib/supabaseClient';
@@ -58,26 +57,17 @@ export const ContactPage: React.FC = () => {
 
   return (
     <div className="bg-white text-zinc-900 min-h-screen">
-      {/* Header Banner */}
-      <section className="bg-hero-glow py-16 px-4 md:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="flex items-center justify-center space-x-2 text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">
-            <Link to="/" className="hover:text-zinc-900 transition-colors">Home</Link>
-            <span>/</span>
-            <span className="text-zinc-900 font-semibold">Contact</span>
-          </div>
-
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-zinc-950 mb-3">
-            Contact Engineering Support
+      {/* Direct Page Header */}
+      <section className="pt-8 pb-4 px-4 md:px-8 bg-white border-b border-zinc-100">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-3xl font-bold tracking-tight text-zinc-950">
+            Contact
           </h1>
-          <p className="text-base sm:text-lg text-zinc-600 max-w-xl mx-auto leading-relaxed">
-            Reach our engineering team for technical validation inquiries, enterprise licensing, or academic partnerships.
-          </p>
         </div>
       </section>
 
       {/* Main 2-Column Contact Section */}
-      <section className="py-16 px-4 md:px-8 bg-white">
+      <section className="py-10 px-4 md:px-8 bg-white">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           {/* Left Column: Contact Form */}
           <div className="lg:col-span-7 bg-white border border-zinc-200 rounded-2xl p-8 shadow-md">
