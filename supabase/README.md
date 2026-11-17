@@ -22,7 +22,7 @@
 ## Academy videos: what Strata Control must edit
 
 - **Table**: `public.academy_videos` (defined in `supabase/SQL.sql`).
-- **Fields**: `title`, `description` (the bio), `video_url` (a YouTube link), `program_id` (pick from `programs`), `category_id` (auto-filled from the selected program, editable), `sort_order`, `is_published`.
+- **Fields**: `title`, `description` (the bio), `video_url` (a YouTube link), `duration` (e.g. `14:25`), `program_id` (pick from `programs`), `category_id` (auto-filled from the selected program, editable), `sort_order`, `is_published`.
 - **Link validation & editor controls**: Strata Control must validate `video_url` with the exact same rules as `src/lib/youtube.ts` (supported `youtube.com`, `youtu.be`, and `youtube-nocookie.com` URL shapes and an 11-character ID matching `/^[A-Za-z0-9_-]{11}$/`), show a live preview of the video, and let the owner reorder (`sort_order`) and unpublish (`is_published`).
 - **Website updates**: the website fetches published rows when loaded and shows any edit on the next page load.
 

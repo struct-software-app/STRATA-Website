@@ -1,5 +1,5 @@
 import React, { useMemo, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Boxes, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { AssetImage } from '../AssetImage';
 
@@ -20,8 +20,8 @@ export const FilterRail: React.FC<FilterRailProps> = ({
   onSelectProgram,
   onClearFilters,
 }) => {
-  const { academyVideos, categories, apps, categoryLogos, appLogos, loading } = useData();
-  const programsScrollRef = useRef<HTMLDivElement | null>(null);
+  const { academyVideos, categories, apps, appLogos } = useData();
+  const chipScrollRef = useRef<HTMLDivElement | null>(null);
 
   const visibleCategories = useMemo(
     () =>
@@ -53,9 +53,9 @@ export const FilterRail: React.FC<FilterRailProps> = ({
     selectedCategory || selectedProgram || hasActiveSearch
   );
 
-  const scrollPrograms = (direction: -1 | 1) => {
-    programsScrollRef.current?.scrollBy({
-      left: direction * 240,
+  const scrollChips = (direction: -1 | 1) => {
+    chipScrollRef.current?.scrollBy({
+      left: direction * 260,
       behavior: 'smooth',
     });
   };
@@ -65,140 +65,117 @@ export const FilterRail: React.FC<FilterRailProps> = ({
   }
 
   return (
-    <div className="space-y-5">
-      {/* Row 1: Categories */}
-      <div className="flex items-center justify-between gap-4">
-        <div
-          role="tablist"
-          aria-label="Filter tutorials by discipline"
-          className="flex items-center gap-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-w-0 flex-1"
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={() => scrollChips(-1)}
+        aria-label="Scroll filters left"
+        className="hidden md:flex p-1.5 text-zinc-500 hover:text-black rounded-full hover:bg-zinc-100 shrink-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
+      >
+        <ChevronLeft className="w-4 h-4" />
+      </button>
+
+      <div
+        ref={chipScrollRef}
+        role="tablist"
+        aria-label="Filter tutorials"
+        className="flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-w-0 flex-1 py-1"
+      >
+        {/* All Pill */}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={!selectedCategory && !selectedProgram}
+          onClick={() => onSelectCategory('')}
+          className={`shrink-0 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black ${
+            !selectedCategory && !selectedProgram
+              ? 'bg-zinc-950 text-white font-semibold'
+              : 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 font-medium'
+          }`}
         >
-          <button
-            type="button"
-            role="tab"
-            aria-selected={!selectedCategory}
-            onClick={() => onSelectCategory('')}
-            className={`shrink-0 pb-2.5 text-sm whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black ${
-              !selectedCategory
-                ? 'text-black font-semibold border-b-2 border-black'
-                : 'text-zinc-500 hover:text-black border-b-2 border-transparent'
-            }`}
-          >
-            All
-          </button>
+          All
+        </button>
 
-          {visibleCategories.map((cat) => {
-            const isActive = selectedCategory === cat.slug;
-            const catLogo = categoryLogos[cat.slug] || categoryLogos[cat.name];
-            return (
-              <button
-                key={cat.slug}
-                type="button"
-                role="tab"
-                aria-selected={isActive}
-                onClick={() => onSelectCategory(cat.slug)}
-                className={`shrink-0 pb-2.5 inline-flex items-center gap-2 text-sm whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black ${
-                  isActive
-                    ? 'text-black font-semibold border-b-2 border-black'
-                    : 'text-zinc-500 hover:text-black border-b-2 border-transparent'
-                }`}
-              >
-                {(loading || catLogo) && (
-                  <AssetImage src={catLogo} alt="" className="w-6 h-6 shrink-0" />
-                )}
-                <span>{cat.name}</span>
-              </button>
-            );
-          })}
-        </div>
+        {/* Category Pills */}
+        {visibleCategories.map((cat) => {
+          const isActive = selectedCategory === cat.slug && !selectedProgram;
+          return (
+            <button
+              key={cat.slug}
+              type="button"
+              role="tab"
+              aria-selected={selectedCategory === cat.slug}
+              onClick={() =>
+                onSelectCategory(selectedCategory === cat.slug ? '' : cat.slug)
+              }
+              className={`shrink-0 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black ${
+                isActive
+                  ? 'bg-zinc-950 text-white font-semibold'
+                  : 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 font-medium'
+              }`}
+            >
+              {cat.name}
+            </button>
+          );
+        })}
 
-        {hasActiveFilterOrSearch && (
-          <button
-            type="button"
-            onClick={onClearFilters}
-            className="hidden sm:inline-block shrink-0 pb-2.5 text-xs font-medium text-zinc-600 hover:text-black underline underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
-          >
-            Clear filters
-          </button>
+        {visiblePrograms.length > 0 && (
+          <div className="w-px h-4 bg-zinc-200 mx-1 shrink-0" aria-hidden="true" />
         )}
+
+        {/* Program Pills */}
+        {visiblePrograms.map((program) => {
+          const isActive =
+            selectedProgram === program.id || selectedProgram === program.slug;
+          const programLogo = appLogos[program.id] || appLogos[program.slug];
+          return (
+            <button
+              key={program.id}
+              type="button"
+              title={program.name}
+              aria-pressed={isActive}
+              onClick={() =>
+                onSelectProgram(isActive ? '' : program.id, program.categorySlug)
+              }
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs whitespace-nowrap transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black ${
+                isActive
+                  ? 'bg-zinc-950 text-white font-semibold'
+                  : 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 font-medium'
+              }`}
+            >
+              <AssetImage
+                src={programLogo}
+                alt=""
+                className="w-4 h-4 shrink-0"
+                fallback={
+                  <Boxes
+                    className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-zinc-700'}`}
+                  />
+                }
+              />
+              <span>{program.name}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Row 2: Programs */}
-      {visiblePrograms.length > 0 && (
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => scrollPrograms(-1)}
-            aria-label="Scroll programs left"
-            className="hidden md:flex p-1.5 text-zinc-500 hover:text-black shrink-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-
-          <div
-            ref={programsScrollRef}
-            className="flex items-center gap-5 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden min-w-0 flex-1 py-1"
-          >
-            {visiblePrograms.map((program) => {
-              const isActive =
-                selectedProgram === program.id || selectedProgram === program.slug;
-              const programLogo = appLogos[program.id] || appLogos[program.slug];
-              return (
-                <button
-                  key={program.id}
-                  type="button"
-                  title={program.name}
-                  aria-label={program.name}
-                  aria-pressed={isActive}
-                  onClick={() =>
-                    onSelectProgram(
-                      isActive ? '' : program.id,
-                      program.categorySlug
-                    )
-                  }
-                  className={`snap-start shrink-0 pb-2 border-b-2 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-black ${
-                    isActive
-                      ? 'opacity-100 border-black'
-                      : 'opacity-40 hover:opacity-100 border-transparent'
-                  }`}
-                >
-                  {(loading || programLogo) ? (
-                    <AssetImage
-                      src={programLogo}
-                      alt={program.name}
-                      className="w-12 h-12 shrink-0"
-                    />
-                  ) : (
-                    <span className="inline-flex w-12 h-12 items-center justify-center text-[11px] font-semibold text-black text-center leading-tight line-clamp-2">
-                      {program.name}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => scrollPrograms(1)}
-            aria-label="Scroll programs right"
-            className="hidden md:flex p-1.5 text-zinc-500 hover:text-black shrink-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+      <button
+        type="button"
+        onClick={() => scrollChips(1)}
+        aria-label="Scroll filters right"
+        className="hidden md:flex p-1.5 text-zinc-500 hover:text-black rounded-full hover:bg-zinc-100 shrink-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
+      >
+        <ChevronRight className="w-4 h-4" />
+      </button>
 
       {hasActiveFilterOrSearch && (
-        <div className="sm:hidden">
-          <button
-            type="button"
-            onClick={onClearFilters}
-            className="text-xs font-medium text-zinc-600 hover:text-black underline underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
-          >
-            Clear filters
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onClearFilters}
+          className="shrink-0 px-2 text-xs font-medium text-zinc-600 hover:text-black underline underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-black whitespace-nowrap"
+        >
+          Clear filters
+        </button>
       )}
     </div>
   );

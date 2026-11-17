@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ArrowRight, 
+  Boxes,
   Check,
   Zap
 } from 'lucide-react';
@@ -48,10 +49,18 @@ export const HomePage: React.FC = () => {
     return copy;
   }, [apps, shuffleSeed]);
 
-  const marqueeAppsWithLogos = React.useMemo(
-    () => shuffledApps.filter((app) => Boolean((appLogos[app.id] || appLogos[app.slug] || '').trim())),
-    [shuffledApps, appLogos]
-  );
+  const marqueeTrackApps = React.useMemo(() => {
+    const withLogos = shuffledApps.filter((app) =>
+      Boolean((appLogos[app.id] || appLogos[app.slug] || '').trim())
+    );
+    const source = withLogos.length > 0 ? withLogos : shuffledApps;
+    if (source.length === 0) return [];
+    const filled = [...source];
+    while (filled.length < 18) {
+      filled.push(...source);
+    }
+    return filled;
+  }, [shuffledApps, appLogos]);
 
   const fullSuiteBundle = React.useMemo(() => {
     if (bundles.length === 0) return undefined;
@@ -80,48 +89,58 @@ export const HomePage: React.FC = () => {
       {/* Governing Standards Section */}
       <StandardsTicker />
 
-      {/* Infinite Scrolling Engines Row (Logos Only) */}
-      {(marqueeAppsWithLogos.length > 0 || loading) && (
-        <section className="py-10 bg-white overflow-hidden relative">
+      {/* Infinite Scrolling Engines Row (Formal & Compact) */}
+      {(marqueeTrackApps.length > 0 || loading) && (
+        <section className="py-3 bg-zinc-50/70 border-b border-zinc-200/80 overflow-hidden relative">
           <div className="relative w-full flex items-center">
-            {/* Gradient Overlays for smooth fading edges */}
-            <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-            <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+            {/* Subtle edge fades matching section background */}
+            <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-zinc-50 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-zinc-50 to-transparent z-10 pointer-events-none" />
 
             <div
-              className="animate-scroll-left items-center gap-10 md:gap-14 pr-10 md:pr-14 whitespace-nowrap"
-              style={{ '--marquee-duration': '90s' } as React.CSSProperties}
+              className="animate-scroll-left items-center whitespace-nowrap"
+              style={{ '--marquee-duration': '45s' } as React.CSSProperties}
             >
-              {marqueeAppsWithLogos.length > 0
-                ? [...marqueeAppsWithLogos, ...marqueeAppsWithLogos].map((app, idx) => {
-                    const logoUrl = appLogos[app.id] || appLogos[app.slug];
-                    const isDuplicate = idx >= marqueeAppsWithLogos.length;
-                    return (
-                      <Link
-                        key={`${app.id}-${idx}`}
-                        to={`/app/${app.slug}`}
-                        aria-label={app.name}
-                        title={app.name}
-                        aria-hidden={isDuplicate ? 'true' : undefined}
-                        tabIndex={isDuplicate ? -1 : undefined}
-                        className="inline-flex items-center justify-center shrink-0 select-none"
-                      >
-                        <AssetImage
-                          src={logoUrl}
-                          alt={app.name}
-                          fit="contain"
-                          className="w-10 h-10 md:w-12 md:h-12 shrink-0"
+              {[0, 1].map((groupIdx) => (
+                <div
+                  key={groupIdx}
+                  aria-hidden={groupIdx === 1 ? 'true' : undefined}
+                  className="flex items-center gap-7 md:gap-9 pr-7 md:pr-9 shrink-0"
+                >
+                  {marqueeTrackApps.length > 0
+                    ? marqueeTrackApps.map((app, idx) => {
+                        const logoUrl = appLogos[app.id] || appLogos[app.slug];
+                        return (
+                          <Link
+                            key={`${groupIdx}-${app.id}-${idx}`}
+                            to={`/app/${app.slug}`}
+                            aria-label={groupIdx === 1 ? undefined : app.name}
+                            title={app.name}
+                            tabIndex={groupIdx === 1 ? -1 : undefined}
+                            className="inline-flex items-center gap-2 shrink-0 select-none opacity-85 hover:opacity-100 transition-opacity"
+                          >
+                            <AssetImage
+                              src={logoUrl}
+                              alt={app.name}
+                              fit="contain"
+                              className="w-5 h-5 md:w-6 md:h-6 shrink-0"
+                              fallback={<Boxes className="w-5 h-5 text-zinc-700" />}
+                            />
+                            <span className="text-[11px] md:text-xs font-medium text-zinc-800 tracking-tight whitespace-nowrap">
+                              {app.name}
+                            </span>
+                          </Link>
+                        );
+                      })
+                    : Array.from({ length: 18 }).map((_, idx) => (
+                        <div
+                          key={`${groupIdx}-skel-${idx}`}
+                          aria-hidden="true"
+                          className="w-6 h-6 bg-black rounded-none shrink-0"
                         />
-                      </Link>
-                    );
-                  })
-                : Array.from({ length: 24 }).map((_, idx) => (
-                    <div
-                      key={idx}
-                      aria-hidden="true"
-                      className="w-10 h-10 md:w-12 md:h-12 bg-black rounded-none shrink-0"
-                    />
-                  ))}
+                      ))}
+                </div>
+              ))}
             </div>
           </div>
         </section>

@@ -562,7 +562,7 @@ export const AppDetailPage: React.FC = () => {
                 Tutorials
               </h3>
               <Link
-                to={`/academy?program=${encodeURIComponent(appData.id)}`}
+                to={`/tutorial?program=${encodeURIComponent(appData.id)}`}
                 className="inline-flex items-center gap-1.5 text-sm font-medium text-black hover:opacity-75 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-black shrink-0"
               >
                 <span>All tutorials</span>
