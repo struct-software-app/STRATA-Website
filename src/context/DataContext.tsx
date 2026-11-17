@@ -97,6 +97,7 @@ export interface AcademyVideo {
   title: string;
   description: string;
   videoId: string;
+  duration: string;
   programId: string;
   categoryId: string;
   sortOrder: number;
@@ -754,6 +755,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
               title: typeof row.title === 'string' ? row.title : '',
               description: typeof row.description === 'string' ? row.description : '',
               videoId,
+              duration: typeof row.duration === 'string' ? row.duration.trim() : '',
               programId,
               categoryId,
               sortOrder: typeof row.sort_order === 'number' ? row.sort_order : Number(row.sort_order) || 0,

@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Boxes } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { youtubeEmbedUrl } from '../lib/youtube';
+import { formatUsd, tokensToUsd } from '../lib/pricing';
+import { formatReleaseDate } from '../lib/formatDate';
 import { AssetImage } from '../components/AssetImage';
 import { SuggestedList } from '../components/academy/SuggestedList';
 
@@ -36,7 +38,7 @@ export const AcademyWatchPage: React.FC = () => {
 
   useEffect(() => {
     if (video) {
-      document.title = `${video.title} — STRATA Academy`;
+      document.title = `${video.title} — STRATA Tutorial`;
     }
     return () => {
       document.title = 'Strata ENG';
@@ -66,12 +68,13 @@ export const AcademyWatchPage: React.FC = () => {
   }
 
   if (!video) {
-    return <Navigate to="/academy" replace />;
+    return <Navigate to="/tutorial" replace />;
   }
 
   const programLogo = program
     ? appLogos[program.id] || appLogos[program.slug]
     : undefined;
+  const releaseDate = formatReleaseDate(video.createdAt);
   const isLongDescription = video.description.length > DESCRIPTION_COLLAPSE_CHARS;
   const displayedDescription =
     isLongDescription && !isExpanded
@@ -82,14 +85,14 @@ export const AcademyWatchPage: React.FC = () => {
     if (fromAcademy) {
       navigate(-1);
     } else {
-      navigate('/academy');
+      navigate('/tutorial');
     }
   };
 
   return (
-    <div className="bg-white text-zinc-900 min-h-screen py-8 md:py-12 px-4 md:px-8">
+    <div className="bg-white text-zinc-900 min-h-screen py-8 md:py-10 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
+        <div className="mb-5">
           <button
             type="button"
             onClick={handleBack}
@@ -118,31 +121,41 @@ export const AcademyWatchPage: React.FC = () => {
               />
             </div>
 
-            <div className="mt-6">
+            <div className="mt-5">
               <h1 className="text-2xl md:text-3xl font-bold text-black tracking-tight">
                 {video.title}
               </h1>
 
-              {(program || category) && (
-                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+              {(program || category || releaseDate || video.duration) && (
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
                   {program && (
                     <Link
                       to={`/app/${program.slug}`}
-                      className="inline-flex items-center gap-2 text-sm font-semibold text-black hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
+                      className="inline-flex items-center gap-2 font-semibold text-black hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
                     >
-                      {(loading || programLogo) && (
-                        <AssetImage
-                          src={programLogo}
-                          alt={program.name}
-                          className="w-5 h-5 shrink-0"
-                        />
-                      )}
+                      <AssetImage
+                        src={programLogo}
+                        alt={program.name}
+                        className="w-4 h-4 shrink-0"
+                        fallback={<Boxes className="w-4 h-4 text-zinc-700" />}
+                      />
                       <span>{program.name}</span>
+                      <span className="font-mono text-xs text-black">
+                        {formatUsd(tokensToUsd(program.price))}
+                      </span>
                     </Link>
                   )}
 
                   {category && (
-                    <span className="text-sm text-zinc-600">{category.name}</span>
+                    <span className="text-zinc-600">{category.name}</span>
+                  )}
+
+                  {releaseDate && (
+                    <span className="text-zinc-500 text-xs">{releaseDate}</span>
+                  )}
+
+                  {video.duration && (
+                    <span className="text-zinc-500 font-mono text-xs">{video.duration}</span>
                   )}
                 </div>
               )}

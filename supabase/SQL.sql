@@ -400,6 +400,7 @@ create table if not exists public.academy_videos (
   title text not null check (char_length(title) between 1 and 200), -- Video display title (1..200 chars).
   description text not null default '' check (char_length(description) <= 5000), -- Video bio / description (max 5000 chars).
   video_url text not null check (video_url ~* '^https?://([a-z0-9-]+\.)?(youtube\.com|youtu\.be|youtube-nocookie\.com)/'), -- Video source link parsed by src/lib/youtube.ts.
+  duration text not null default '', -- Display video duration label (e.g., 14:25).
   program_id text null, -- Optional program id matching public.programs.id.
   category_id text null, -- Optional category id matching public.categories.id (may be empty when program_id is set).
   sort_order integer not null default 0, -- Ascending display order in Academy listings.
@@ -410,6 +411,7 @@ create table if not exists public.academy_videos (
 alter table public.academy_videos add column if not exists title text not null default ''; -- Video display title.
 alter table public.academy_videos add column if not exists description text not null default ''; -- Video bio / description.
 alter table public.academy_videos add column if not exists video_url text not null default ''; -- Video source URL.
+alter table public.academy_videos add column if not exists duration text not null default ''; -- Video duration label (e.g., 14:25).
 alter table public.academy_videos add column if not exists program_id text null; -- Optional linked public.programs.id.
 alter table public.academy_videos add column if not exists category_id text null; -- Optional linked public.categories.id.
 alter table public.academy_videos add column if not exists sort_order integer not null default 0; -- Ascending sort order.
@@ -790,3 +792,4 @@ create policy "toolbox_programs public read"
 -- U-001 | 2026-11-15 | Initial organized file; contact_messages and trial_requests    | 00-12, 99        | YES
 -- U-002 | 2026-11-16 | Add academy_videos table, indexes, trigger, and public read RLS | 00, 04, 07, 08, 12, 99 | YES
 -- U-003 | 2026-11-16 | Add toolbox_categories and toolbox_programs tables, indexes, triggers, and RLS | 00, 04, 07, 08, 12, 99 | YES
+-- U-004 | 2026-11-17 | Add duration column to public.academy_videos                               | 04, 99           | YES

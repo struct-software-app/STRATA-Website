@@ -68,6 +68,8 @@ export function App() {
                   <Route path="/category/:categorySlug" element={<CategoryPage />} />
                   <Route path="/app/:appSlug" element={<AppDetailPage />} />
                   <Route path="/pricing" element={<PricingPage />} />
+                  <Route path="/tutorial" element={<AcademyPage />} />
+                  <Route path="/tutorial/:videoId" element={<AcademyWatchPage />} />
                   <Route path="/academy" element={<AcademyPage />} />
                   <Route path="/academy/:videoId" element={<AcademyWatchPage />} />
                   <Route path="/toolbox" element={<ToolboxPage />} />

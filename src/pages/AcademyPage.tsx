@@ -2,11 +2,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ArrowDown, Search, X } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import { FeaturedVideo } from '../components/academy/FeaturedVideo';
 import { FilterRail } from '../components/academy/FilterRail';
 import { VideoCard } from '../components/academy/VideoCard';
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 18;
 
 export const AcademyPage: React.FC = () => {
   const { academyVideos, apps, categories, loading } = useData();
@@ -20,18 +19,16 @@ export const AcademyPage: React.FC = () => {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
-    document.title = 'Academy — STRATA';
+    document.title = 'Tutorial — STRATA';
     return () => {
       document.title = 'Strata ENG';
     };
   }, []);
 
-  // Keep input synced when URL changes externally (back/forward or Clear filters)
   useEffect(() => {
     setSearchInput(urlQuery);
   }, [urlQuery]);
 
-  // Debounce search query into URL params
   useEffect(() => {
     const trimmed = searchInput.trim();
     const timer = window.setTimeout(() => {
@@ -53,7 +50,6 @@ export const AcademyPage: React.FC = () => {
     return () => window.clearTimeout(timer);
   }, [searchInput, urlQuery, setSearchParams]);
 
-  // Reset pagination when filters or search change
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
   }, [urlQuery, selectedCategory, selectedProgram]);
@@ -111,7 +107,9 @@ export const AcademyPage: React.FC = () => {
         );
         const matchesProgram =
           video.programId === selectedProgram ||
-          (matchedApp ? video.programId === matchedApp.id || video.programId === matchedApp.slug : false);
+          (matchedApp
+            ? video.programId === matchedApp.id || video.programId === matchedApp.slug
+            : false);
         if (!matchesProgram) {
           return false;
         }
@@ -144,64 +142,51 @@ export const AcademyPage: React.FC = () => {
   const newestSuggestions = useMemo(() => {
     return [...academyVideos]
       .sort((a, b) => (Date.parse(b.createdAt) || 0) - (Date.parse(a.createdAt) || 0))
-      .slice(0, 4);
+      .slice(0, 6);
   }, [academyVideos]);
 
   const isLoadingEmpty = loading && academyVideos.length === 0;
-  const hasFilterOrSearch = Boolean(trimmedQuery || selectedCategory || selectedProgram);
-  const showFeatured = !hasFilterOrSearch && filteredVideos.length > 0;
-  const gridVideos = showFeatured ? filteredVideos.slice(1) : filteredVideos;
-  const displayedGridVideos = gridVideos.slice(0, visibleCount);
-  const hasMore = gridVideos.length > visibleCount;
+  const displayedGridVideos = filteredVideos.slice(0, visibleCount);
+  const hasMore = filteredVideos.length > visibleCount;
 
   return (
     <div className="bg-white text-zinc-900 min-h-screen">
-      {/* Hero */}
-      <section className="bg-hero-glow pt-14 pb-10 px-4 md:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="max-w-3xl">
-            <span className="block text-xs font-semibold uppercase tracking-widest text-black mb-3">
-              STRATA Academy
-            </span>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-black">
-              Learn every engine, step by step.
+      {/* Compact Video-Portal Header + Centered Pill Search + Filter Chips */}
+      <section className="pt-5 pb-3 px-4 md:px-6 bg-white">
+        <div className="max-w-[1800px] mx-auto space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+            <h1 className="text-xl font-bold tracking-tight text-black shrink-0">
+              Tutorial
             </h1>
-            <p className="mt-4 text-base sm:text-lg text-zinc-600 leading-relaxed">
-              Guided workflows, design checks, and submittal walkthroughs for every engineering calculation tool in the suite.
-            </p>
 
-            {/* Search Input */}
-            <div className="mt-8 relative max-w-2xl">
-              <Search
-                className="w-5 h-5 text-zinc-400 pointer-events-none absolute left-4 top-1/2 -translate-y-1/2"
-                aria-hidden="true"
-              />
+            <div className="flex-1 max-w-xl sm:mx-auto w-full h-10 flex items-center border border-zinc-300 rounded-full bg-white focus-within:border-black transition-colors overflow-hidden shadow-2xs">
               <input
                 type="search"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Search tutorials, engines, disciplines"
                 aria-label="Search tutorials, engines, disciplines"
-                className="w-full h-14 pl-12 pr-12 bg-white border border-zinc-200 rounded-2xl text-sm text-black placeholder:text-zinc-400 focus:outline-none focus:border-black transition-colors shadow-2xs"
+                className="flex-1 h-full pl-4 pr-2 bg-transparent text-sm text-black placeholder:text-zinc-400 focus:outline-none"
               />
               {searchInput && (
                 <button
                   type="button"
                   onClick={() => setSearchInput('')}
                   aria-label="Clear search"
-                  className="p-2 text-zinc-400 hover:text-black absolute right-3 top-1/2 -translate-y-1/2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
+                  className="p-2 text-zinc-400 hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
                 >
                   <X className="w-4 h-4" />
                 </button>
               )}
+              <div
+                className="h-full px-4 bg-zinc-50 border-l border-zinc-200 flex items-center justify-center text-zinc-700 shrink-0"
+                aria-hidden="true"
+              >
+                <Search className="w-4 h-4" />
+              </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Main Content */}
-      <section className="pb-20 pt-2 px-4 md:px-8 bg-white">
-        <div className="max-w-7xl mx-auto space-y-12">
           {!isLoadingEmpty && academyVideos.length > 0 && (
             <FilterRail
               selectedCategory={selectedCategory}
@@ -212,13 +197,18 @@ export const AcademyPage: React.FC = () => {
               onClearFilters={handleClearFilters}
             />
           )}
+        </div>
+      </section>
 
+      {/* Main 5-6 Column Video Grid */}
+      <section className="pb-20 pt-3 px-4 md:px-6 bg-white">
+        <div className="max-w-[1800px] mx-auto">
           {isLoadingEmpty ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-x-6 gap-y-10 pt-2">
-              {Array.from({ length: 6 }).map((_, idx) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-x-4 gap-y-7">
+              {Array.from({ length: 12 }).map((_, idx) => (
                 <div
                   key={idx}
-                  className="aspect-video rounded-2xl bg-black"
+                  className="aspect-video rounded-xl bg-black"
                   aria-hidden="true"
                 />
               ))}
@@ -233,7 +223,7 @@ export const AcademyPage: React.FC = () => {
               </p>
             </div>
           ) : filteredVideos.length === 0 ? (
-            <div className="space-y-14 pt-6">
+            <div className="space-y-12 pt-6">
               <div className="py-10 text-center max-w-md mx-auto">
                 <p className="text-lg font-semibold text-black">
                   No tutorials match your filters.
@@ -248,11 +238,11 @@ export const AcademyPage: React.FC = () => {
               </div>
 
               {newestSuggestions.length > 0 && (
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <h2 className="text-sm font-semibold uppercase tracking-widest text-black">
                     Suggested for you
                   </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-x-4 gap-y-7">
                     {newestSuggestions.map((video) => (
                       <VideoCard key={video.id} video={video} fromAcademy />
                     ))}
@@ -261,35 +251,29 @@ export const AcademyPage: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="space-y-14">
-              {showFeatured && <FeaturedVideo video={filteredVideos[0]} />}
+            <div className="space-y-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-x-4 gap-y-7">
+                {displayedGridVideos.map((video, idx) => (
+                  <VideoCard
+                    key={video.id}
+                    video={video}
+                    fromAcademy
+                    className="animate-in fade-in slide-in-from-bottom-2 motion-reduce:animate-none"
+                    style={{ animationDelay: `${Math.min(idx, 11) * 40}ms` }}
+                  />
+                ))}
+              </div>
 
-              {displayedGridVideos.length > 0 && (
-                <div className="space-y-12">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-x-6 gap-y-10">
-                    {displayedGridVideos.map((video, idx) => (
-                      <VideoCard
-                        key={video.id}
-                        video={video}
-                        fromAcademy
-                        className="animate-in fade-in slide-in-from-bottom-2 motion-reduce:animate-none"
-                        style={{ animationDelay: `${Math.min(idx, 11) * 40}ms` }}
-                      />
-                    ))}
-                  </div>
-
-                  {hasMore && (
-                    <div className="flex justify-center">
-                      <button
-                        type="button"
-                        onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
-                        className="inline-flex items-center gap-2 text-sm font-semibold text-black hover:opacity-75 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
-                      >
-                        <span>Load more</span>
-                        <ArrowDown className="w-4 h-4" aria-hidden="true" />
-                      </button>
-                    </div>
-                  )}
+              {hasMore && (
+                <div className="flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-black hover:opacity-75 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
+                  >
+                    <span>Load more</span>
+                    <ArrowDown className="w-4 h-4" aria-hidden="true" />
+                  </button>
                 </div>
               )}
             </div>

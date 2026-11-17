@@ -113,6 +113,7 @@ export const ToolboxProgramPage: React.FC = () => {
                   key={item.id}
                   program={item}
                   categorySlug={category.slug}
+                  categoryName={category.name}
                 />
               ))}
             </div>

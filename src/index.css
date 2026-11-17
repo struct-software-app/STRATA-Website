@@ -75,7 +75,12 @@ html, body {
 }
 .animate-scroll-left {
   display: inline-flex;
-  animation: scroll-left var(--marquee-duration, 90s) linear infinite;
+  width: max-content;
+  animation: scroll-left var(--marquee-duration, 45s) linear infinite;
+  will-change: transform;
+}
+.animate-scroll-left:hover {
+  animation-play-state: paused;
 }
 
 @keyframes marquee-right {
@@ -93,7 +98,6 @@ html, body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-scroll-left,
   .animate-marquee-right {
     animation: none;
   }
