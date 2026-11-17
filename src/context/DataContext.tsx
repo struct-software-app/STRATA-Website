@@ -292,8 +292,8 @@ const DataContext = createContext<DataContextType>({
   pricingPlans: PRICING_PLANS as any,
   pricingMatrix: [],
   faqs: [],
-  academyVideos: [],
-  toolboxCategories: [],
+  academyVideos: ACADEMY_MOCK_VIDEOS,
+  toolboxCategories: TOOLBOX_MOCK_CATEGORIES,
   categoryLogos: {},
 
   appLogos: {},
@@ -328,8 +328,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [heroBanners, setHeroBanners] = useState<HeroBannerItem[]>(() => initialCache?.heroBanners ?? []);
   const [pricingPlans, setPricingPlans] = useState<PricingPlanItem[]>(PRICING_PLANS as any);
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
-  const [academyVideos, setAcademyVideos] = useState<AcademyVideo[]>([]);
-  const [toolboxCategories, setToolboxCategories] = useState<ToolboxCategory[]>([]);
+  const [academyVideos, setAcademyVideos] = useState<AcademyVideo[]>(ACADEMY_MOCK_VIDEOS);
+  const [toolboxCategories, setToolboxCategories] = useState<ToolboxCategory[]>(TOOLBOX_MOCK_CATEGORIES);
   const [categoryLogos, setCategoryLogos] = useState<Record<string, string>>(() => initialCache?.categoryLogos ?? {});
   const [appLogos, setAppLogos] = useState<Record<string, string>>(() => initialCache?.appLogos ?? {});
   const [branding, setBranding] = useState(() =>
@@ -764,12 +764,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
           resolvedAcademyVideos = liveVideos;
         }
-        if (
-          !import.meta.env.PROD &&
-          import.meta.env.DEV &&
-          import.meta.env.VITE_ACADEMY_MOCK === 'true' &&
-          resolvedAcademyVideos.length === 0
-        ) {
+        if (resolvedAcademyVideos.length === 0) {
           resolvedAcademyVideos = ACADEMY_MOCK_VIDEOS;
         }
         setAcademyVideos(resolvedAcademyVideos);
@@ -818,12 +813,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             cat.programs.sort(byOrderName);
           }
         }
-        if (
-          !import.meta.env.PROD &&
-          import.meta.env.DEV &&
-          import.meta.env.VITE_TOOLBOX_MOCK === 'true' &&
-          resolvedToolbox.length === 0
-        ) {
+        if (resolvedToolbox.length === 0) {
           resolvedToolbox = TOOLBOX_MOCK_CATEGORIES;
         }
         setToolboxCategories(resolvedToolbox);
