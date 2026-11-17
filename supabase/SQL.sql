@@ -794,4 +794,7 @@ create policy "toolbox_programs public read"
 -- U-002 | 2026-11-16 | Add academy_videos table, indexes, trigger, and public read RLS | 00, 04, 07, 08, 12, 99 | YES
 -- U-003 | 2026-11-16 | Add toolbox_categories and toolbox_programs tables, indexes, triggers, and RLS | 00, 04, 07, 08, 12, 99 | YES
 -- U-004 | 2026-11-17 | Add duration column to public.academy_videos                               | 04, 99           | YES
+<<<<<<< HEAD
 -- U-005 | 2026-11-17 | Match public.is_admin(uid uuid default auth.uid()) signature to prevent overload | 02, 99 | YES
+=======
+>>>>>>> 65075948994abf6f7c501531e29234250a0ebcc4
